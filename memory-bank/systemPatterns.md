@@ -6,7 +6,7 @@ A directory at the repository root is one model and one release-please package. 
 
 `publish.yaml` in that directory is the only per-model publish record. Tooling that uploads to Cults will read it and nothing else in the directory for the listing. The fields are the name, the description, `license_code`, `category_id`, the `files` list, `images`, and `cults_creation_id`. A blank `license_code` or `category_id` means the model is not ready to publish. A blank `cults_creation_id` means Cults has not returned an id yet.
 
-Release-please does not discover `publish.yaml`. A model is onboarded when `publish.yaml` exists and the directory is registered in both release-please files. Conventional commits whose paths fall inside the directory drive that package. `separate-pull-requests` gives each package its own release pull request.
+Release-please does not discover `publish.yaml`. A model is onboarded when `publish.yaml` exists and the directory is registered in both release-please files. Conventional commits whose paths fall inside the directory drive that package. `separate-pull-requests` gives each package its own release pull request. Every release pull request still edits the shared `.release-please-manifest.json`, so `always-update` must stay true: after one release merges, release-please must rewrite the other open release branches from `main`, not only when release notes change.
 
 The root `memory-bank/` describes the catalog. Each model directory has its own `memory-bank/` describing that model. An agent working on a model reads the model's files. An agent changing publish or release behavior reads the root files.
 
