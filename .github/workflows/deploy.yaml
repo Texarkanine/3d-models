@@ -18,6 +18,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.tag }}
+          lfs: true
 
       - name: Resolve the model from the tag
         id: model
