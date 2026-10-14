@@ -1,0 +1,3 @@
+# Shared by every model. The Cults API key is a GitHub Actions secret, not a field here.
+cults_nick:
+locale: EN

@@ -1,0 +1,15 @@
+name: Fire extinguisher rattlinator
+description: |
+  Stops the handle of a car-mounted fire extinguisher from rattling.
+
+  The handle, trigger, and lock on a full-size extinguisher are light and loose, so they buzz at the frequencies a car runs at. This sleeve slides onto the business end of the handle, holds those parts still, and gives them soft plastic to touch.
+
+  Print it in TPU 95. It is firm enough to stay put and flexible enough to deform out of the way, so you can use the extinguisher without taking it off.
+
+  Fit has been checked on 2.5 pound and 5 pound extinguishers.
+license_code:
+category_id:
+files:
+  - rattlinator.stl
+images: []
+cults_creation_id:

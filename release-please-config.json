@@ -1,0 +1,19 @@
+{
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": false,
+  "separate-pull-requests": true,
+  "packages": {
+    "h7-bulb-storage": {
+      "release-type": "simple",
+      "component": "h7-bulb-storage",
+      "include-component-in-tag": true,
+      "pull-request-header": ":service_dog: I have created a release \\*bark\\* \\*woof\\*"
+    },
+    "fire-extinguisher-rattlinator": {
+      "release-type": "simple",
+      "component": "fire-extinguisher-rattlinator",
+      "include-component-in-tag": true,
+      "pull-request-header": ":service_dog: I have created a release \\*bark\\* \\*woof\\*"
+    }
+  }
+}

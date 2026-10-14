@@ -1,0 +1,44 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Git tag to publish, for example h7-bulb-storage-v0.1.0
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag }}
+
+      - name: Resolve the model from the tag
+        id: model
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          version="${TAG##*-v}"
+          component="${TAG%-v${version}}"
+          if [[ "$component" == "$TAG" || ! -f "$component/publish.yaml" ]]; then
+            echo "Tag must look like <model>-vX.Y.Z and that model must contain publish.yaml." >&2
+            exit 1
+          fi
+          echo "component=$component" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Resolved $component at $version"
+
+      - name: Upload to Cults
+        env:
+          COMPONENT: ${{ steps.model.outputs.component }}
+          VERSION: ${{ steps.model.outputs.version }}
+        run: |
+          echo "Would read ${COMPONENT}/publish.yaml at ${VERSION}."
+          echo "Cults upload is not implemented yet."
+          exit 1
