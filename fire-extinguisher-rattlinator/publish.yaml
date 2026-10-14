@@ -7,8 +7,12 @@ description: |
   Print it in TPU 95. It is firm enough to stay put and flexible enough to deform out of the way, so you can use the extinguisher without taking it off.
 
   Fit has been checked on 2.5 pound and 5 pound extinguishers.
-license_code:
-category_id:
+manufacturing:
+tags: []
+license_code: gpl
+category_id: Q2F0ZWdvcnkvMjU
+subcategory_ids:
+  - Q2F0ZWdvcnkvODY
 files:
   - rattlinator.stl
 images: []

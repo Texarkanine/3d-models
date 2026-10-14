@@ -2,8 +2,12 @@ name: H7 bulb storage
 description: >
   Holds a spare H7 bulb by the flange. The head is enclosed.
   The back of the bulb stays free.
-license_code:
-category_id:
+manufacturing:
+tags: []
+license_code: gpl
+category_id: Q2F0ZWdvcnkvMjU
+subcategory_ids:
+  - Q2F0ZWdvcnkvODY
 files:
   - h7_cover.stl
   - h7_cover.step

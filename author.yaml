@@ -1,3 +1,6 @@
 # Shared by every model. The Cults API key is a GitHub Actions secret, not a field here.
-cults_nick:
+cults_nick: texarkanine
 locale: EN
+made_with_ai: true
+boilerplate:
+  description: "made with AI, permission granted to be downloaded and used by AI, pursuant to the terms of the {license_name}, under which this model is made available."
