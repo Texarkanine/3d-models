@@ -9,7 +9,7 @@
 
 - Keep each publishable model under version control, whatever tool authored it.
 - Cut a separate GitHub release for each model from conventional commits in that model's directory.
-- Publish one tag to Cults by running the deploy workflow by hand against that tag.
+- Publishing a GitHub release publishes that tag to Cults. Run workflow remains for an older tag: start it from the branch that contains the current publisher, and the tag input selects the model files.
 
 ## Key Benefits
 

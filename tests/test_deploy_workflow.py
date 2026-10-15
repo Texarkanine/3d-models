@@ -5,6 +5,10 @@ from pathlib import Path
 import yaml
 
 WORKFLOW = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "deploy.yaml"
+MODEL_TAG = (
+    "${{ github.event_name == 'workflow_dispatch' && inputs.tag "
+    "|| github.event.release.tag_name }}"
+)
 
 
 def load_workflow():
@@ -22,7 +26,8 @@ class DeployWorkflowTests(unittest.TestCase):
         self.assertIn("pyyaml", upload["run"])
         self.assertNotIn("exit 1", upload["run"])
         self.assertEqual(upload["env"]["CULTS3D_API_KEY"], "${{ secrets.CULTS3D_API_KEY }}")
-        self.assertEqual(upload["env"]["TAG"], "${{ inputs.tag }}")
+        self.assertIn("publisher/tools/cults_publish.py", upload["run"])
+        self.assertEqual(upload["env"]["TAG"], MODEL_TAG)
 
     def test_later_step_records_the_creation_id_on_main(self):
         workflow = load_workflow()
@@ -40,3 +45,42 @@ class DeployWorkflowTests(unittest.TestCase):
         self.assertIn("main", run)
         self.assertIn("chore: record Cults creation id", run)
         self.assertIn("--set-creation-id", run)
+
+    def test_published_release_starts_deploy(self):
+        release = load_workflow()[True]["release"]
+        self.assertEqual(release["types"], ["published"])
+
+    def test_manual_tag_stays_required(self):
+        tag = load_workflow()[True]["workflow_dispatch"]["inputs"]["tag"]
+        self.assertIs(tag["required"], True)
+
+    def test_model_checkout_uses_the_release_tag_or_the_manual_tag(self):
+        job_steps = steps(load_workflow())
+        checkout = next(
+            step for step in job_steps
+            if str(step.get("uses", "")).startswith("actions/checkout")
+            and step.get("with", {}).get("lfs") is True
+        )
+        self.assertEqual(checkout["with"]["ref"], MODEL_TAG)
+        resolve = next(step for step in job_steps if step.get("id") == "model")
+        self.assertEqual(resolve["env"]["TAG"], MODEL_TAG)
+
+    def test_publisher_checkout_uses_the_workflow_ref(self):
+        checkout = next(
+            step for step in steps(load_workflow())
+            if step.get("with", {}).get("path") == "publisher"
+        )
+        self.assertEqual(checkout["with"]["ref"], "${{ github.sha }}")
+        self.assertEqual(checkout["with"]["sparse-checkout"], "tools")
+
+    def test_creation_id_step_removes_the_publisher_checkout(self):
+        job_steps = steps(load_workflow())
+        upload_at = next(
+            index for index, step in enumerate(job_steps) if step.get("name") == "Upload to Cults"
+        )
+        later = next(
+            step for step in job_steps[upload_at + 1:]
+            if "run" in step and "git checkout -B main" in step["run"]
+        )
+        run = later["run"]
+        self.assertLess(run.index("rm -rf publisher"), run.index("git checkout -B main"))

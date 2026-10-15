@@ -8,6 +8,7 @@ from urllib.parse import quote
 import yaml
 
 ENDPOINT = "https://cults3d.com/graphql"
+USER_AGENT = "Texarkanine GitHub CICD for Cults3D"
 _PAGE = 50
 _INTROSPECT = """
 query Introspect {
@@ -398,6 +399,7 @@ def _http_transport(query, variables, auth):
             "Authorization": f"Basic {token}",
             "Content-Type": "application/json",
             "Accept": "application/json",
+            "User-Agent": USER_AGENT,
         },
         method="POST",
     )

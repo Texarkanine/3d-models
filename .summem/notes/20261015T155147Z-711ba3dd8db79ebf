@@ -1,0 +1,1 @@
+Do not test the Cults User-Agent string. Asserting the header, or that Python-urllib is absent, is a change detector.

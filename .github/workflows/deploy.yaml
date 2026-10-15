@@ -1,10 +1,15 @@
 name: Deploy
 
 on:
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
       tag:
-        description: Git tag to publish, for example h7-bulb-storage-v0.1.0
+        description: >
+          Model tag to publish, for example h7-bulb-storage-v1.0.1.
+          Start this workflow from the branch that contains the current publisher,
+          and pass that tag here.
         required: true
         type: string
 
@@ -17,13 +22,19 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.tag }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
           lfs: true
+
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          path: publisher
+          sparse-checkout: tools
 
       - name: Resolve the model from the tag
         id: model
         env:
-          TAG: ${{ inputs.tag }}
+          TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
         run: |
           version="${TAG##*-v}"
           component="${TAG%-v${version}}"
@@ -39,11 +50,11 @@ jobs:
         id: upload
         env:
           COMPONENT: ${{ steps.model.outputs.component }}
-          TAG: ${{ inputs.tag }}
+          TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
           CULTS3D_API_KEY: ${{ secrets.CULTS3D_API_KEY }}
         run: |
           python -m pip install pyyaml
-          id="$(python tools/cults_publish.py)"
+          id="$(python publisher/tools/cults_publish.py)"
           echo "creation_id=$id" >> "$GITHUB_OUTPUT"
 
       - name: Record the Cults creation id on main
@@ -51,6 +62,7 @@ jobs:
           COMPONENT: ${{ steps.model.outputs.component }}
           CREATION_ID: ${{ steps.upload.outputs.creation_id }}
         run: |
+          rm -rf publisher
           echo "Writing cults_creation_id onto main."
           git fetch origin main:refs/remotes/origin/main
           git checkout -B main refs/remotes/origin/main

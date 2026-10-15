@@ -1,0 +1,1 @@
+A Cults user-agent test must require the header. urllib adds Python-urllib only when User-Agent is absent, so scanning the headers you set stays green.

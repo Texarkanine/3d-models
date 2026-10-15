@@ -13,7 +13,7 @@ The catalog has no CAD toolchain. Each model directory documents its own in that
 - `release-please-config.json` sets `separate-pull-requests` and `always-update`. Sibling release pull requests share one manifest file; `always-update` forces release-please to refresh those branches from `main` on every workflow run so merging one release does not leave the others conflicted.
 - A `docs` or `fix` commit that touches a package proposes a patch. A `feat` commit proposes a minor. A breaking change proposes a major. A `chore` commit does not propose a version. A package that has never been released proposes `1.0.0` on its first release, whatever the commit type. `changelog-sections` in `release-please-config.json` is what makes `docs` visible. A custom list replaces the defaults, so the file keeps the full default list.
 - The workflow opens a release pull request. The GitHub release and the tag are created when that pull request is merged, not when the model's own pull request is merged.
-- `.github/workflows/deploy.yaml` is started by hand with a tag input. It checks out that tag and runs `tools/cults_publish.py`.
+- Publishing a GitHub release starts `.github/workflows/deploy.yaml` for that tag. Run workflow remains for an older tag. A manual run is started from the branch that contains the current publisher. The tag input selects the model files, and the publisher that runs is the one from that branch.
 
 ## Testing Process
 
