@@ -47,7 +47,9 @@ What the bulb must fit (defaults: the PGJ19 standard at its largest, plus cleara
 
 Print notes
   Open end down, supports off. The ring the fins turn in, the gaps round the catches and the
-  closed end all have 45 degree ceilings; the only flat ceiling is a 1 mm spot at the tip.
+  inside of the closed end all have 45 degree ceilings; the only flat ceiling is a 1 mm spot
+  at the tip inside. The outside of the closed end is a round dome, which faces up and needs
+  no support.
   PETG is the better choice: the catches are springs, and PETG bends further before it breaks.
   The catches are 1.0 mm thick: print with at least 3 walls (perimeters), 0.2 mm layers.
   Turn on elephant-foot compensation. The catches stand on the bed with 0.6 mm gaps around
@@ -67,5 +69,6 @@ Sources for the defaults
   fins, 32 mm long.
 
 Versions
-  v1 is the first release. Its holder is unchanged from 0.1, whose fit test (the open end only)
-  fit the operator's halogen and LED H11s on its first print, 2026-10-15.
+  v1 is the first release. Its open end is unchanged from 0.1, whose fit test fit the
+  operator's halogen and LED H11s on its first print, 2026-10-15. v1 rounds the outside of the
+  closed end into a dome (0.1: a 45 degree cone); the inside is still the 45 degree cone.

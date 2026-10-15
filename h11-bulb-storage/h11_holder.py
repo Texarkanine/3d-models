@@ -20,7 +20,8 @@ catches and the stop act on them only.
 The holder prints standing on its open end, so the wall the fins rest on is
 the first layers on the bed. The catches stand on the bed too and are free on
 every other side. The ring the fins turn in has a 45 degree ceiling, and so do
-the gaps around the catches and the closed end. No supports.
+the gaps around the catches and the inside of the closed end. The outside of
+the closed end is a round dome: it faces up, so it needs no support. No supports.
 
 Sources for the default dimensions:
   - IEC 60061-1 sheet 7004-110-2 (cap PGJ19), read from GOST IEC 60061-1-2014:
@@ -105,7 +106,7 @@ R_OUT = R_P + SIDE_WALL
 R_TUBE = R_HEAD + TUBE_WALL
 C0 = SLOT_R + SLOT_H               # the ring's 45 degree ceiling is the cone r + z = C0
 SQ2 = math.sqrt(2)
-Z_TOP = HEAD_LEN + R_HEAD + TUBE_WALL
+Z_TOP = HEAD_LEN + R_TUBE           # top of the dome: a half sphere on the tube
 Q = 128                            # circle segments for 2D shapes
 
 assert R_LAND >= FIN_R + 0.05, "fin tips must rest on the wall beside the catches"
@@ -114,6 +115,7 @@ assert FIN_R_MIN - CATCH_R >= 0.3, "catch must grip the shortest fins"
 assert CAR_FIN_R - CATCH_R < BEAM_GAP - 0.1, "beam needs room to bend out of the way"
 assert STOP_IN >= R_HEAD + 0.05, "stop block must clear the head bore"
 assert KEY_R >= CAR_FIN_R + 0.2, "openings must pass any fin that fits a car"
+assert Z_TOP - (HEAD_LEN + R_HEAD - 0.5) >= TUBE_WALL, "dome must cover the inner cone's tip"
 
 
 # ---- Shapes ------------------------------------------------------------------------
@@ -328,14 +330,19 @@ def below_cone(c, r_max=R_OUT + 2):
 
 
 def outer_shell():
-    """Wide base round the ring, 45 degree shoulder, tube, 45 degree closed end."""
+    """Wide base round the ring, 45 degree shoulder, tube, round dome on the end.
+
+    Inside, the closed end is a 45 degree cone (see holder()): a dome's inside
+    would be too flat near the top to print without support."""
     c_sh = C0 + SIDE_WALL * SQ2         # shoulder: SIDE_WALL from the ring's ceiling cone
-    c_end = HEAD_LEN + R_HEAD + TUBE_WALL * SQ2
-    return revolve([
-        (0, -WALL), (R_OUT - BASE_CHAMFER, -WALL), (R_OUT, -WALL + BASE_CHAMFER),
-        (R_OUT, c_sh - R_OUT), (R_TUBE, c_sh - R_TUBE), (R_TUBE, c_end - R_TUBE),
-        (c_end - Z_TOP, Z_TOP), (0, Z_TOP),
-    ])
+    a, top = math.radians(45), math.radians(88)   # stop just short of the pole: no point at the top
+    return (cq.Workplane("XZ")
+            .polyline([(0, -WALL), (R_OUT - BASE_CHAMFER, -WALL), (R_OUT, -WALL + BASE_CHAMFER),
+                       (R_OUT, c_sh - R_OUT), (R_TUBE, c_sh - R_TUBE), (R_TUBE, HEAD_LEN)])
+            .threePointArc((R_TUBE * math.cos(a), HEAD_LEN + R_TUBE * math.sin(a)),
+                           (R_TUBE * math.cos(top), HEAD_LEN + R_TUBE * math.sin(top)))
+            .lineTo(0, HEAD_LEN + R_TUBE * math.sin(top))
+            .close().revolve(360, (0, 0, 0), (0, 1, 0)))
 
 
 def holder():

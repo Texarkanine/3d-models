@@ -8,12 +8,13 @@ Every flat shape (fins, openings, stop, catch pockets and beams) is a region: a 
 
 `measure_cap.svg` is drawn by `tools/make_svg.py`, which still holds its own copy of the standard's numbers. It could import them from `h11_holder.py`, as the H7 one does, at the cost of needing CadQuery to draw the SVG.
 
-## The holder (v1; unchanged from 0.1)
+## The holder (v1)
 
 - Coordinates: z = 0 is the wall's inner face, where the fins' back faces rest; +z runs into the holder. Seen from the glass end, the wide-fin opening is at 180 degrees and the narrow ones near plus and minus 63 degrees. The twist is +`TWIST_DEG` about +z: clockwise seen from the plug. `TWIST = "ccw"` mirrors the stop and catches.
 - The keyhole is symmetric about the x axis, so the standard's unstated view direction does not matter. The wide opening takes the widest side of every wide fin on both sides (plus or minus 6.05 plus `KEY_CLEAR`).
 - One stop block sits between the upper narrow opening and where the lower narrow fin ends up. It ends the twist and blocks the wrong direction. It acts on narrow fins only, because they are the same on every bulb type; the wide fin's edges move with the type.
 - Two catches, one behind each narrow fin when locked: a curved beam in the ring wall, fixed at one end, with a bump on its free end. The beam stands on the bed and has gaps all round (through the wall too), so it prints with no overhang and bends outward when a fin tip pushes the bump. The fin tip's radius is what the catch grips, so `CATCH_R` sets the grip on the shortest fins (r8 12.15) and `BEAM_GAP` must exceed the push from the longest a car takes (12.5).
+- The closed end is a round dome outside (a half sphere on the tube; the operator asked for it to match the other models) and a 45 degree cone inside. A dome's inside would be flatter than 45 degrees over its top 15 mm and sag. Both curves stop just short of the axis with a flat under 1 mm across, because a curve that reaches the axis left a hole in the STL.
 - The ring's ceiling is the cone r + z = `C0`. The pockets' ceilings sit 0.2 above it: coincident cones made OpenCascade return invalid solids.
 
 ## How an H11 bulb is held
