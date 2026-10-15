@@ -28,6 +28,12 @@
       "component": "fire-extinguisher-rattlinator",
       "include-component-in-tag": true,
       "pull-request-header": ":service_dog: I have created a release \\*bark\\* \\*woof\\*"
+    },
+    "models/h11-bulb-storage": {
+      "release-type": "simple",
+      "component": "h11-bulb-storage",
+      "include-component-in-tag": true,
+      "pull-request-header": ":service_dog: I have created a release \\*bark\\* \\*woof\\*"
     }
   }
 }
