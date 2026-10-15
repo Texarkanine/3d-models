@@ -2,13 +2,16 @@ name: Fire extinguisher rattlinator
 description: |
   Stops the handle of a car-mounted fire extinguisher from rattling.
 
-  The handle, trigger, and lock on a full-size extinguisher are light and loose, so they buzz at the frequencies a car runs at. This sleeve slides onto the business end of the handle, holds those parts still, and gives them soft plastic to touch.
+  The handle, trigger, and lock on a full-size extinguisher are light and loose, so they buzz at the frequencies a car runs at. This sleeve slides onto the business end of the handle, holds those parts still, and gives them soft plastic to touch to absorb the noise.
 
-  Print it in TPU 95. It is firm enough to stay put and flexible enough to deform out of the way, so you can use the extinguisher without taking it off.
+  Intended to be printed in TPU 95, which is firm enough to stay put and flexible enough to deform out of the way, so it does not impede the operation of the extinguisher. This means you don't have to remove it before use - just pull the pin and squeeze!
 
   Fit has been checked on 2.5 pound and 5 pound extinguishers.
-# Cults print notes go here. Leave this empty until they are written.
-manufacturing:
+manufacturing: | 
+  1. Designed to be printed in TPU 95.
+  2. Recommendations:
+    - Add a support-blocker on the ring (as shown in the slicer image); no supports are needed for it.
+    - Use tree supports.
 tags: []
 license_code: gpl
 category_id: Q2F0ZWdvcnkvMjU

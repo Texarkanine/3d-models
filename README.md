@@ -8,5 +8,3 @@ Publishable models. People download a single model from Cults, or from that mode
 | `fire-extinguisher-rattlinator` | Solid Edge part. A TPU sleeve that stops an extinguisher handle from rattling in a car. |
 
 Each directory has a `publish.yaml`. That file lists what a publish ships. Release-please cuts a version when commits land in that directory; the package list is `release-please-config.json`. Adding a model is both steps. Publishing a GitHub release starts deploy for that tag. Run workflow remains for an older tag: start it from the branch that contains the current publisher, and pass the tag. The tag selects the model files. The publisher is the one from that branch. It publishes that model's listing to Cults. `author.yaml` holds the shared Cults nickname.
-
-The license for this repository is AGPL-3.0. The license on a Cults listing is the `license_code` in that model's `publish.yaml`, chosen at publish time.

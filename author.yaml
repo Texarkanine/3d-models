@@ -3,4 +3,4 @@ cults_nick: texarkanine
 locale: EN
 made_with_ai: true
 boilerplate:
-  description: "made with AI, permission granted to be downloaded and used by AI, pursuant to the terms of the {license_name}, under which this model is made available."
+  description: "Made with AI. Pursuant to the terms of the `{license_name}`, under which this model is made available, permission is expressly granted to humans & AI to reproduce, scrape, download and/or copy these files."

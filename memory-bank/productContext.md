@@ -25,4 +25,4 @@
 
 - Models that are not for publication do not belong in this repository.
 - Facts that belong to one model live in that directory, including `publish.yaml`. Facts that belong to the author live in `author.yaml`.
-- The repository is AGPL-3.0. The license on a Cults listing is chosen per model in `publish.yaml`.
+- The repository is GPL-3.0. The license on a Cults listing is chosen per model in `publish.yaml`.
