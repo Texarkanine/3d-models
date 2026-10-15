@@ -35,4 +35,4 @@ Read the root `memory-bank/` for how the catalog publishes. When the task names 
 
 Release-please does not discover `publish.yaml` on its own. A directory is onboarded only when both files name it. Conventional commits that touch the directory drive that component's release pull request. Merging the pull request on `main` tags `<directory>-vX.Y.Z`.
 
-Author-wide facts (Cults nickname, locale) live in `author.yaml`. The Cults API key is a GitHub Actions secret. A Cults upload job is not in this repo yet.
+Author-wide facts (Cults nickname, locale) live in `author.yaml`. The Cults API key is a GitHub Actions secret. Deploy runs `tools/cults_publish.py` for one tag.

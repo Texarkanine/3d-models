@@ -25,4 +25,4 @@
 
 - Print in TPU 95: firm, and flexible enough to slide on and to move out of the way of the trigger.
 - Known to fit the operator's 2.5 pound and 5 pound extinguishers. Not tried on the small half-pound and 2 pound bottles, or on a 10, 15, or 20 pound restaurant extinguisher.
-- Photos of the print exist and are not in this directory yet. When they are added, list them in `publish.yaml` under `images`. A Cults listing needs those pictures. None of the models in this repo have them yet.
+- Photos of the print are the files in `img/`. Those files are the listing photos.

@@ -9,7 +9,7 @@ on:
         type: string
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   deploy:
@@ -36,10 +36,29 @@ jobs:
           echo "Resolved $component at $version"
 
       - name: Upload to Cults
+        id: upload
         env:
           COMPONENT: ${{ steps.model.outputs.component }}
-          VERSION: ${{ steps.model.outputs.version }}
+          TAG: ${{ inputs.tag }}
+          CULTS3D_API_KEY: ${{ secrets.CULTS3D_API_KEY }}
         run: |
-          echo "Would read ${COMPONENT}/publish.yaml at ${VERSION}."
-          echo "Cults upload is not implemented yet."
-          exit 1
+          python -m pip install pyyaml
+          id="$(python tools/cults_publish.py)"
+          echo "creation_id=$id" >> "$GITHUB_OUTPUT"
+
+      - name: Record the Cults creation id on main
+        env:
+          COMPONENT: ${{ steps.model.outputs.component }}
+          CREATION_ID: ${{ steps.upload.outputs.creation_id }}
+        run: |
+          echo "Writing cults_creation_id onto main."
+          git fetch origin main:refs/remotes/origin/main
+          git checkout -B main refs/remotes/origin/main
+          python tools/cults_publish.py --set-creation-id "$CREATION_ID"
+          git add -- "$COMPONENT/publish.yaml"
+          if git diff --cached --quiet -- "$COMPONENT/publish.yaml"; then
+            echo "Creation id is already on main."
+            exit 0
+          fi
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'chore: record Cults creation id'
+          git push origin HEAD:main
