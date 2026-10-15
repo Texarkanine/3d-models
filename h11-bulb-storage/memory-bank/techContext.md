@@ -5,15 +5,18 @@ Parametric CAD in Python with CadQuery (OpenCascade kernel), as in `h7-bulb-stor
 ## Environment Setup
 
 - No dependency manifest is committed. Run each script from this directory with `uv run --no-project --with <each package> python <script>`; uv caches the packages, so no virtual environment is kept.
-- `tools/make_svg.py` needs `shapely`. The model script will need `cadquery`.
+- `h11_holder.py` needs `cadquery` and `shapely`. `tools/make_svg.py` needs `shapely`. `tools/overhang.py` needs `trimesh`, `shapely`, `rtree`, `networkx` and `scipy`.
 
 ## Build Tools
 
+- `python h11_holder.py` regenerates `h11_holder` and `h11_fit_test` (`.step` and `.stl`) in place, standing on the open end. Outputs are committed; regenerate and commit them with any change to the script. Each run rewrites STEP headers (a timestamp); if a STEP file's only changes are in its header, restore it rather than commit it.
 - `tools/make_svg.py <output.svg>` draws `measure_cap.svg`: the PGJ19 cap at its largest sizes, the letters to measure, and the four wide-fin variants. Redraw it when the standard's numbers or the defaults change.
 
 ## Testing Process
 
-- The final test is a physical print on the operator's halogen and LED H11s. A fit-test print of only the wall and twist slot comes first, as `h7_fit_test` did for H7.
+- The final test is a physical print on the operator's halogen and LED H11s. `h11_fit_test` (openings, ring, stop and catches only) comes first, as `h7_fit_test` did for H7.
+- The model script's assertions catch impossible geometry when it runs.
+- `tools/overhang.py <file.stl>` lists faces that need support in print orientation (copied from H7). Exported STLs should be watertight.
 - Do not add committed tests for shapes still being prototyped. Verify ad hoc in scratch and let the test print decide; add checks once a shape settles.
 
 ## Sources for the defaults

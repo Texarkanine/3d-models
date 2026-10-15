@@ -1,0 +1,1 @@
+Iterate a model on its own branch; land on main only after a test print is verified and photographed, since a release on main now publishes to Cults.

@@ -7,6 +7,8 @@ tags: []
 license_code:
 category_id:
 subcategory_ids: []
-files: []
+files:
+  - h11_holder.stl
+  - h11_holder.step
 images: []
 cults_creation_id:

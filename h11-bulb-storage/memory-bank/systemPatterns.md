@@ -2,9 +2,19 @@
 
 ## How This System Works
 
-The model script is not written yet. The plan follows `h7-bulb-storage`: one CadQuery script is the single source of truth, every dimension is a named parameter at the top, and the STL and STEP files are generated outputs, committed so people can print without running Python.
+`h11_holder.py` is the single source of truth, as in `h7-bulb-storage`: every dimension is a named parameter at the top, and the STL and STEP files are generated outputs, committed so people can print without running Python.
 
-`measure_cap.svg` is drawn by `tools/make_svg.py`, which holds the standard's numbers for now. Once the model script exists, `make_svg.py` should import its parameters, as the H7 one does.
+Every flat shape (fins, openings, stop, catch pockets and beams) is a region: a list of half-planes, circles and polygons that all hold at once. `region_2d()` turns a region into a shapely polygon and `region_3d()` into a CadQuery prism with true circles. The 3D model is built from the same regions, so 2D checks on them test the real shapes. For 0.1, a pass/fail script ran ad hoc (every bulb type through the openings, fins on the wall after the twist, the twist path touching only the bumps, catch force and strain, the head clearing the body); it is not committed until the shape settles. Do not build curves from shapely polylines: that made each STEP about 4 MB instead of 320 KB.
+
+`measure_cap.svg` is drawn by `tools/make_svg.py`, which still holds its own copy of the standard's numbers. It could import them from `h11_holder.py`, as the H7 one does, at the cost of needing CadQuery to draw the SVG.
+
+## The holder (0.1)
+
+- Coordinates: z = 0 is the wall's inner face, where the fins' back faces rest; +z runs into the holder. Seen from the glass end, the wide-fin opening is at 180 degrees and the narrow ones near plus and minus 63 degrees. The twist is +`TWIST_DEG` about +z: clockwise seen from the plug. `TWIST = "ccw"` mirrors the stop and catches.
+- The keyhole is symmetric about the x axis, so the standard's unstated view direction does not matter. The wide opening takes the widest side of every wide fin on both sides (plus or minus 6.05 plus `KEY_CLEAR`).
+- One stop block sits between the upper narrow opening and where the lower narrow fin ends up. It ends the twist and blocks the wrong direction. It acts on narrow fins only, because they are the same on every bulb type; the wide fin's edges move with the type.
+- Two catches, one behind each narrow fin when locked: a curved beam in the ring wall, fixed at one end, with a bump on its free end. The beam stands on the bed and has gaps all round (through the wall too), so it prints with no overhang and bends outward when a fin tip pushes the bump. The fin tip's radius is what the catch grips, so `CATCH_R` sets the grip on the shortest fins (r8 12.15) and `BEAM_GAP` must exceed the push from the longest a car takes (12.5).
+- The ring's ceiling is the cone r + z = `C0`. The pockets' ceilings sit 0.2 above it: coincident cones made OpenCascade return invalid solids.
 
 ## How an H11 bulb is held
 
