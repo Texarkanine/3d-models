@@ -4,11 +4,11 @@
 
 `h11_holder.py` is the single source of truth, as in `h7-bulb-storage`: every dimension is a named parameter at the top, and the STL and STEP files are generated outputs, committed so people can print without running Python.
 
-Every flat shape (fins, openings, stop, catch pockets and beams) is a region: a list of half-planes, circles and polygons that all hold at once. `region_2d()` turns a region into a shapely polygon and `region_3d()` into a CadQuery prism with true circles. The 3D model is built from the same regions, so 2D checks on them test the real shapes. For 0.1, a pass/fail script ran ad hoc (every bulb type through the openings, fins on the wall after the twist, the twist path touching only the bumps, catch force and strain, the head clearing the body); it is not committed until the shape settles. Do not build curves from shapely polylines: that made each STEP about 4 MB instead of 320 KB.
+Every flat shape (fins, openings, stop, catch pockets and beams) is a region: a list of half-planes, circles and polygons that all hold at once. `region_2d()` turns a region into a shapely polygon and `region_3d()` into a CadQuery prism with true circles. The 3D model is built from the same regions, so 2D checks on them test the real shapes. `tools/check_fit.py` tests those regions; it was committed once the 0.1 fit test proved the shape. Do not build curves from shapely polylines: that made each STEP about 4 MB instead of 320 KB.
 
 `measure_cap.svg` is drawn by `tools/make_svg.py`, which still holds its own copy of the standard's numbers. It could import them from `h11_holder.py`, as the H7 one does, at the cost of needing CadQuery to draw the SVG.
 
-## The holder (0.1)
+## The holder (v1; unchanged from 0.1)
 
 - Coordinates: z = 0 is the wall's inner face, where the fins' back faces rest; +z runs into the holder. Seen from the glass end, the wide-fin opening is at 180 degrees and the narrow ones near plus and minus 63 degrees. The twist is +`TWIST_DEG` about +z: clockwise seen from the plug. `TWIST = "ccw"` mirrors the stop and catches.
 - The keyhole is symmetric about the x axis, so the standard's unstated view direction does not matter. The wide opening takes the widest side of every wide fin on both sides (plus or minus 6.05 plus `KEY_CLEAR`).

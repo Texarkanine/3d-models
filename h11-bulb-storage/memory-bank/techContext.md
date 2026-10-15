@@ -16,6 +16,8 @@ Parametric CAD in Python with CadQuery (OpenCascade kernel), as in `h7-bulb-stor
 
 - The final test is a physical print on the operator's halogen and LED H11s. `h11_fit_test` (openings, ring, stop and catches only) comes first, as `h7_fit_test` did for H7.
 - The model script's assertions catch impossible geometry when it runs.
+- `tools/check_fit.py` is the pass/fail suite (needs `cadquery` and `shapely`). Its lettered sections move every bulb type's cap through the openings, onto the wall, along the twist path and past the catches, and check catch strain and force, the wall against the seal, and the head against the body. It also checks that the 3D model matches the 2D shapes it tests. It exits 1 if any check fails; name sections to run only those.
+- Tested 2026-10-15: the 0.1 fit test fit the operator's halogen and LED H11s on its first print ("fits like a glove").
 - `tools/overhang.py <file.stl>` lists faces that need support in print orientation (copied from H7). Exported STLs should be watertight.
 - Do not add committed tests for shapes still being prototyped. Verify ad hoc in scratch and let the test print decide; add checks once a shape settles.
 

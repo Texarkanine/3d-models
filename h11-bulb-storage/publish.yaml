@@ -1,12 +1,19 @@
 name: H11 bulb storage
-description: >
-  Holds a spare H11 bulb by its fins, with the same push-and-twist as a
-  headlamp socket. Also fits H8, H9 and H16. The head is enclosed.
-manufacturing:
+description: |
+  Holds a spare H11 bulb, halogen or LED, by its fins. The head is enclosed.
+
+  Push the bulb in and twist it, like a headlamp socket. Two springy catches click behind the fins and hold it, so LED bulbs without the halogen's spring clip lock too.
+
+  Also fits H8, H9 and H16 bulbs, which use the same cap (PGJ19). Not H8B, H9B or H11B.
+manufacturing: |
+  Print as shown - open end down. No supports needed.
+
+  PETG is best: the catches are springs. Print at least 3 walls, and turn on elephant-foot compensation so the catches don't fuse to the wall on the first layer.
 tags: []
-license_code:
-category_id:
-subcategory_ids: []
+license_code: gpl
+category_id: Q2F0ZWdvcnkvMjU
+subcategory_ids:
+  - Q2F0ZWdvcnkvODY
 files:
   - h11_holder.stl
   - h11_holder.step

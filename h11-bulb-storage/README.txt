@@ -1,18 +1,18 @@
-H11 bulb holder (twist lock), 0.1
-=================================
+H11 bulb holder (twist lock), v1
+================================
 
 Holds one spare H11 bulb, halogen or LED. H8, H9 and H16 bulbs fit too: all four use the same
 cap (PGJ19) and differ only in the wide fin. H8B, H9B and H11B use a different cap (PGJY19)
 and do not fit.
 
-0.1 is untested: nothing has been printed yet. Print the fit test first.
+Tested: the fit test (0.1) fits the operator's halogen and LED H11s (2026-10-15).
 
 Files
   h11_holder.stl / .step    the holder. Print standing on its open end. No supports.
   h11_fit_test.stl / .step  the holder cut off 7.5 mm above the wall the fins rest on: the
                             openings, the ring the fins turn in, the stop and the two catches.
                             Print it the same way. It shows in a few minutes whether your bulbs
-                            go in, turn, click and stay.
+                            go in, turn, click and stay. Not part of a Cults listing.
   measure_cap.svg           the cap at its largest, with a letter for each size (open in a
                             browser).
   h11_holder.py             CadQuery source. All dimensions are parameters at the top.
@@ -65,3 +65,7 @@ Sources for the defaults
   UNECE R37 sheet H8/1 head outline, read from GOST R 41.37-99: at most 44 mm long.
   The operator's LED H11: fins 1.0 mm thick, plate 3.33 mm and seal face 1.38 mm behind the
   fins, 32 mm long.
+
+Versions
+  v1 is the first release. Its holder is unchanged from 0.1, whose fit test (the open end only)
+  fit the operator's halogen and LED H11s on its first print, 2026-10-15.
