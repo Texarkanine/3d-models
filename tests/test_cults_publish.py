@@ -1,6 +1,7 @@
 """Publisher behavior: URLs, description, schema filtering, and Cults calls."""
 import base64
 import itertools
+import json
 import sys
 import tempfile
 import unittest
@@ -10,16 +11,19 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from tools.cults_publish import (
     assemble_description,
+    changelog_url,
     choose_action,
     ensure_made_with_ai,
     file_url,
     publish,
     select_arguments,
     set_creation_id,
+    version_from_tag,
 )
 
 REPO = "Texarkanine/3d-models"
 TAG = "h7-bulb-storage-v1.0.0"
+PUBLISH_TAG = "widget-v1.0.0"
 ATTRIBUTES = "*.png filter=lfs diff=lfs merge=lfs -text\n"
 SECRET = "test-secret"
 UNEXPECTED = {"errors": [{"message": "Unexpected error!"}]}
@@ -229,13 +233,15 @@ class FakeCults:
 
 
 def write_repo(root, *, license_code="gpl", category_id="cat", creation_id="",
-               manufacturing="", made_with_ai=True, files=None, photos=True):
+               manufacturing="", made_with_ai=True, files=None, photos=True,
+               name="Example part", description="A spare part.",
+               boilerplate="pursuant to the terms of the {license_name}."):
     (root / "author.yaml").write_text(
         "cults_nick: texarkanine\n"
         "locale: EN\n"
         f"made_with_ai: {'true' if made_with_ai else 'false'}\n"
         "boilerplate:\n"
-        "  description: \"pursuant to the terms of the {license_name}.\"\n"
+        f"  description: {json.dumps(boilerplate)}\n"
     )
     (root / ".gitattributes").write_text(ATTRIBUTES)
     model = root / "models" / "widget"
@@ -250,9 +256,9 @@ def write_repo(root, *, license_code="gpl", category_id="cat", creation_id="",
         files = ["part.stl"]
     files_block = "files: []\n" if not files else "files:\n" + "".join(f"  - {path}\n" for path in files)
     (model / "publish.yaml").write_text(
-        "name: Example part\n"
-        "description: A spare part.\n"
-        f"manufacturing: {manufacturing}\n"
+        f"name: {json.dumps(name)}\n"
+        f"description: {json.dumps(description)}\n"
+        f"manufacturing: {json.dumps(manufacturing)}\n"
         "tags: []\n"
         f"license_code: {license_code}\n"
         f"category_id: {category_id}\n"
@@ -267,10 +273,10 @@ def write_repo(root, *, license_code="gpl", category_id="cat", creation_id="",
 
 def _publish(root, transport, **kwargs):
     kwargs.setdefault("sleep", lambda seconds: None)
+    kwargs.setdefault("tag", PUBLISH_TAG)
     return publish(
         root=root,
         component="widget",
-        tag=TAG,
         repository=REPO,
         api_key=SECRET,
         transport=transport,
@@ -363,6 +369,36 @@ class FileUrlTests(unittest.TestCase):
         )
 
 
+class ListingTextTests(unittest.TestCase):
+    def test_version_from_tag(self):
+        self.assertEqual(
+            version_from_tag("h7-bulb-storage-v1.0.2", "h7-bulb-storage"),
+            "1.0.2",
+        )
+
+    def test_tag_must_match_component(self):
+        with self.assertRaises(ValueError):
+            version_from_tag("h7-bulb-storage-v1.0.2", "other")
+
+    def test_empty_version_is_refused(self):
+        with self.assertRaises(ValueError):
+            version_from_tag("widget-v", "widget")
+
+    def test_changelog_url_is_blob_main(self):
+        url = changelog_url("Texarkanine/3d-models", "h7-bulb-storage")
+        self.assertEqual(
+            url,
+            "https://github.com/Texarkanine/3d-models/blob/main/"
+            "models/h7-bulb-storage/CHANGELOG.md",
+        )
+        self.assertNotIn("h7-bulb-storage-v", url)
+        self.assertNotIn("#", url)
+
+    def test_changelog_url_refuses_a_bad_repository(self):
+        with self.assertRaises(ValueError):
+            changelog_url("nope", "widget")
+
+
 class DescriptionTests(unittest.TestCase):
     def test_boilerplate_replaces_license_name(self):
         text = assemble_description(
@@ -371,10 +407,59 @@ class DescriptionTests(unittest.TestCase):
             "GNU General Public License",
             "",
             manufacturing_argument=None,
+            version="1.0.0",
+            changelog_url="https://example.test/CHANGELOG.md",
         )
         self.assertIn("A spare part.", text)
         self.assertIn("GNU General Public License", text)
         self.assertNotIn("{license_name}", text)
+
+    def test_description_fills_version_changelog_and_license(self):
+        url = changelog_url("Texarkanine/3d-models", "h7-bulb-storage")
+        text = assemble_description(
+            "See {changelog_url}#{version} under the {license_name}.",
+            "Shared line.",
+            "GNU General Public License",
+            "",
+            manufacturing_argument=None,
+            version="1.0.2",
+            changelog_url=url,
+        )
+        self.assertIn(f"See {url}#1.0.2 under the GNU General Public License.", text)
+        self.assertNotIn("{version}", text)
+        self.assertNotIn("{changelog_url}", text)
+        self.assertNotIn("{license_name}", text)
+
+    def test_boilerplate_fills_the_same_tokens(self):
+        url = changelog_url("Texarkanine/3d-models", "h7-bulb-storage")
+        text = assemble_description(
+            "A spare part.",
+            "Version {version}. {changelog_url}. {license_name}.",
+            "GNU General Public License",
+            "",
+            manufacturing_argument=None,
+            version="1.0.2",
+            changelog_url=url,
+        )
+        self.assertIn("Version 1.0.2.", text)
+        self.assertIn(url, text)
+        self.assertIn("GNU General Public License.", text)
+        self.assertNotIn("{version}", text)
+        self.assertNotIn("{changelog_url}", text)
+        self.assertNotIn("{license_name}", text)
+
+    def test_manufacturing_in_the_description_is_filled(self):
+        text = assemble_description(
+            "A spare part.",
+            "Shared line.",
+            "GPL",
+            "Notes {version}",
+            manufacturing_argument=None,
+            version="1.0.2",
+            changelog_url="https://example.test/CHANGELOG.md",
+        )
+        self.assertIn("Notes 1.0.2", text)
+        self.assertNotIn("{version}", text)
 
     def test_manufacturing_without_schema_field_is_in_the_description(self):
         text = assemble_description(
@@ -383,6 +468,8 @@ class DescriptionTests(unittest.TestCase):
             "GPL",
             "Layer height 0.2",
             manufacturing_argument=None,
+            version="1.0.0",
+            changelog_url="https://example.test/CHANGELOG.md",
         )
         self.assertIn("Layer height 0.2", text)
         self.assertIn("Manufacturing", text)
@@ -394,6 +481,8 @@ class DescriptionTests(unittest.TestCase):
             "GPL",
             "Layer height 0.2",
             manufacturing_argument="manufacturingNotes",
+            version="1.0.0",
+            changelog_url="https://example.test/CHANGELOG.md",
         )
         self.assertNotIn("Layer height 0.2", text)
 
@@ -404,6 +493,8 @@ class DescriptionTests(unittest.TestCase):
             "GPL",
             "",
             manufacturing_argument=None,
+            version="1.0.0",
+            changelog_url="https://example.test/CHANGELOG.md",
         )
         self.assertNotIn("Manufacturing", text)
 
@@ -454,6 +545,42 @@ class SetCreationIdTests(unittest.TestCase):
 
 
 class PublishTests(unittest.TestCase):
+    def test_manufacturing_argument_is_filled(self):
+        create_args = dict(CREATE_ARGS, manufacturingNotes="String")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, manufacturing="Notes {version}")
+            transport = FakeCults(create_args=create_args)
+            _publish(root, transport, tag="widget-v1.0.2")
+        variables = next(call[1] for call in transport.calls if "createCreation(" in call[0])
+        self.assertEqual(variables["manufacturingNotes"], "Notes 1.0.2")
+        self.assertNotIn("Notes 1.0.2", variables["description"])
+        self.assertNotIn("{version}", variables["manufacturingNotes"])
+
+    def test_listing_name_is_not_filled(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(
+                root,
+                name="Example {version}",
+                boilerplate="Version {version}. {changelog_url}. {license_name}.",
+            )
+            transport = FakeCults()
+            _publish(root, transport, tag="widget-v1.0.2")
+        variables = next(call[1] for call in transport.calls if "createCreation(" in call[0])
+        self.assertEqual(variables["name"], "Example {version}")
+        self.assertIn("Version 1.0.2.", variables["description"])
+        self.assertIn(
+            "https://github.com/Texarkanine/3d-models/blob/main/models/widget/CHANGELOG.md",
+            variables["description"],
+        )
+        self.assertNotIn("widget-v1.0.2", variables["description"])
+        self.assertNotIn("#", variables["description"])
+        self.assertIn("GNU General Public License", variables["description"])
+        self.assertNotIn("{version}", variables["description"])
+        self.assertNotIn("{changelog_url}", variables["description"])
+        self.assertNotIn("{license_name}", variables["description"])
+
     def test_publish_returns_the_creation_id(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -468,11 +595,11 @@ class PublishTests(unittest.TestCase):
         self.assertNotIn(SECRET, query)
         self.assertEqual(
             variables["fileUrls"],
-            [f"https://raw.githubusercontent.com/{REPO}/{TAG}/models/widget/part.stl"],
+            [f"https://raw.githubusercontent.com/{REPO}/{PUBLISH_TAG}/models/widget/part.stl"],
         )
         self.assertEqual(
             variables["imageUrls"],
-            [f"https://media.githubusercontent.com/media/{REPO}/{TAG}/models/widget/img/part.png"],
+            [f"https://media.githubusercontent.com/media/{REPO}/{PUBLISH_TAG}/models/widget/img/part.png"],
         )
         joined = " ".join(variables["imageUrls"])
         self.assertNotIn("readme.png", joined)
@@ -595,13 +722,13 @@ class PublishTests(unittest.TestCase):
         self.assertIn("blueprint { id } errors", blueprint[0])
         self.assertEqual(
             blueprint[1]["fileUrl"],
-            f"https://raw.githubusercontent.com/{REPO}/{TAG}/models/widget/part.stl",
+            f"https://raw.githubusercontent.com/{REPO}/{PUBLISH_TAG}/models/widget/part.stl",
         )
         illustration = next(call for call in transport.calls if "createIllustration(" in call[0])
         self.assertIn("illustration { id } errors", illustration[0])
         self.assertEqual(
             illustration[1]["imageUrl"],
-            f"https://media.githubusercontent.com/media/{REPO}/{TAG}/models/widget/img/part.png",
+            f"https://media.githubusercontent.com/media/{REPO}/{PUBLISH_TAG}/models/widget/img/part.png",
         )
         update = next(call for call in transport.calls if "updateCreation(" in call[0])
         self.assertNotIn("fileUrls", update[1])
@@ -859,6 +986,21 @@ class PublishTests(unittest.TestCase):
         self.assertNotIn("createBlueprint", _operation_names(transport))
         self.assertNotIn("createIllustration", _operation_names(transport))
         self.assertNotIn("destroyBlueprint", _operation_names(transport))
+
+    def test_manufacturing_is_sent_as_details_not_in_the_description(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1", manufacturing="Print as shown")
+            transport = FakeCults(rows=[_owned_row()])
+            _publish(root, transport)
+        updates = [call[1] for call in transport.calls if "updateCreation(" in call[0]]
+        self.assertEqual(updates[0]["details"], "Print as shown")
+        self.assertNotIn("Print as shown", updates[0]["description"])
+        self.assertNotIn("Manufacturing", updates[0]["description"])
+        self.assertEqual(
+            [item["details"] for item in updates],
+            ["Print as shown", ".", "Print as shown"],
+        )
 
     def test_update_refreshes_the_gallery_after_old_assets_are_gone(self):
         """Cults rebuilds the public gallery only when a field changes.

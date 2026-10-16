@@ -1,4 +1,4 @@
-name: Fire extinguisher rattlinator
+name: Fire-Extinguisher Rattlinator
 description: |
   Stops the handle of a car-mounted fire extinguisher from rattling.
 
@@ -7,11 +7,14 @@ description: |
   Intended to be printed in TPU 95, which is firm enough to stay put and flexible enough to deform out of the way, so it does not impede the operation of the extinguisher. This means you don't have to remove it before use - just pull the pin and squeeze!
 
   Fit has been checked on 2.5 pound and 5 pound extinguishers.
-manufacturing: | 
-  1. Designed to be printed in TPU 95.
-  2. Recommendations:
-    - Add a support-blocker on the ring (as shown in the slicer image); no supports are needed for it.
-    - Use tree supports.
+manufacturing: |
+  ## Material
+
+  Designed to be printed in TPU 95.
+
+  ## Printing Instructions
+
+  Add a support-blocker on the ring (as shown in the slicer image); no supports are needed for the ring. See screenshot of slicer for reference.
 tags: []
 license_code: gpl
 category_id: Q2F0ZWdvcnkvMjU
@@ -19,5 +22,4 @@ subcategory_ids:
   - Q2F0ZWdvcnkvODY
 files:
   - rattlinator.stl
-images: []
 cults_creation_id:

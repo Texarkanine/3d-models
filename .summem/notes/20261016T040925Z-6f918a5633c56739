@@ -1,0 +1,1 @@
+Cults listing text replaces {version}, {changelog_url}, and {license_name} in the boilerplate, description, and manufacturing. The changelog URL is blob/main with no fragment. name is not replaced. publish.yaml has no images field.

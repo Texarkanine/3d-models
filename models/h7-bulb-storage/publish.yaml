@@ -1,12 +1,19 @@
-name: H7 bulb storage
+name: H7 Bulb Storage
 description: |
   Holds a spare H7 bulb by the flange. The head is enclosed, the back of the bulb stays free.
   
   Slide a clip into the slot to hold the bulb securely.
 manufacturing: |
+  ## Material Recommendation
+
+  PLA
+
+  ## Printing Instructions
+
   Print as shown - tube down. No supports needed.
 
-  Three clips are provided for different bulb flange thicknesses; if you have a thin flange (e.g. 1mm), you'll need a thicker clip - the `1.0-1.5mm` clip.
+  Various clips are provided for different bulb flange thicknesses.
+  The thinner your flange, the thicker the clip you'll need. Print the clip labelled with the thickness of your bulb's flange's outer rim.
 tags: []
 license_code: gpl
 category_id: Q2F0ZWdvcnkvMjU
@@ -23,5 +30,4 @@ files:
   - clips/h7_clip_flange_2.0-2.5mm.step
   - clips/h7_clip_flange_2.5-3.0mm.stl
   - clips/h7_clip_flange_2.5-3.0mm.step
-images: []
 cults_creation_id: "Q3JlYXRpb24vaDctYnVsYi1zdG9yYWdl"
