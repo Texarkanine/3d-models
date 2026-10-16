@@ -154,6 +154,7 @@ _ASSET_SELECTION = {
     "destroyIllustration": "errors",
 }
 _KEPT_MUTATIONS = ("createCreation", "updateCreation", *_ASSET_REQUIREMENTS)
+_ASSET_RETRY_WAITS = (10, 30, 60)
 _ASSETS = """
 query Assets($ids: [String!], $limit: Int!, $offset: Int!) {
   myself {
@@ -186,22 +187,35 @@ def require_asset_mutations(mutations):
                 raise ValueError(f"Cults schema {name} has no {argument} argument")
 
 
-def create_assets(*, transport, auth, mutations, creation_id, file_urls, image_urls):
+def create_assets(*, transport, auth, mutations, creation_id, file_urls, image_urls, sleep):
     """Add file_urls as blueprints and image_urls as illustrations.
 
-    creation_id is the existing Cults creation. A non-empty errors list
-    from Cults raises RuntimeError. This does not remove existing assets.
+    creation_id is the existing Cults creation. Cults fetches each URL
+    while it handles the call, and that fetch fails now and then on a good
+    URL. A call that Cults fails is tried again after each wait in
+    _ASSET_RETRY_WAITS; sleep(seconds) does the waiting. RuntimeError naming
+    the mutation and the URL is raised when the last attempt fails. This
+    does not remove existing assets.
     """
-    for url in file_urls:
-        _call_mutation(
-            transport, auth, mutations, "createBlueprint",
-            {"creationId": creation_id, "fileUrl": url},
-        )
-    for url in image_urls:
-        _call_mutation(
-            transport, auth, mutations, "createIllustration",
-            {"creationId": creation_id, "imageUrl": url},
-        )
+    for operation, key, urls in (
+        ("createBlueprint", "fileUrl", file_urls),
+        ("createIllustration", "imageUrl", image_urls),
+    ):
+        for url in urls:
+            for wait in (*_ASSET_RETRY_WAITS, None):
+                try:
+                    _call_mutation(
+                        transport, auth, mutations, operation,
+                        {"creationId": creation_id, key: url},
+                    )
+                    break
+                except RuntimeError as exc:
+                    if wait is None:
+                        raise RuntimeError(
+                            f"Cults {operation} failed for {url} after "
+                            f"{len(_ASSET_RETRY_WAITS) + 1} attempts: {exc}"
+                        ) from exc
+                    sleep(wait)
 
 
 def destroy_assets(*, transport, auth, mutations, blueprint_ids, illustration_ids):
@@ -271,12 +285,14 @@ def _listing_assets(transport, auth, creation_id):
     raise ValueError("Cults has no creation with this id")
 
 
-def publish(*, root, component, tag, repository, api_key, transport=None):
+def publish(*, root, component, tag, repository, api_key, transport=None, sleep=None):
     """Create or update the Cults listing and return the creation id.
 
     transport(query, variables, auth) returns the decoded GraphQL JSON.
     auth is (cults_nick, api_key). Raise when Cults returns a non-empty
-    errors list. The api_key is not written into the query.
+    errors list. The api_key is not written into the query. sleep(seconds)
+    waits between attempts to add a file or photo; it defaults to
+    time.sleep.
 
     Every listing is free: downloadPrice is 0. updateCreation fails the
     price check when downloadPrice is absent, and a price sent without
@@ -294,6 +310,10 @@ def publish(*, root, component, tag, repository, api_key, transport=None):
         raise ValueError("CULTS3D_API_KEY is empty")
     if transport is None:
         transport = _http_transport
+    if sleep is None:
+        import time
+
+        sleep = time.sleep
     auth = (author["cults_nick"], api_key)
     locale = author["locale"]
     if not re.fullmatch(r"[A-Z]{2}", str(locale)):
@@ -382,6 +402,7 @@ def publish(*, root, component, tag, repository, api_key, transport=None):
             creation_id=creation_id,
             file_urls=file_urls,
             image_urls=image_urls,
+            sleep=sleep,
         )
         destroy_assets(
             transport=transport,

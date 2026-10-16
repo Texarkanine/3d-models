@@ -1,5 +1,6 @@
 """Publisher behavior: URLs, description, schema filtering, and Cults calls."""
 import base64
+import itertools
 import sys
 import tempfile
 import unittest
@@ -21,6 +22,7 @@ REPO = "Texarkanine/3d-models"
 TAG = "h7-bulb-storage-v1.0.0"
 ATTRIBUTES = "*.png filter=lfs diff=lfs merge=lfs -text\n"
 SECRET = "test-secret"
+UNEXPECTED = {"errors": [{"message": "Unexpected error!"}]}
 
 
 def _type(text):
@@ -80,14 +82,19 @@ class FakeCults:
     named listing_name with no assets. An ids variable selects a row by the
     slug of a global id, and by the row id when that id is not a global id.
     Like Cults, updateCreation without downloadPrice fails the price check.
+    asset_failures maps createBlueprint or createIllustration to an iterator
+    of failure responses; each call of that mutation takes the next one
+    until the iterator is exhausted, then succeeds.
     """
 
     def __init__(self, *, matches=None, rows=None, creation_id="creation-1", errors=None,
                  create_args=None, update_args=None, asset_args=None, omit_mutations=(),
-                 page_cap=None, listing_name="Example part", blueprint_errors=None):
+                 page_cap=None, listing_name="Example part", blueprint_errors=None,
+                 asset_failures=None):
         self.creation_id = creation_id
         self.errors = errors
         self.blueprint_errors = blueprint_errors
+        self.asset_failures = asset_failures or {}
         self.create_args = CREATE_ARGS if create_args is None else create_args
         self.update_args = UPDATE_ARGS if update_args is None else update_args
         self.asset_args = ASSET_ARGS if asset_args is None else asset_args
@@ -135,6 +142,11 @@ class FakeCults:
                 "total": len(rows),
                 "results": [_row(row) for row in chunk],
             }}}}
+        for name, failures in self.asset_failures.items():
+            if f"{name}(" in query:
+                failure = next(failures, None)
+                if failure is not None:
+                    return failure
         if "createBlueprint(" in query:
             errors = self.blueprint_errors or []
             blueprint = None if errors else {"id": "bp-new"}
@@ -194,6 +206,7 @@ def write_repo(root, *, license_code="gpl", category_id="cat", creation_id="",
 
 
 def _publish(root, transport, **kwargs):
+    kwargs.setdefault("sleep", lambda seconds: None)
     return publish(
         root=root,
         component="widget",
@@ -681,6 +694,81 @@ class PublishTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 _publish(root, transport)
         self.assertNotIn("destroyBlueprint", _operation_names(transport))
+
+    def test_photo_unexpected_error_is_retried_and_old_assets_removed(self):
+        """Run 38837740527: Cults answered one createIllustration with a
+        top-level Unexpected error! and the same URL worked when tried again."""
+        row = _owned_row(blueprints=["b1"], illustrations=["i1"])
+        waits = []
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1")
+            transport = FakeCults(
+                rows=[row], asset_failures={"createIllustration": iter([UNEXPECTED])},
+            )
+            self.assertEqual(_publish(root, transport, sleep=waits.append), "creation-1")
+        self.assertEqual(
+            _operation_names(transport),
+            [
+                "updateCreation",
+                "createBlueprint",
+                "createIllustration",
+                "createIllustration",
+                "destroyBlueprint",
+                "destroyIllustration",
+            ],
+        )
+        self.assertEqual(len(waits), 1)
+        self.assertGreater(waits[0], 0)
+
+    def test_photo_download_error_is_retried(self):
+        """Cults reports a failed fetch as a payload error, which also clears up."""
+        download = {"data": {"createIllustration": {
+            "illustration": None,
+            "errors": ["Could not download URL"],
+        }}}
+        row = _owned_row(illustrations=["i1"])
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1")
+            transport = FakeCults(
+                rows=[row], asset_failures={"createIllustration": iter([download])},
+            )
+            _publish(root, transport)
+        self.assertEqual(_operation_names(transport).count("createIllustration"), 2)
+        self.assertIn("destroyIllustration", _operation_names(transport))
+
+    def test_file_unexpected_error_is_retried(self):
+        row = _owned_row(blueprints=["b1"])
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1")
+            transport = FakeCults(
+                rows=[row], asset_failures={"createBlueprint": iter([UNEXPECTED, UNEXPECTED])},
+            )
+            _publish(root, transport)
+        self.assertEqual(_operation_names(transport).count("createBlueprint"), 3)
+        self.assertIn("destroyBlueprint", _operation_names(transport))
+
+    def test_photo_that_keeps_failing_names_the_url_and_stops_before_destroy(self):
+        row = _owned_row(blueprints=["b1"], illustrations=["i1"])
+        waits = []
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1")
+            transport = FakeCults(
+                rows=[row], asset_failures={"createIllustration": itertools.repeat(UNEXPECTED)},
+            )
+            with self.assertRaises(RuntimeError) as caught:
+                _publish(root, transport, sleep=waits.append)
+        message = str(caught.exception)
+        self.assertIn("createIllustration", message)
+        self.assertIn("widget/img/part.png", message)
+        attempts = _operation_names(transport).count("createIllustration")
+        self.assertGreater(attempts, 1)
+        self.assertEqual(len(waits), attempts - 1)
+        self.assertNotIn("destroyBlueprint", _operation_names(transport))
+        self.assertNotIn("destroyIllustration", _operation_names(transport))
 
     def test_update_errors_stop_before_destroy(self):
         row = _owned_row(blueprints=["b1"])

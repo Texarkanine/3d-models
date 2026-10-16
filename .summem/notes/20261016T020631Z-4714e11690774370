@@ -1,0 +1,1 @@
+Re-running a failed Cults update deploy converges: it records every asset on the listing before adding the tag's set, then removes all of them. Partial adds from the failed run go too.

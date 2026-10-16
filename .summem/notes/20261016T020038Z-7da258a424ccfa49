@@ -1,0 +1,1 @@
+Cults createIllustration fails intermittently on a good GitHub photo URL: 'Could not download URL' (payload error) or top-level 'Unexpected error!'. The same URL succeeds minutes later. Not file-specific.
