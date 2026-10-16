@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: cults-gallery-refresh
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 - An update deploy now edits `details` and restores it after the old assets are gone, so Cults rebuilds the public gallery

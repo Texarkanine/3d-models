@@ -28,3 +28,13 @@ After an update deploy removes old Cults photos and files, bump the creation so 
 * Insights
     - A gallery built before an STL preview exists keeps missing that preview
     - A free details edit still has to send `downloadPrice` 0 and `licenseCode`
+
+## 2026-10-15 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantic review of the build against the plan: every planned behavior is present, no blocking findings
+    - Re-ran the catalog suite: 66 passed
+* Decisions made
+    - PASS: the implementation is acceptable as-is; two advisories recorded in `tasks.md`
+* Insights
+    - The details edit-and-restore after the file swap is what moves `updatedAt`, and the live listing confirmed it
