@@ -50,6 +50,33 @@ query Mine($limit: Int!, $offset: Int!) {
 """
 
 
+def version_from_tag(tag, component):
+    """Return the version suffix of tag.
+
+    tag must be `<component>-v<version>`. Raise ValueError when the tag
+    does not start with that prefix or the version is empty.
+    """
+    prefix = f"{component}-v"
+    if not str(tag).startswith(prefix) or len(str(tag)) == len(prefix):
+        raise ValueError(f"tag {tag} is not {component}-v<version>")
+    return str(tag)[len(prefix):]
+
+
+def changelog_url(repository, component):
+    """Return the GitHub URL of this model's CHANGELOG.md on main.
+
+    The URL has no fragment and does not include the tag.
+    repository is owner/name. Raise ValueError when it is not.
+    """
+    if repository.count("/") != 1 or repository.startswith("/"):
+        raise ValueError("repository must be owner/name")
+    parts = (MODELS_DIR, component, "CHANGELOG.md")
+    if any(part in ("", ".", "..") for part in parts):
+        raise ValueError(f"refusing component {component}")
+    suffix = "/".join(quote(part) for part in parts)
+    return f"https://github.com/{repository}/blob/main/{suffix}"
+
+
 def file_url(path, *, repository, tag, component, attributes):
     """Return the public GitHub URL Cults can fetch for one publish path.
 
@@ -71,21 +98,51 @@ def file_url(path, *, repository, tag, component, attributes):
     return f"{host}/{repository}/{quote(tag, safe='')}/{suffix}"
 
 
-def assemble_description(description, boilerplate, license_name, manufacturing, *, manufacturing_argument):
+def fill_listing_text(text, *, version, changelog_url, license_name):
+    """Replace {changelog_url}, then {license_name}, then {version}."""
+    return (
+        str(text)
+        .replace("{changelog_url}", changelog_url)
+        .replace("{license_name}", license_name)
+        .replace("{version}", version)
+    )
+
+
+def assemble_description(
+    description,
+    boilerplate,
+    license_name,
+    manufacturing,
+    *,
+    manufacturing_argument,
+    version,
+    changelog_url,
+):
     """Return one Cults description.
 
-    The model description comes first. The author boilerplate follows, with
-    {license_name} replaced. Non-empty manufacturing is a Manufacturing
-    section when manufacturing_argument is None, and is left out of the
-    description when that argument is set. Empty manufacturing adds nothing.
+    The model description, the author boilerplate, and manufacturing each
+    have {version}, {changelog_url}, and {license_name} replaced. The model
+    description comes first. The boilerplate follows. Non-empty manufacturing
+    is a Manufacturing section when manufacturing_argument is None, and is
+    left out of the description when that argument is set. Empty manufacturing
+    adds nothing.
     """
+    filled = {
+        "version": version,
+        "changelog_url": changelog_url,
+        "license_name": license_name,
+    }
+    description = fill_listing_text(description or "", **filled).strip()
+    boilerplate = fill_listing_text(boilerplate, **filled).strip()
+    manufacturing_text = fill_listing_text(
+        "" if manufacturing is None else manufacturing, **filled
+    ).strip()
     parts = []
-    if description and str(description).strip():
-        parts.append(str(description).strip())
-    parts.append(str(boilerplate).replace("{license_name}", license_name).strip())
-    text = "" if manufacturing is None else str(manufacturing).strip()
-    if text and not manufacturing_argument:
-        parts.append("Manufacturing\n\n" + text)
+    if description:
+        parts.append(description)
+    parts.append(boilerplate)
+    if manufacturing_text and not manufacturing_argument:
+        parts.append("Manufacturing\n\n" + manufacturing_text)
     return "\n\n".join(parts)
 
 
@@ -448,6 +505,8 @@ def publish(*, root, component, tag, repository, api_key, transport=None, sleep=
     locale = author["locale"]
     if not re.fullmatch(r"[A-Z]{2}", str(locale)):
         raise ValueError(f"unsupported locale {locale}")
+    version = version_from_tag(tag, component)
+    listing_changelog = changelog_url(repository, component)
 
     mutations = _mutation_arguments(transport, auth)
     create_args = mutations["createCreation"]
@@ -461,13 +520,20 @@ def publish(*, root, component, tag, repository, api_key, transport=None, sleep=
     flag = author["made_with_ai"]
     if not isinstance(flag, bool):
         raise ValueError("made_with_ai must be a boolean")
-    manufacturing = record.get("manufacturing") or ""
+    manufacturing = fill_listing_text(
+        record.get("manufacturing") or "",
+        version=version,
+        changelog_url=listing_changelog,
+        license_name=license_name,
+    )
     description = assemble_description(
         record.get("description") or "",
         author["boilerplate"]["description"],
         license_name,
         manufacturing,
         manufacturing_argument=manufacturing_argument,
+        version=version,
+        changelog_url=listing_changelog,
     )
     file_urls = [
         file_url(path, repository=repository, tag=tag, component=component, attributes=attributes)
