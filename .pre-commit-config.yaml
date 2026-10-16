@@ -1,0 +1,16 @@
+repos:
+  - repo: local
+    hooks:
+      # Orientation and ICC_Profile are copied back so photos keep their rotation and colors.
+      # ExifTool cannot write BMP or ICO, and neither format carries EXIF or XMP.
+      - id: strip-image-metadata
+        name: strip image metadata
+        language: perl
+        additional_dependencies: [EXIFTOOL/Image-ExifTool-13.55.tar.gz]
+        entry: exiftool -q -q -overwrite_original -all= -tagsfromfile @ -Orientation -ICC_Profile
+        files: '(?i)\.(jpe?g|png|gif|webp|tiff?|heic|heif|avif|jxl)$'
+      - id: strip-svg-metadata
+        name: strip SVG metadata
+        language: python
+        entry: python tools/strip_svg_metadata.py
+        files: '(?i)\.svg$'
