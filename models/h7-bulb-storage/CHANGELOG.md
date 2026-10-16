@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/Texarkanine/3d-models/compare/h7-bulb-storage-v1.0.3...h7-bulb-storage-v1.0.4) (2026-10-16)
+
+
+### Bug Fixes
+
+* **h7-bulb-storage:** rename flange clips for rim plate thickness ([#9](https://github.com/Texarkanine/3d-models/issues/9)) ([5aa1ea7](https://github.com/Texarkanine/3d-models/commit/5aa1ea79db7a7d9cec377d63918a9871e1675b8e))
+
 ## [1.0.3](https://github.com/Texarkanine/3d-models/compare/h7-bulb-storage-v1.0.2...h7-bulb-storage-v1.0.3) (2026-10-16)
 
 
