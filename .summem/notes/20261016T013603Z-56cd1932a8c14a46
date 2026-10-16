@@ -1,0 +1,1 @@
+Cults updateCreation without downloadPrice fails 'Price must be >= 0.5' even with only id (probed live 2026-10-16). downloadPrice 0 succeeds and the listing stays free. A free update must send downloadPrice 0.

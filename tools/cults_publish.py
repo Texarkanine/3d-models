@@ -85,9 +85,7 @@ def select_arguments(payload, arguments):
     """Keep the payload keys that arguments lists.
 
     arguments maps an argument name to {"non_null": bool, "graphql_type": str}.
-    Keys the schema does not list are dropped. A payload that does not set
-    downloadPrice leaves it out. Cults treats 0 as a paid price, and a paid
-    price must be at least 0.5. A free listing omits the argument.
+    Keys the schema does not list are dropped.
     """
     return {key: value for key, value in payload.items() if key in arguments}
 
@@ -279,6 +277,10 @@ def publish(*, root, component, tag, repository, api_key, transport=None):
     transport(query, variables, auth) returns the decoded GraphQL JSON.
     auth is (cults_nick, api_key). Raise when Cults returns a non-empty
     errors list. The api_key is not written into the query.
+
+    Every listing is free: downloadPrice is 0. updateCreation fails the
+    price check when downloadPrice is absent, and a price sent without
+    licenseCode resets the license to the Cults default.
     """
     from pathlib import Path
 
@@ -332,6 +334,7 @@ def publish(*, root, component, tag, repository, api_key, transport=None):
         "categoryId": str(record["category_id"]).strip(),
         "subCategoryIds": list(record.get("subcategory_ids") or []),
         "licenseCode": str(record["license_code"]).strip(),
+        "downloadPrice": 0,
         ai_argument: flag,
     }
     if str(manufacturing).strip() and manufacturing_argument:
@@ -359,6 +362,8 @@ def publish(*, root, component, tag, repository, api_key, transport=None):
         raise ValueError(f"{action} cannot carry fileUrls and imageUrls; refusing a partial publish")
     if ai_argument not in selected:
         raise ValueError("made-with-AI flag was dropped")
+    if "licenseCode" not in selected:
+        raise ValueError("licenseCode was dropped; a price without it resets the Cults license")
     operation = "createCreation" if action == "create" else "updateCreation"
     if action == "update":
         selected["id"] = creation_id

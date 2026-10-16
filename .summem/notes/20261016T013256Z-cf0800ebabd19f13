@@ -1,0 +1,1 @@
+Cults updateCreation schema defaults currency to EUR and openPriced to false, and downloadPrice to null. Omitting downloadPrice still fails with Price must be >= 0.5 (run 38835243248), so omission does not mean free on update.

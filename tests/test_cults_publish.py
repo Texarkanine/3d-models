@@ -79,6 +79,7 @@ class FakeCults:
     rows are creation records. matches is a shorthand: each id becomes a row
     named listing_name with no assets. An ids variable selects a row by the
     slug of a global id, and by the row id when that id is not a global id.
+    Like Cults, updateCreation without downloadPrice fails the price check.
     """
 
     def __init__(self, *, matches=None, rows=None, creation_id="creation-1", errors=None,
@@ -147,6 +148,11 @@ class FakeCults:
         operation = "updateCreation" if "updateCreation(" in query else "createCreation"
         if self.errors:
             return {"data": {operation: {"creation": None, "errors": self.errors}}}
+        if operation == "updateCreation" and "downloadPrice" not in variables:
+            return {"data": {operation: {
+                "creation": None,
+                "errors": ["Price must be greater than or equal to 0.5"],
+            }}}
         return {"data": {operation: {"creation": {"id": self.creation_id}, "errors": []}}}
 
 
@@ -335,20 +341,6 @@ class ArgumentTests(unittest.TestCase):
         )
         self.assertEqual(got, {"name": "A"})
 
-    def test_download_price_is_omitted_when_non_null_and_unset(self):
-        got = select_arguments(
-            {},
-            {"downloadPrice": {"non_null": True, "graphql_type": "Float!"}},
-        )
-        self.assertNotIn("downloadPrice", got)
-
-    def test_download_price_is_omitted_when_nullable(self):
-        got = select_arguments(
-            {},
-            {"downloadPrice": {"non_null": False, "graphql_type": "Float"}},
-        )
-        self.assertEqual(got, {})
-
     def test_made_with_ai_argument_is_returned(self):
         self.assertEqual(ensure_made_with_ai({"madeWithAi": {}}), "madeWithAi")
 
@@ -412,7 +404,8 @@ class PublishTests(unittest.TestCase):
         self.assertNotIn("not-uploaded.png", joined)
         self.assertIs(variables["madeWithAi"], True)
         self.assertIn("GNU General Public License", variables["description"])
-        self.assertNotIn("downloadPrice", variables)
+        self.assertEqual(variables["downloadPrice"], 0)
+        self.assertEqual(variables["licenseCode"], "gpl")
         self.assertEqual(_operation_names(transport), ["createCreation"])
 
     def test_publish_raises_when_cults_returns_errors(self):
@@ -538,15 +531,26 @@ class PublishTests(unittest.TestCase):
             ["updateCreation", "createBlueprint", "createIllustration"],
         )
 
-    def test_free_update_omits_download_price_when_the_argument_is_required(self):
-        update_args = dict(UPDATE_ARGS, downloadPrice="Float!")
+    def test_free_update_sends_a_zero_price_with_the_license(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1")
+            transport = FakeCults(rows=[_owned_row()])
+            _publish(root, transport)
+        variables = next(call[1] for call in transport.calls if "updateCreation(" in call[0])
+        self.assertEqual(variables["downloadPrice"], 0)
+        self.assertEqual(variables["licenseCode"], "gpl")
+
+    def test_schema_without_license_code_refuses_before_a_mutation(self):
+        """Cults resets the license to its default when a price arrives without one."""
+        update_args = {key: value for key, value in UPDATE_ARGS.items() if key != "licenseCode"}
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             write_repo(root, creation_id="local-1")
             transport = FakeCults(rows=[_owned_row()], update_args=update_args)
-            _publish(root, transport)
-        variables = next(call[1] for call in transport.calls if "updateCreation(" in call[0])
-        self.assertNotIn("downloadPrice", variables)
+            with self.assertRaises(ValueError):
+                _publish(root, transport)
+        self.assertEqual(_mutations(transport), [])
 
     def test_global_creation_id_is_looked_up_by_slug(self):
         slug = "h7-bulb-storage"

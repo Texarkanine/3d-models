@@ -1,0 +1,1 @@
+Cults updateCreation with downloadPrice but no licenseCode silently resets the license to cults_pu. Always send licenseCode with downloadPrice.
