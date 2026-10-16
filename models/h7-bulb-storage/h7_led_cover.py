@@ -41,7 +41,8 @@ Sources for the default dimensions:
   - UNECE R37 sheet H7/1, maximum lamp outline: Ø25.0 for 4.1 mm in front of
     the reference plane, then Ø19.0, glass at most Ø15.0, at most 44.0 mm
     long from the reference plane.
-  - The MakerWorld screw-together H7 case cup (h7-bulbholderv2.stl):
+  - The screw-together H7 bulb case cup (h7-bulbholderv2.stl),
+    https://www.printables.com/model/36482-h7-bulb-case :
     Ø26.4 x 4 mm in front of the flange, Ø36 around the flange.
   - IEC 60061-1 sheet 7004-5 (cap PX26d), read from its identical Russian
     adoption GOST IEC 60061-1-2014: flange O 33.8-34.0, tab K 7.9-8.0,
@@ -49,7 +50,8 @@ Sources for the default dimensions:
     mapped by fit to a measured LED bulb (Ø33.3, tab 7.7, flat at 12.8) and
     a retailer's "34 mm plate, 21 mm flat, 8 mm tab". Plate thickness
     T 0.6-0.8 and the back of the plate at most Z 1.4 behind the reference
-    plane are read off the sheet's drawing (meganorm.ru copy).
+    plane are read off the sheet's drawing. A copy with the drawing:
+    https://meganorm.ru/mega_doc/norm/gost_gosudarstvennyj-standart/18/gost_IEC_60061-1-2014_mezhgosudarstvennyy_standart_tsokoli_i.html
   - Test prints of 0.2 to 0.4 on the operator's LED bulbs (2026-10-12/13).
 
 Coordinates (use position): z = 0 is the seat (the bulb's reference plane),

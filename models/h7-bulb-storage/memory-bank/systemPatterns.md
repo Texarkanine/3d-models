@@ -11,7 +11,7 @@ Know these before changing anything:
 - **Inside the bore, nothing may sit under the clip arm.** The arms are springs that bend between the tunnel roofs at ±`X_SUPPORT`. A roof under an arm in the bore shortens that span and makes the clamp much stiffer. Any guide there must stay outside the arm, as the barb-groove roof does. Nothing may sit inside the bore circle at all, because the flange goes in from the back.
 - **Defaults are anchored to the H7 cap standard (PX26d)** at its largest sizes, plus clearance. Parameter comments name the standard's letter (O, K, Q, M) behind each value. Do not tune defaults to one measured bulb.
 - **The assertions are geometry limits**, not style checks: arms inside the bore, barb catching on the flat of the collar face, bump fitting the tunnel, tip long enough for the barb. They fail when the script runs. Do not delete one to make a change go through.
-- **`README.md` repeats derived sizes** (collar, length, the "What fits" envelope). Update it when parameters change; the script prints the main sizes on each run. The README is the welcome for source readers; design detail belongs here.
+- **Each fact has one home.** Sizes and the sources behind them live in the script (its parameter comments and docstring); it prints the main sizes on each run. Print settings and which clip to choose live in the Cults listing text, `publish.yaml`. Design detail lives here. `README.md` only orients a source reader and points to those homes, so it never needs updating when a parameter changes.
 
 ## Coordinates: built in use position
 
@@ -34,6 +34,8 @@ The arms are printed turned out `ARM_SPREAD` (1.5 degrees) about the bridge bar;
 - `clip(spread=0)`: pressed straight, as the tunnels hold the arm while it slides. The insertion and release sweeps (B, C, D) use it.
 
 A new clip feature must say which pose each of its checks uses.
+
+The test clips were PLA at 10% infill with the slicer's default walls, and they worked. The listing gives no material or infill advice: the parts work at slicer defaults, and people tune as they like.
 
 ## Test prints are tagged
 

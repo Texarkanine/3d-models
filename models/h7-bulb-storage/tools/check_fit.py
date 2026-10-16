@@ -189,7 +189,7 @@ def bodies():
     check("Ø38 heatsink 4 mm behind a 2 mm flange clears the cover", o < EPS, f"overlap {o:.4f}")
     o = vol(h7.clip(lo, hi).translate((0, 0, -0.6)).intersect(led.cut(flange(t))))
     check("clip flexed 0.6 mm back clears the LED body", o < EPS, f"overlap {o:.4f}")
-    # What README promises may sit right behind the flange beside the tab.
+    # A body up to Ø29 may sit right behind the flange beside the tab.
     t = 1.0
     o = vol(body.intersect(flange(t).union(cyl(14.5, -6.0, -t))))
     check("a Ø29 body right behind a 1 mm flange clears the keys", o < EPS, f"overlap {o:.4f}")
@@ -246,9 +246,9 @@ def tab_lead_in():
 @section("K", "longest standard bulb fits the tube, with 10 mm to spare")
 def head_length():
     """A lamp at the R37 H7/1 maximum outline (Ø25.0 for 4.1 mm, then Ø19.0 to
-    44.0 mm) must fit, and so must the same outline SPARE longer: README promises
-    heads up to 54 mm long. This reads only the cover's solid, so anything that
-    shortens the usable tube (closed end, wall, taper) turns it red."""
+    44.0 mm) must fit, and so must the same outline SPARE longer (HEAD_LEN).
+    This reads only the cover's solid, so anything that shortens the usable
+    tube (closed end, wall, taper) turns it red."""
     for length, label in ((R37_LEN, "standard maximum"), (R37_LEN + SPARE, f"{SPARE:.0f} mm longer")):
         o = vol(max_lamp(length).intersect(body))
         check(f"lamp {length:.0f} mm long ({label}) fits", o < EPS, f"overlap {o:.4f}")
