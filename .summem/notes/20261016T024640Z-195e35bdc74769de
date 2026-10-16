@@ -1,0 +1,1 @@
+Issues: #1 moves the model directories under models/. #2 interpolates {version} and {changelog_url} in the Cults boilerplate and is blocked by #1.
