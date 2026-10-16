@@ -16,7 +16,7 @@ h7 = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(h7)
 
 EPS = 1e-3          # mm³; overlaps below this are touching faces, not collisions
-lo, hi = 1.5, 2.0   # the clip band the operator's bulb takes (v2)
+lo, hi = 0.5, 1.0   # the clip band the operator's bulb takes (v2; its plate is 0.85 mm)
 FAILED = []
 SECTIONS = {}
 
@@ -169,15 +169,16 @@ def key_seat():
 def squeeze():
     for lo_, hi_ in h7.CLIP_VARIANTS:
         for t in (lo_, hi_):
-            fl = flange(t).union(cyl(12, -t - 4.2, -t))
+            z = t + h7.PLATE_SETBACK  # the back of the plate, behind the seat
+            fl = flange(z).union(cyl(12, -z - 4.2, -z))
             i = h7.clip(lo_, hi_).intersect(fl)
             if vol(i) > 1e-6:
                 b = bb(i)
                 sq = b.zmax - b.zmin
-                check(f"{lo_}-{hi_} on a {t} mm flange", 0.05 <= sq <= 0.65,
+                check(f"{lo_}-{hi_} on a {t} mm plate", 0.05 <= sq <= 0.65,
                       f"squeeze {sq:.2f} at x[{b.xmin:.1f},{b.xmax:.1f}]")
             else:
-                check(f"{lo_}-{hi_} on a {t} mm flange", False, "no contact")
+                check(f"{lo_}-{hi_} on a {t} mm plate", False, "no contact")
 
 
 @section("G", "heatsink and LED body")

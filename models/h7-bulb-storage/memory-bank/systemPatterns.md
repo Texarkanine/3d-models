@@ -21,9 +21,9 @@ Parts are modelled where they sit in use: z = 0 is the seat (the bulb's referenc
 
 Clip-path and key geometry is built for the +y side and mirrored with `both_sides`. The clip path is symmetric along x so the clip goes in from either side. New tunnel or key features must keep both symmetries.
 
-## One clip per flange-thickness band
+## One clip per flange-plate band
 
-Flange thickness varies between bulbs, so the clip is exported once per 0.5 mm band (`CLIP_VARIANTS`); only the spring bump height differs. File names carry the band.
+Flange plates vary between bulbs, so the clip is exported once per 0.5 mm band (`CLIP_VARIANTS`); only the spring bump height differs. Bands and file names are the plate thickness at its rim, which users can measure. The bulb rests on three lugs in front of the plate, so the bump presses on the back of the plate, `PLATE_SETBACK` deeper than the plate is thick (PX26d: plate T 0.6-0.8, back Z at most 1.4). `bump_height` builds for band + setback. The setback (1.0) comes from the operator's bulb, not the standard. Before 2026-10-16 the bands named that depth, so old names are 1.0 mm higher.
 
 ## The clip is a preloaded spring
 

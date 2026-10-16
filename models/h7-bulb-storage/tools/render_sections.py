@@ -13,7 +13,7 @@ def tm(w, name):
 t = 2.0
 bulb = cyl(16, -t, 0).union(h7.box(0, 18.6, -3.5, 3.5, -t, 0).intersect(cyl(17.6, -t, 0)))
 bulb = bulb.union(cyl(12, -6, -t)).union(cyl(19, -36, -6)).union(cyl(12.0, 0, 3)).union(cyl(8, 3, 22)).union(cyl(6, 22, 40))
-cover_m, clip_m, bulb_m = tm(h7.cover(), "cover"), tm(h7.clip(2.0, 2.5), "clip"), tm(bulb, "bulb")
+cover_m, clip_m, bulb_m = tm(h7.cover(), "cover"), tm(h7.clip(0.5, 1.0), "clip"), tm(bulb, "bulb")
 
 fig, axes = plt.subplots(1, 3, figsize=(20, 7))
 y_arm = (h7.Y0 + h7.Y1) / 2
@@ -30,7 +30,7 @@ for ax, (kind, val, title, lim) in zip(axes, [
             ax.fill(ent[:, 0], ent[:, 2] if kind == "y" else ent[:, 1], color=col, alpha=0.7, lw=0.5, ec="k")
     ax.set_aspect("equal"); ax.set_title(title); ax.grid(alpha=0.3)
     ax.set_xlim(*lim[0]); ax.set_ylim(*lim[1])
-fig.suptitle("cover (blue), clip 2.0-2.5 (red), mock LED (gold: Ø32x2 flange with 7 mm tab at +x, Ø38 heatsink)")
+fig.suptitle("cover (blue), clip 0.5-1.0 (red), mock LED (gold: Ø32x2 flange with 7 mm tab at +x, Ø38 heatsink)")
 fig.tight_layout(); fig.savefig(SP + "sections.png", dpi=80)
 
 def view(meshes, fname, elev, azim, title):

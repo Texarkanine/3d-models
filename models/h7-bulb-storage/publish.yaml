@@ -22,12 +22,8 @@ subcategory_ids:
 files:
   - h7_cover.stl
   - h7_cover.step
-  - clips/h7_clip_flange_1.0-1.5mm.stl
-  - clips/h7_clip_flange_1.0-1.5mm.step
-  - clips/h7_clip_flange_1.5-2.0mm.stl
-  - clips/h7_clip_flange_1.5-2.0mm.step
-  - clips/h7_clip_flange_2.0-2.5mm.stl
-  - clips/h7_clip_flange_2.0-2.5mm.step
-  - clips/h7_clip_flange_2.5-3.0mm.stl
-  - clips/h7_clip_flange_2.5-3.0mm.step
+  - clips/h7_clip_flange_0.5-1.0mm.stl
+  - clips/h7_clip_flange_0.5-1.0mm.step
+  - clips/h7_clip_flange_0.0-0.5mm.stl
+  - clips/h7_clip_flange_0.0-0.5mm.step
 cults_creation_id: "Q3JlYXRpb24vaDctYnVsYi1zdG9yYWdl"
