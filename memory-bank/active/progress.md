@@ -2,7 +2,7 @@
 
 Replace `{version}`, `{changelog_url}`, and `{license_name}` in the Cults boilerplate and in each model's `publish.yaml` description and manufacturing. The changelog URL is the file on `main`, with no fragment. Remove the unused `images` field. Leave `tags` and the listing title.
 
-**Complexity:** Level 2
+**Complexity:** Level 1
 
 ## 2026-10-15 - COMPLEXITY-ANALYSIS - COMPLETE
 
@@ -109,3 +109,12 @@ Replace `{version}`, `{changelog_url}`, and `{license_name}` in the Cults boiler
     - Complexity before this reclassification: Level 2
 * Insights
     - On the Cults edit form, the manufacturing text is inside the 3D model description, under a Manufacturing heading. Settings and manufacturing instructions is empty
+
+## 2026-10-15 - COMPLEXITY-ANALYSIS - COMPLETE
+
+* Work completed
+    - Classified the rework as Level 1
+* Decisions made
+    - It is a bug in one publisher: the manufacturing text is appended to the description
+* Insights
+    - The publisher only sends manufacturing to a schema argument whose name contains "manufactur". Otherwise it writes a Manufacturing section into the description
