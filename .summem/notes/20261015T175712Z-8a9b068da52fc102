@@ -1,0 +1,1 @@
+CadQuery: shapes from shapely polylines bloat STEP (4 MB vs 320 KB) and coincident cones make invalid solids; build from true circles and offset touching cones by 0.2.

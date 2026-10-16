@@ -29,9 +29,12 @@ Read the root `memory-bank/` for how the catalog publishes. When the task names 
 1. Create `models/<component>/` where `<component>` is the release-please component name. Use lowercase words separated by hyphens.
 2. Put the source and the printable files in that directory. This repo does not require a language, a script, or a particular CAD format.
 3. Add `memory-bank/productContext.md`, `systemPatterns.md`, and `techContext.md` for that model.
-4. Add `publish.yaml` in the directory. Its `files` list is what a Cults publish will ship. `license_code` and `category_id` stay empty until the first publish. `cults_creation_id` stays empty until Cults returns one.
-5. Register `models/<component>` in `release-please-config.json` (`release-type` `simple`, `component` equal to the directory name, `include-component-in-tag` true, and the shared pull-request header) and in `.release-please-manifest.json` at version `0.0.0`.
-6. Run `.summem/summem start models/<component>` so the model has its own SumMem store.
+4. Add a one-paragraph `AGENTS.md` that says which model the directory is and tells agents to read its `memory-bank/` first. Copy an existing model's.
+5. Add `publish.yaml` in the directory. Its `files` list is what a Cults publish will ship. `license_code` and `category_id` stay empty until the first publish. `cults_creation_id` stays empty until Cults returns one.
+6. Register `models/<component>` in `release-please-config.json` (`release-type` `simple`, `component` equal to the directory name, `include-component-in-tag` true, and the shared pull-request header) and in `.release-please-manifest.json` at version `0.0.0`.
+7. Run `.summem/summem start models/<component>` so the model has its own SumMem store.
+
+Do not list the model in the root `README.md`. The directories are the list.
 
 Release-please does not discover `publish.yaml` on its own. A directory is onboarded only when both files name it. Conventional commits that touch the directory drive that component's release pull request. Merging the pull request on `main` tags `<directory>-vX.Y.Z`.
 
