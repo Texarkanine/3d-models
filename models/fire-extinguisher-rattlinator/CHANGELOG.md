@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/Texarkanine/3d-models/compare/fire-extinguisher-rattlinator-v1.0.1...fire-extinguisher-rattlinator-v1.0.2) (2026-10-16)
+
+
+### Documentation
+
+* switch manufacturing instructions to H3 header ([28d3ead](https://github.com/Texarkanine/3d-models/commit/28d3ead8a070ee0ee2173b4be88008e4c54c6b8b))
+
 ## [1.0.1](https://github.com/Texarkanine/3d-models/compare/fire-extinguisher-rattlinator-v1.0.0...fire-extinguisher-rattlinator-v1.0.1) (2026-10-16)
 
 
