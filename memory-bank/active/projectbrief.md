@@ -39,3 +39,7 @@ The same placeholders in a model's `publish.yaml` `description` and `manufacturi
 4. The listing title equals `publish.yaml` `name`, with no substitution.
 5. `publish.yaml` files no longer have an `images` field. `tags` remains.
 6. Photos still upload from `img/`.
+
+## Rework
+
+The manufacturing text belongs in Cults' "Settings and manufacturing instructions" field. On the listing the operator opened, that field is empty and still shows the placeholder "3D printing or CNC / Laser cutting settings in English". The same text is inside the 3D model description, under a Manufacturing heading, after the boilerplate.

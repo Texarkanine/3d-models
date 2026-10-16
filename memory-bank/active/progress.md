@@ -100,3 +100,12 @@ Replace `{version}`, `{changelog_url}`, and `{license_name}` in the Cults boiler
     - Leave the double fill in place. The smaller shape is one fill in `publish` and a joiner that does not substitute
 * Insights
     - `PublishTests` and `FileUrlTests` no longer share one tag
+
+## 2026-10-15 - REWORK - INITIATED
+
+* Work completed
+    - The operator chose rework
+* Decisions made
+    - Complexity before this reclassification: Level 2
+* Insights
+    - On the Cults edit form, the manufacturing text is inside the 3D model description, under a Manufacturing heading. Settings and manufacturing instructions is empty

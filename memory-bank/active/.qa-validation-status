@@ -1,8 +1,0 @@
-PASS
-Task: cults-listing-placeholders (Level 2)
-Reviewed: tools/cults_publish.py, tests/test_cults_publish.py, memory-bank/systemPatterns.md, both publish.yaml records (commits 8b79980, e40ac14, 1177d14).
-Full suite: 79 tests OK.
-Advisory: publish() fills manufacturing with fill_listing_text and then assemble_description fills it again. Harmless (the second pass finds no tokens) and the plan prescribed both fills, but it is redundant.
-Advisory: version_from_tag calls str(tag) three times; a local would read cleaner.
-Advisory: an unknown or misspelled token such as {verison} stays literal in the listing. Recorded at preflight and build as a deliberate non-goal.
-Operator's uncommitted manufacturing edit in models/h7-bulb-storage/publish.yaml left untouched.
