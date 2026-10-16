@@ -45,6 +45,9 @@ jobs:
 
       - name: Upload to Cults
         id: upload
+        environment:
+          name: cults3d.com
+          url: https://cults3d.com/en/users/texarkanine/3d-models
         env:
           COMPONENT: ${{ steps.model.outputs.component }}
           TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
