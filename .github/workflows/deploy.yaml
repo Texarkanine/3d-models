@@ -6,10 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: >
-          Model tag to publish, for example h7-bulb-storage-v1.0.1.
-          Start this workflow from the branch that contains the current publisher,
-          and pass that tag here.
+        description: Tat to publish
         required: true
         type: string
 
