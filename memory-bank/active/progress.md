@@ -129,3 +129,14 @@ Replace `{version}`, `{changelog_url}`, and `{license_name}` in the Cults boiler
     - An argument whose name contains "manufactur" still wins over `details`
 * Insights
     - The gallery refresh reads `details` after the text update, so restoring it puts the manufacturing text back
+
+## 2026-10-15 - QA - COMPLETE
+
+* Work completed
+    - Reviewed the `details` fallback, description omission, and gallery refresh against the task and brief rework note
+    - Full suite: 80 tests passed
+    - Wrote `.qa-validation-status`: PASS
+* Decisions made
+    - PASS with two advisories, none blocking
+* Insights
+    - Empty manufacturing on update preserves pre-existing `details`; the plan scoped files to the publisher and its tests, so no pattern-doc change was required
