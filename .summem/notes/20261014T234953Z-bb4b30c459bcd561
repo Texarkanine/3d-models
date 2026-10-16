@@ -1,1 +1,0 @@
-Add-a-model checklist (AGENTS.md) omits two things the existing models have: a one-paragraph AGENTS.md in the model dir and a row in the root README table. summem start prints nothing on success.

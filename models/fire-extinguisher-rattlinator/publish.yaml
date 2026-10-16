@@ -4,18 +4,28 @@ description: |
 
   The handle, trigger, and lock on a full-size extinguisher are light and loose, so they buzz at the frequencies a car runs at. This sleeve slides onto the business end of the handle, holds those parts still, and gives them soft plastic to touch to absorb the noise.
 
+  If you find it backs off a little bit or still permits too much play, toss a rubber band around it, as shown.
+
   Intended to be printed in TPU 95, which is firm enough to stay put and flexible enough to deform out of the way, so it does not impede the operation of the extinguisher. This means you don't have to remove it before use - just pull the pin and squeeze!
 
-  Fit has been checked on 2.5 pound and 5 pound extinguishers.
+  Fit has been checked on 2.5 pound and 5 pound AMEREX fire extinguishers.
 manufacturing: |
   ## Material
 
-  Designed to be printed in TPU 95.
+  TPU 95 (required)
 
   ## Printing Instructions
 
-  Add a support-blocker on the ring (as shown in the slicer image); no supports are needed for the ring. See screenshot of slicer for reference.
-tags: []
+  Add a support-blocker on the ring (as shown in the slicer screenshot); no supports are needed for the ring.
+tags:
+  - fire extinguisher
+  - extinguisher rattle
+  - extinguisher handle
+  - amerex
+  - car
+  - race car
+  - off-road
+  - tpu
 license_code: gpl
 category_id: Q2F0ZWdvcnkvMjU
 subcategory_ids:
