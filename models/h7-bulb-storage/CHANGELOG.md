@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/Texarkanine/3d-models/compare/h7-bulb-storage-v1.0.2...h7-bulb-storage-v1.0.3) (2026-10-16)
+
+
+### Documentation
+
+* put the version and changelog link in the Cults listing [[#2](https://github.com/Texarkanine/3d-models/issues/2)] ([#7](https://github.com/Texarkanine/3d-models/issues/7)) ([d68d68f](https://github.com/Texarkanine/3d-models/commit/d68d68fdea460cf3637c0fe16c2a059e4fb99506))
+
 ## [1.0.2](https://github.com/Texarkanine/3d-models/compare/h7-bulb-storage-v1.0.1...h7-bulb-storage-v1.0.2) (2026-10-15)
 
 
