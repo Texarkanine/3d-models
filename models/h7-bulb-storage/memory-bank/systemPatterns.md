@@ -11,7 +11,7 @@ Know these before changing anything:
 - **Inside the bore, nothing may sit under the clip arm.** The arms are springs that bend between the tunnel roofs at ±`X_SUPPORT`. A roof under an arm in the bore shortens that span and makes the clamp much stiffer. Any guide there must stay outside the arm, as the barb-groove roof does. Nothing may sit inside the bore circle at all, because the flange goes in from the back.
 - **Defaults are anchored to the H7 cap standard (PX26d)** at its largest sizes, plus clearance. Parameter comments name the standard's letter (O, K, Q, M) behind each value. Do not tune defaults to one measured bulb.
 - **The assertions are geometry limits**, not style checks: arms inside the bore, barb catching on the flat of the collar face, bump fitting the tunnel, tip long enough for the barb. They fail when the script runs. Do not delete one to make a change go through.
-- **`README.txt` repeats derived sizes** (bore, collar, length with clip, fit envelope). Update it when parameters change; the script prints the main sizes on each run.
+- **`README.md` repeats derived sizes** (collar, length, the "What fits" envelope). Update it when parameters change; the script prints the main sizes on each run. The README is the welcome for source readers; design detail belongs here.
 
 ## Coordinates: built in use position
 
@@ -37,6 +37,6 @@ A new clip feature must say which pose each of its checks uses.
 
 ## Test prints are tagged
 
-Each version sent to the printer for testing gets a git tag `h7-bulb-storage-v<N>-print<M>`. The directory name is the prefix so the tag does not collide with another model in this repo. The outcome is recorded in `README.txt` (the "Tested" line and "Changes in vN").
+Each version sent to the printer for testing gets a git tag `h7-bulb-storage-v<N>-print<M>`. The directory name is the prefix so the tag does not collide with another model in this repo. The outcome is recorded as a SumMem note for this model (`.summem/summem note --path models/h7-bulb-storage/...`). Earlier outcomes are in `README.txt` in git history, under the old clip names (1.0 mm higher than today's).
 
 The cover and the clip now in this directory are a matched set: v2 changed only the clip, and the cover is v1's.
