@@ -37,8 +37,8 @@ A new clip feature must say which pose each of its checks uses.
 
 The test clips were PLA at 10% infill with the slicer's default walls, and they worked. The listing gives no material or infill advice: the parts work at slicer defaults, and people tune as they like.
 
-## Test prints are tagged
+## Test prints are notes, not tags
 
-Each version sent to the printer for testing gets a git tag `h7-bulb-storage-v<N>-print<M>`. The directory name is the prefix so the tag does not collide with another model in this repo. The outcome is recorded as a SumMem note for this model (`.summem/summem note --path models/h7-bulb-storage/...`). Earlier outcomes are in `README.txt` in git history, under the old clip names (1.0 mm higher than today's).
+Git tags mark releases only (`h7-bulb-storage-vX.Y.Z`, made by release-please). A test print gets no tag: a part can take several prints to get right. Record each print's outcome as a SumMem note for this model (`.summem/summem note --path models/h7-bulb-storage/...`). Earlier outcomes are in `README.txt` in git history, under the old clip names (1.0 mm higher than today's).
 
-The cover and the clip now in this directory are a matched set: v2 changed only the clip, and the cover is v1's.
+The cover and the clips now in this directory are a matched set. The last clip change (test v2, arms printed spread) left the cover as it was.
