@@ -10,11 +10,11 @@ description: |
 
   Fit has been checked on 2.5 pound and 5 pound AMEREX fire extinguishers.
 manufacturing: |
-  ## Material
+  ### Material
 
   TPU 95 (required)
 
-  ## Printing Instructions
+  ### Printing Instructions
 
   Add a support-blocker on the ring (as shown in the slicer screenshot); no supports are needed for the ring.
 tags:
