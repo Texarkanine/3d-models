@@ -1,10 +1,8 @@
 name: H8 H9 H11 H16 Bulb Storage
 description: |
-  Holds a spare headlight bulb by its fins. The head is enclosed. Works with filament and LED bulbs.
+  Holds a spare headlight bulb by its fins. The head is enclosed. Works with filament and LED bulbs. Fits H8, H9, H11 and H16 bulbs, as they all use the same PGJ19 cap/connector.
 
   Push the bulb in and twist it, like a headlamp socket. Two springy catches click behind the fins and hold it, so LED bulbs without the halogen's spring clip lock too.
-
-  Also fits H8, H9 and H16 bulbs, which use the same cap (PGJ19).
 manufacturing: |
   ### Material
 
@@ -13,7 +11,17 @@ manufacturing: |
   ### Printing
 
   Print as shown - open end down, tube up. No supports needed.
-tags: []
+tags:
+  - h8
+  - h9
+  - h11
+  - h16
+  - pgj19
+  - headlight bulb
+  - fog light
+  - led headlight
+  - spare bulb
+  - bulb holder
 license_code: gpl
 category_id: Q2F0ZWdvcnkvMjU
 subcategory_ids:
