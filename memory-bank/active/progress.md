@@ -63,3 +63,19 @@ Replace `{version}`, `{changelog_url}`, and `{license_name}` in the Cults boiler
 * Insights
     - The operator's uncommitted h7 manufacturing prose and the `images: []` deletion are separate diff hunks, so `git add -p` can keep the prose out of the `chore` commit
     - Advisory: a leftover-token guard (`{verison}`-style typos refuse the deploy) would strengthen the "no tokens remain" criterion; recorded for the operator, not added to the plan
+
+## 2026-10-15 - BUILD - COMPLETE
+
+* Work completed
+    - `version_from_tag` and `changelog_url` parse the tag and build the `blob/main` URL
+    - `fill_listing_text` replaces the three tokens in the description, boilerplate, and manufacturing
+    - `publish` fills the schema manufacturing argument and leaves `name` literal
+    - Removed `images` from both `publish.yaml` files and from the system-patterns field list
+    - Full suite: 79 tests passed
+* Decisions made
+    - The placeholder commit is `feat` and does not touch a model directory
+    - The `images` removal is a separate `chore` so release-please does not cut a model release
+    - No leftover-token guard. An unknown `{token}` stays literal
+* Insights
+    - `PublishTests` needed `widget-v1.0.0` once the tag must match the component
+    - `write_repo` quotes fields with `json.dumps` so `{version}` is valid YAML

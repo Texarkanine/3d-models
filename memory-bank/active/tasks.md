@@ -33,7 +33,7 @@ Replace `{version}`, `{changelog_url}`, and `{license_name}` in the Cults boiler
 
 ## Implementation Plan
 
-### 1. Version and changelog URL — executable
+### 1. [x] Version and changelog URL — executable
 
 - Files: `tools/cults_publish.py`, `tests/test_cults_publish.py`
 
@@ -42,7 +42,7 @@ Replace `{version}`, `{changelog_url}`, and `{license_name}` in the Cults boiler
 3. Write tests and run red: assert the version, the exact changelog URL, the absence of the tag and of `#`, and `ValueError` for a mismatched tag, an empty version, and a repository that is not `owner/name`.
 4. Write code and run green: `version_from_tag` returns the suffix after `<component>-v` and raises `ValueError` otherwise. `changelog_url` returns `https://github.com/<repository>/blob/main/models/<component>/CHANGELOG.md`, quoting path segments the way `file_url` does, and raises `ValueError` for a repository that is not `owner/name`.
 
-### 2. Fill the three listing texts — executable
+### 2. [x] Fill the three listing texts — executable
 
 - Files: `tools/cults_publish.py`, `tests/test_cults_publish.py`
 
@@ -51,7 +51,7 @@ Replace `{version}`, `{changelog_url}`, and `{license_name}` in the Cults boiler
 3. Write tests and run red: assert the operator's deep-link shape `{changelog_url}#{version}` becomes the `blob/main` URL plus `#1.0.2`, and that boilerplate and in-description manufacturing lose their tokens.
 4. Write code and run green: `fill_listing_text` replaces `{changelog_url}`, then `{license_name}`, then `{version}`. `assemble_description` fills the model description, the boilerplate, and manufacturing before it joins them.
 
-### 3. Wire publish — executable
+### 3. [x] Wire publish — executable
 
 - Files: `tools/cults_publish.py`, `tests/test_cults_publish.py`
 
@@ -60,7 +60,7 @@ Replace `{version}`, `{changelog_url}`, and `{license_name}` in the Cults boiler
 3. Write tests and run red: call `_publish(..., tag="widget-v1.0.2")`. A `manufacturingNotes` variable is `Notes 1.0.2` when the yaml says `Notes {version}`. A name of `Example {version}` is sent unchanged. The description still contains the filled boilerplate.
 4. Write code and run green: at the top of `publish`, before `_mutation_arguments` or any other Cults request, derive the version and changelog URL. Pass them into `assemble_description`, fill manufacturing before assigning the schema argument, and assign `name` from the yaml with no substitution. Run the existing `PublishTests` with the new tests and confirm the old ones stay green.
 
-### 4. Drop the unused images field — prose/policy
+### 4. [x] Drop the unused images field — prose/policy
 
 - Files: `models/h7-bulb-storage/publish.yaml`, `models/fire-extinguisher-rattlinator/publish.yaml`, `memory-bank/systemPatterns.md`
 - No tests: prose/policy artifact
@@ -104,6 +104,6 @@ No new technology - validation not required
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
-- [ ] Build
+- [x] Preflight
+- [x] Build
 - [ ] QA
