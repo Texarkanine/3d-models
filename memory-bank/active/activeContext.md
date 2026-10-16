@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: cults-listing-placeholders
-**Phase:** PLAN - COMPLETE
+**Phase:** PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
 
 ## What Was Done
 - Planned four steps: parse the version and build the `blob/main` changelog URL, fill the three tokens, wire `publish`, then delete `images`

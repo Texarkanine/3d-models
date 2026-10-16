@@ -50,3 +50,16 @@ Replace `{version}`, `{changelog_url}`, and `{license_name}` in the Cults boiler
     - Do not stage the operator's uncommitted h7 manufacturing prose
 * Insights
     - A `{changelog_url}#{version}` fragment will not scroll to a release-please heading. The publisher still adds no fragment
+
+## 2026-10-15 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Re-ran Level 2 preflight against the revised `tasks.md`, the publisher, the tests, the publish-record tests, the workflow, and both publish records
+    - Verified the prior blocking finding is resolved: `PUBLISH_TAG = "widget-v1.0.0"`, an overridable `_publish` tag, and repointed URL assertions are scheduled before the red run
+    - First line of `.preflight-status`: `PASS WITH ADVISORY`
+* Decisions made
+    - No plan edits: the TDD ordering check found nothing to swap or strike
+    - Unit 4 owes no tests: the publisher never reads `images`, and `test_publish_records.py` asserts only on `files` and release-please registration
+* Insights
+    - The operator's uncommitted h7 manufacturing prose and the `images: []` deletion are separate diff hunks, so `git add -p` can keep the prose out of the `chore` commit
+    - Advisory: a leftover-token guard (`{verison}`-style typos refuse the deploy) would strengthen the "no tokens remain" criterion; recorded for the operator, not added to the plan
