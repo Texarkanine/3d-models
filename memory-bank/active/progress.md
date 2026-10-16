@@ -140,3 +140,12 @@ Replace `{version}`, `{changelog_url}`, and `{license_name}` in the Cults boiler
     - PASS with two advisories, none blocking
 * Insights
     - Empty manufacturing on update preserves pre-existing `details`; the plan scoped files to the publisher and its tests, so no pattern-doc change was required
+
+## 2026-10-15 - QA - COMPLETE
+
+* Work completed
+    - The Level 1 rework passed QA. The task, including that rework, is ready to archive
+* Decisions made
+    - Archive at Level 2, the highest cycle
+* Insights
+    - The operator's listing text in `author.yaml` and both `publish.yaml` files is still uncommitted and is not part of this checkpoint
