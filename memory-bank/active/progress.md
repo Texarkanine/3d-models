@@ -90,3 +90,13 @@ Replace `{version}`, `{changelog_url}`, and `{license_name}` in the Cults boiler
     - Three advisories, none blocking
 * Insights
     - The double fill of manufacturing is idempotent because the built changelog URL and the version hold no tokens
+
+## 2026-10-15 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-cults-listing-placeholders.md`
+    - Checked the persistent memory bank. `systemPatterns.md` already records the tokens, the untouched title, and the dropped `images` field
+* Decisions made
+    - Leave the double fill in place. The smaller shape is one fill in `publish` and a joiner that does not substitute
+* Insights
+    - `PublishTests` and `FileUrlTests` no longer share one tag
