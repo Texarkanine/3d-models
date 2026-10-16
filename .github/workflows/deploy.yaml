@@ -35,8 +35,8 @@ jobs:
         run: |
           version="${TAG##*-v}"
           component="${TAG%-v${version}}"
-          if [[ "$component" == "$TAG" || ! -f "$component/publish.yaml" ]]; then
-            echo "Tag must look like <model>-vX.Y.Z and that model must contain publish.yaml." >&2
+          if [[ "$component" == "$TAG" || ! -f "models/$component/publish.yaml" ]]; then
+            echo "Tag must look like <model>-vX.Y.Z and models/<model> must contain publish.yaml." >&2
             exit 1
           fi
           echo "component=$component" >> "$GITHUB_OUTPUT"
@@ -67,8 +67,8 @@ jobs:
           git fetch origin main:refs/remotes/origin/main
           git checkout -B main refs/remotes/origin/main
           python tools/cults_publish.py --set-creation-id "$CREATION_ID"
-          git add -- "$COMPONENT/publish.yaml"
-          if git diff --cached --quiet -- "$COMPONENT/publish.yaml"; then
+          git add -- "models/$COMPONENT/publish.yaml"
+          if git diff --cached --quiet -- "models/$COMPONENT/publish.yaml"; then
             echo "Creation id is already on main."
             exit 0
           fi

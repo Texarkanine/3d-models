@@ -9,6 +9,14 @@ import yaml
 
 ENDPOINT = "https://cults3d.com/graphql"
 USER_AGENT = "Texarkanine GitHub CICD for Cults3D"
+MODELS_DIR = "models"
+
+
+def model_dir(root, component):
+    """Return the path to one model directory under models/."""
+    from pathlib import Path
+
+    return Path(root) / MODELS_DIR / component
 _PAGE = 50
 _INTROSPECT = """
 query Introspect {
@@ -51,7 +59,7 @@ def file_url(path, *, repository, tag, component, attributes):
     """
     if repository.count("/") != 1 or repository.startswith("/"):
         raise ValueError("repository must be owner/name")
-    parts = (component, *PurePosixPath(path).parts)
+    parts = (MODELS_DIR, component, *PurePosixPath(path).parts)
     if any(part in ("", ".", "..") for part in parts):
         raise ValueError(f"refusing path {path}")
     suffix = "/".join(quote(part) for part in parts)
@@ -422,7 +430,8 @@ def publish(*, root, component, tag, repository, api_key, transport=None, sleep=
     from pathlib import Path
 
     root = Path(root)
-    record = yaml.safe_load((root / component / "publish.yaml").read_text())
+    model = model_dir(root, component)
+    record = yaml.safe_load((model / "publish.yaml").read_text())
     author = yaml.safe_load((root / "author.yaml").read_text())
     attributes = (root / ".gitattributes").read_text()
     _require_text(record.get("license_code"), "license_code")
@@ -466,7 +475,7 @@ def publish(*, root, component, tag, repository, api_key, transport=None, sleep=
     ]
     image_urls = [
         file_url(path, repository=repository, tag=tag, component=component, attributes=attributes)
-        for path in _listing_photos(root / component)
+        for path in _listing_photos(model)
     ]
     payload = {
         "name": str(record["name"]).strip(),
@@ -559,7 +568,7 @@ def main(argv=None):
     parser.add_argument("--set-creation-id", metavar="ID")
     args = parser.parse_args(argv)
     component = os.environ["COMPONENT"]
-    record = Path(component) / "publish.yaml"
+    record = model_dir(Path("."), component) / "publish.yaml"
     if args.set_creation_id is not None:
         if not args.set_creation_id.strip():
             raise SystemExit("creation id is empty")

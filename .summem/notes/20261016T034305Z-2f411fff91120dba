@@ -1,0 +1,1 @@
+Publishable models are under models/<component>/; release-please manifest keys use that path; component name and tag prefix unchanged.

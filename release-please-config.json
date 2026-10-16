@@ -17,13 +17,13 @@
     {"type": "ci", "section": "Continuous Integration", "hidden": true}
   ],
   "packages": {
-    "h7-bulb-storage": {
+    "models/h7-bulb-storage": {
       "release-type": "simple",
       "component": "h7-bulb-storage",
       "include-component-in-tag": true,
       "pull-request-header": ":service_dog: I have created a release \\*bark\\* \\*woof\\*"
     },
-    "fire-extinguisher-rattlinator": {
+    "models/fire-extinguisher-rattlinator": {
       "release-type": "simple",
       "component": "fire-extinguisher-rattlinator",
       "include-component-in-tag": true,

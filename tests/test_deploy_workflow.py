@@ -73,6 +73,16 @@ class DeployWorkflowTests(unittest.TestCase):
         self.assertEqual(checkout["with"]["ref"], "${{ github.sha }}")
         self.assertEqual(checkout["with"]["sparse-checkout"], "tools")
 
+    def test_resolve_step_looks_under_models(self):
+        resolve = next(step for step in steps(load_workflow()) if step.get("id") == "model")
+        run = resolve["run"]
+        self.assertIn("models/$component/publish.yaml", run)
+        later = next(
+            step for step in steps(load_workflow())
+            if step.get("name") == "Record the Cults creation id on main"
+        )
+        self.assertIn("models/$COMPONENT/publish.yaml", later["run"])
+
     def test_creation_id_step_removes_the_publisher_checkout(self):
         job_steps = steps(load_workflow())
         upload_at = next(

@@ -238,8 +238,8 @@ def write_repo(root, *, license_code="gpl", category_id="cat", creation_id="",
         "  description: \"pursuant to the terms of the {license_name}.\"\n"
     )
     (root / ".gitattributes").write_text(ATTRIBUTES)
-    model = root / "widget"
-    model.mkdir()
+    model = root / "models" / "widget"
+    model.mkdir(parents=True)
     if photos:
         img = model / "img"
         img.mkdir()
@@ -345,7 +345,7 @@ class FileUrlTests(unittest.TestCase):
         self.assertEqual(
             url,
             "https://raw.githubusercontent.com/Texarkanine/3d-models/"
-            "h7-bulb-storage-v1.0.0/h7-bulb-storage/h7_cover.stl",
+            "h7-bulb-storage-v1.0.0/models/h7-bulb-storage/h7_cover.stl",
         )
 
     def test_lfs_extension_uses_media_host(self):
@@ -359,7 +359,7 @@ class FileUrlTests(unittest.TestCase):
         self.assertEqual(
             url,
             "https://media.githubusercontent.com/media/Texarkanine/3d-models/"
-            "h7-bulb-storage-v1.0.0/h7-bulb-storage/img/h7-bulb-storage-clip-cura.png",
+            "h7-bulb-storage-v1.0.0/models/h7-bulb-storage/img/h7-bulb-storage-clip-cura.png",
         )
 
 
@@ -468,11 +468,11 @@ class PublishTests(unittest.TestCase):
         self.assertNotIn(SECRET, query)
         self.assertEqual(
             variables["fileUrls"],
-            [f"https://raw.githubusercontent.com/{REPO}/{TAG}/widget/part.stl"],
+            [f"https://raw.githubusercontent.com/{REPO}/{TAG}/models/widget/part.stl"],
         )
         self.assertEqual(
             variables["imageUrls"],
-            [f"https://media.githubusercontent.com/media/{REPO}/{TAG}/widget/img/part.png"],
+            [f"https://media.githubusercontent.com/media/{REPO}/{TAG}/models/widget/img/part.png"],
         )
         joined = " ".join(variables["imageUrls"])
         self.assertNotIn("readme.png", joined)
@@ -595,13 +595,13 @@ class PublishTests(unittest.TestCase):
         self.assertIn("blueprint { id } errors", blueprint[0])
         self.assertEqual(
             blueprint[1]["fileUrl"],
-            f"https://raw.githubusercontent.com/{REPO}/{TAG}/widget/part.stl",
+            f"https://raw.githubusercontent.com/{REPO}/{TAG}/models/widget/part.stl",
         )
         illustration = next(call for call in transport.calls if "createIllustration(" in call[0])
         self.assertIn("illustration { id } errors", illustration[0])
         self.assertEqual(
             illustration[1]["imageUrl"],
-            f"https://media.githubusercontent.com/media/{REPO}/{TAG}/widget/img/part.png",
+            f"https://media.githubusercontent.com/media/{REPO}/{TAG}/models/widget/img/part.png",
         )
         update = next(call for call in transport.calls if "updateCreation(" in call[0])
         self.assertNotIn("fileUrls", update[1])
