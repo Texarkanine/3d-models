@@ -4,16 +4,17 @@ description: |
   
   Slide a clip into the slot to hold the bulb securely.
 manufacturing: |
-  ## Material Recommendation
+  ### Material
 
-  PLA
+  PLA (recommended)
 
-  ## Printing Instructions
+  ### Printing
 
   Print as shown - tube down. No supports needed.
 
-  Various clips are provided for different bulb flange thicknesses.
-  The thinner your flange, the thicker the clip you'll need. Print the clip labelled with the thickness of your bulb's flange's outer rim.
+  Several clips are provided for different bulb flange thicknesses. The flange is the thinnest part of the ring around the bulb's base. The thinner your flange, the thicker the clip you'll need. Print the clip labelled with the thickness of your bulb's flange's outer rim.
+
+  The pictured LED bulbs have an 0.85mm thick flange, so they use the `h7_clip_flange_0.5-1.0mm.stl` clip.
 tags: []
 license_code: gpl
 category_id: Q2F0ZWdvcnkvMjU
@@ -22,12 +23,8 @@ subcategory_ids:
 files:
   - h7_cover.stl
   - h7_cover.step
+  - clips/h7_clip_flange_0.5-1.0mm.stl
+  - clips/h7_clip_flange_0.5-1.0mm.step
   - clips/h7_clip_flange_1.0-1.5mm.stl
   - clips/h7_clip_flange_1.0-1.5mm.step
-  - clips/h7_clip_flange_1.5-2.0mm.stl
-  - clips/h7_clip_flange_1.5-2.0mm.step
-  - clips/h7_clip_flange_2.0-2.5mm.stl
-  - clips/h7_clip_flange_2.0-2.5mm.step
-  - clips/h7_clip_flange_2.5-3.0mm.stl
-  - clips/h7_clip_flange_2.5-3.0mm.step
 cults_creation_id: "Q3JlYXRpb24vaDctYnVsYi1zdG9yYWdl"

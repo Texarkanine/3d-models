@@ -11,7 +11,7 @@ Know these before changing anything:
 - **Inside the bore, nothing may sit under the clip arm.** The arms are springs that bend between the tunnel roofs at ±`X_SUPPORT`. A roof under an arm in the bore shortens that span and makes the clamp much stiffer. Any guide there must stay outside the arm, as the barb-groove roof does. Nothing may sit inside the bore circle at all, because the flange goes in from the back.
 - **Defaults are anchored to the H7 cap standard (PX26d)** at its largest sizes, plus clearance. Parameter comments name the standard's letter (O, K, Q, M) behind each value. Do not tune defaults to one measured bulb.
 - **The assertions are geometry limits**, not style checks: arms inside the bore, barb catching on the flat of the collar face, bump fitting the tunnel, tip long enough for the barb. They fail when the script runs. Do not delete one to make a change go through.
-- **`README.txt` repeats derived sizes** (bore, collar, length with clip, fit envelope). Update it when parameters change; the script prints the main sizes on each run.
+- **Each fact has one home.** Sizes and the sources behind them live in the script (its parameter comments and docstring); it prints the main sizes on each run. Print settings and which clip to choose live in the Cults listing text, `publish.yaml`. Design detail lives here. `README.md` only orients a source reader and points to those homes, so it never needs updating when a parameter changes.
 
 ## Coordinates: built in use position
 
@@ -21,9 +21,11 @@ Parts are modelled where they sit in use: z = 0 is the seat (the bulb's referenc
 
 Clip-path and key geometry is built for the +y side and mirrored with `both_sides`. The clip path is symmetric along x so the clip goes in from either side. New tunnel or key features must keep both symmetries.
 
-## One clip per flange-thickness band
+## One clip per flange-plate band
 
-Flange thickness varies between bulbs, so the clip is exported once per 0.5 mm band (`CLIP_VARIANTS`); only the spring bump height differs. File names carry the band.
+Flange plates vary between bulbs, so the clip is exported once per 0.5 mm band (`CLIP_VARIANTS`); only the spring bump height differs. Bands and file names are the plate thickness at its rim, which users can measure. The bulb rests on three lugs in front of the plate, so the bump presses on the back of the plate, `PLATE_SETBACK` deeper than the plate is thick (PX26d: plate T 0.6-0.8, back Z at most 1.4). `bump_height` builds for band + setback. The setback (0.5) is set so the 0.5-1.0 clip, which takes every PX26d plate, still squeezes a back at 1.4; section F checks that plate. The operator's LED bulb (plate 0.85) takes both clips.
+
+The names moved twice on 2026-10-16; the shapes did not. Before then the bands named the depth of the back of the plate (old 1.0-1.5 and 1.5-2.0). The first rename assumed a 1.0 setback and called them 0.0-0.5 and 0.5-1.0, which sent a PX26d plate to a clip that never touches it. Today's 0.5-1.0 is that first 0.0-0.5 and the old 1.0-1.5; today's 1.0-1.5 is that first 0.5-1.0 and the old 1.5-2.0.
 
 ## The clip is a preloaded spring
 
@@ -35,8 +37,8 @@ The arms are printed turned out `ARM_SPREAD` (1.5 degrees) about the bridge bar;
 
 A new clip feature must say which pose each of its checks uses.
 
-## Test prints are tagged
+## Test prints are notes, not tags
 
-Each version sent to the printer for testing gets a git tag `h7-bulb-storage-v<N>-print<M>`. The directory name is the prefix so the tag does not collide with another model in this repo. The outcome is recorded in `README.txt` (the "Tested" line and "Changes in vN").
+Git tags mark releases only (`h7-bulb-storage-vX.Y.Z`, made by release-please). A test print gets no tag: a part can take several prints to get right. Record each print's outcome as a SumMem note for this model (`.summem/summem note --path models/h7-bulb-storage/...`). Earlier outcomes are in `README.txt` in git history, under the old depth names (0.5 mm higher than today's).
 
-The cover and the clip now in this directory are a matched set: v2 changed only the clip, and the cover is v1's.
+The cover and the clips now in this directory are a matched set. The last clip change (test v2, arms printed spread) left the cover as it was.

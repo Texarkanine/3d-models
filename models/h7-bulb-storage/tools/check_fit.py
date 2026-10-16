@@ -16,7 +16,7 @@ h7 = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(h7)
 
 EPS = 1e-3          # mm³; overlaps below this are touching faces, not collisions
-lo, hi = 1.5, 2.0   # the clip band the operator's bulb takes (v2)
+lo, hi = 0.5, 1.0   # the clip band of a PX26d plate, and of the operator's 0.85 mm plate
 FAILED = []
 SECTIONS = {}
 
@@ -167,17 +167,22 @@ def key_seat():
 
 @section("F", "flange squeeze per clip band (bump contact only)")
 def squeeze():
+    def plate(lo_, hi_, z, label):
+        """Clip band lo_-hi_ on a plate whose back sits z behind the seat."""
+        fl = flange(z).union(cyl(12, -z - 4.2, -z))
+        i = h7.clip(lo_, hi_).intersect(fl)
+        if vol(i) > 1e-6:
+            b = bb(i)
+            sq = b.zmax - b.zmin
+            check(label, 0.05 <= sq <= 0.65, f"squeeze {sq:.2f} at x[{b.xmin:.1f},{b.xmax:.1f}]")
+        else:
+            check(label, False, "no contact")
+
     for lo_, hi_ in h7.CLIP_VARIANTS:
         for t in (lo_, hi_):
-            fl = flange(t).union(cyl(12, -t - 4.2, -t))
-            i = h7.clip(lo_, hi_).intersect(fl)
-            if vol(i) > 1e-6:
-                b = bb(i)
-                sq = b.zmax - b.zmin
-                check(f"{lo_}-{hi_} on a {t} mm flange", 0.05 <= sq <= 0.65,
-                      f"squeeze {sq:.2f} at x[{b.xmin:.1f},{b.xmax:.1f}]")
-            else:
-                check(f"{lo_}-{hi_} on a {t} mm flange", False, "no contact")
+            plate(lo_, hi_, t + h7.PLATE_SETBACK, f"{lo_}-{hi_} on a {t} mm plate")
+    # The listing sends a PX26d plate (T 0.6-0.8) to the 0.5-1.0 clip; its back sits at most 1.4.
+    plate(0.5, 1.0, 1.4, "0.5-1.0 on a PX26d plate, back at 1.4")
 
 
 @section("G", "heatsink and LED body")
@@ -188,7 +193,7 @@ def bodies():
     check("Ø38 heatsink 4 mm behind a 2 mm flange clears the cover", o < EPS, f"overlap {o:.4f}")
     o = vol(h7.clip(lo, hi).translate((0, 0, -0.6)).intersect(led.cut(flange(t))))
     check("clip flexed 0.6 mm back clears the LED body", o < EPS, f"overlap {o:.4f}")
-    # What README promises may sit right behind the flange beside the tab.
+    # A body up to Ø29 may sit right behind the flange beside the tab.
     t = 1.0
     o = vol(body.intersect(flange(t).union(cyl(14.5, -6.0, -t))))
     check("a Ø29 body right behind a 1 mm flange clears the keys", o < EPS, f"overlap {o:.4f}")
@@ -245,9 +250,9 @@ def tab_lead_in():
 @section("K", "longest standard bulb fits the tube, with 10 mm to spare")
 def head_length():
     """A lamp at the R37 H7/1 maximum outline (Ø25.0 for 4.1 mm, then Ø19.0 to
-    44.0 mm) must fit, and so must the same outline SPARE longer: README promises
-    heads up to 54 mm long. This reads only the cover's solid, so anything that
-    shortens the usable tube (closed end, wall, taper) turns it red."""
+    44.0 mm) must fit, and so must the same outline SPARE longer (HEAD_LEN).
+    This reads only the cover's solid, so anything that shortens the usable
+    tube (closed end, wall, taper) turns it red."""
     for length, label in ((R37_LEN, "standard maximum"), (R37_LEN + SPARE, f"{SPARE:.0f} mm longer")):
         o = vol(max_lamp(length).intersect(body))
         check(f"lamp {length:.0f} mm long ({label}) fits", o < EPS, f"overlap {o:.4f}")

@@ -1,0 +1,1 @@
+With PLATE_SETBACK 1.0 the 0.5-1.0 clip's bump top is 1.41 mm behind the seat, so it never touches a PX26d plate (back <= 1.4). Section F seats plates only at t + PLATE_SETBACK, so it cannot see this (PR #9 review).

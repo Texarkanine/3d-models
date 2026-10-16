@@ -29,8 +29,10 @@ sides: the cover prints upright (closed end down) with no supports. The roofs
 over the barb grooves are flat only for a 1 mm ledge against the wall, then
 rise at 45 degrees. No other downward face overhangs more than 45 degrees.
 
-Flange thickness varies between bulbs, so the clip comes in variants, each
-covering a 0.5 mm band (CLIP_VARIANTS). Measure the flange, or try them.
+The bulb rests on three small lugs on the front of its flange plate, so the
+back of the plate, where the bumps press, sits deeper than the plate is thick
+(PLATE_SETBACK). Clips are named for the plate's thickness at its rim, in
+0.5 mm bands (CLIP_VARIANTS). Measure the plate, or try them.
 The arms are printed spread ARM_SPREAD outward; the far tunnel pushes them
 back, so they press the barbs out. clip() is the clip as held in use;
 printed_clip() is what is exported.
@@ -39,13 +41,17 @@ Sources for the default dimensions:
   - UNECE R37 sheet H7/1, maximum lamp outline: Ø25.0 for 4.1 mm in front of
     the reference plane, then Ø19.0, glass at most Ø15.0, at most 44.0 mm
     long from the reference plane.
-  - The MakerWorld screw-together H7 case cup (h7-bulbholderv2.stl):
+  - The screw-together H7 bulb case cup (h7-bulbholderv2.stl),
+    https://www.printables.com/model/36482-h7-bulb-case :
     Ø26.4 x 4 mm in front of the flange, Ø36 around the flange.
   - IEC 60061-1 sheet 7004-5 (cap PX26d), read from its identical Russian
     adoption GOST IEC 60061-1-2014: flange O 33.8-34.0, tab K 7.9-8.0,
     centre to flat Q 13.2-13.7, front ring M 25.9-26.0. The letters are
     mapped by fit to a measured LED bulb (Ø33.3, tab 7.7, flat at 12.8) and
-    a retailer's "34 mm plate, 21 mm flat, 8 mm tab".
+    a retailer's "34 mm plate, 21 mm flat, 8 mm tab". Plate thickness
+    T 0.6-0.8 and the back of the plate at most Z 1.4 behind the reference
+    plane are read off the sheet's drawing. A copy with the drawing:
+    https://meganorm.ru/mega_doc/norm/gost_gosudarstvennyj-standart/18/gost_IEC_60061-1-2014_mezhgosudarstvennyy_standart_tsokoli_i.html
   - Test prints of 0.2 to 0.4 on the operator's LED bulbs (2026-10-12/13).
 
 Coordinates (use position): z = 0 is the seat (the bulb's reference plane),
@@ -64,7 +70,10 @@ import cadquery as cq
 
 # ---- Bulb (measure yours and change these if needed) ----------------------
 FLANGE_D = 34.0      # flange plate diameter, PX26d O max; the tab's outer edge is on this circle
-FLANGE_T_MAX = 3.0   # thickest flange any clip variant must fit
+FLANGE_T_MAX = 3.0   # deepest the back of the flange plate may sit behind the seat; sizes the tunnels
+PLATE_SETBACK = 0.5  # the bulb rests on lugs in front of its plate, so the back of the plate sits this
+                     # much deeper than the plate is thick (PX26d: plate T 0.6-0.8, back Z at most 1.4).
+                     # 0.5 makes the 0.5-1.0 clip, every PX26d plate's band, squeeze a back at 1.4.
 NECK_MAX_W = 26.0    # widest part of the bulb in the first 4.5 mm behind the flange
 FRONT_D = 26.4       # clearance for the ring just in front of the flange (PX26d M max 26.0)
 FRONT_LEN = 4.6      # length of that ring zone (std 4.1)
@@ -114,7 +123,7 @@ BRIDGE_T = 3.0       # thickness of the bridge and loop
 BRIDGE_W = 2.4       # width of the bridge bar
 LOOP_HOLE = 4.0      # screwdriver hole
 LOOP_RIM = 1.8
-CLIP_VARIANTS = [(1.0, 1.5), (1.5, 2.0), (2.0, 2.5), (2.5, 3.0)]  # flange mm
+CLIP_VARIANTS = [(0.5, 1.0), (1.0, 1.5)]  # flange plate thickness at its rim, mm
 
 # ---- Derived ----------------------------------------------------------------
 R_BORE = FLANGE_D / 2 + 0.5
@@ -248,9 +257,10 @@ def cover():
 
 
 def bump_height(t_lo, t_hi):
-    """Bump on the arm so a flange of the band's middle thickness gets BUMP_PRELOAD."""
-    h = (L - ARM_T) - (t_lo + t_hi) / 2 + BUMP_PRELOAD
-    assert L - ARM_T >= t_hi + 0.1, f"flange band {t_lo}-{t_hi}: arm would touch the flange"
+    """Bump on the arm so a plate of the band's middle thickness gets BUMP_PRELOAD."""
+    z_lo, z_hi = t_lo + PLATE_SETBACK, t_hi + PLATE_SETBACK  # seat to the back of the plate
+    h = (L - ARM_T) - (z_lo + z_hi) / 2 + BUMP_PRELOAD
+    assert L - ARM_T >= z_hi + 0.1, f"flange band {t_lo}-{t_hi}: arm would touch the flange"
     assert ARM_T + h <= L - 0.5 - 0.3, f"flange band {t_lo}-{t_hi}: bump too tall for the tunnel"
     return h
 
