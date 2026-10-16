@@ -106,4 +106,8 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA (PASS, see `.qa-validation-status`)
+
+## QA Results
+
+**PASS.** 79 tests pass. No blocking findings. Advisories: manufacturing is filled in `publish` and again in `assemble_description` (redundant, harmless, and both fills are in the plan); `version_from_tag` repeats `str(tag)`; a misspelled token stays literal (accepted non-goal).

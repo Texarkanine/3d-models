@@ -79,3 +79,14 @@ Replace `{version}`, `{changelog_url}`, and `{license_name}` in the Cults boiler
 * Insights
     - `PublishTests` needed `widget-v1.0.0` once the tag must match the component
     - `write_repo` quotes fields with `json.dumps` so `{version}` is valid YAML
+
+## 2026-10-15 - QA - COMPLETE
+
+* Work completed
+    - Reviewed the publisher, tests, system patterns, and both publish records against the plan and brief
+    - Full suite: 79 tests passed
+    - Wrote `.qa-validation-status`: PASS
+* Decisions made
+    - Three advisories, none blocking
+* Insights
+    - The double fill of manufacturing is idempotent because the built changelog URL and the version hold no tokens
