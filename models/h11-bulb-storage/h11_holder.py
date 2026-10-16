@@ -1,7 +1,7 @@
 """H11 (PGJ19) bulb holder with a twist lock, like a headlamp socket.
 
 Fits H8, H9, H11 and H16: they share the PGJ19 cap and differ only in the wide
-fin. The open end of the holder is a wall with a keyhole: a round hole for
+fin. H8B, H9B and H11B use a different cap (PGJY19) and do not fit. The open end of the holder is a wall with a keyhole: a round hole for
 the nose and an opening for each fin. Push the bulb in, glass first, until
 the fins are through the wall, then twist. The fins' back faces then rest on
 the wall's inner face, and the bulb's seal is squeezed between the wall's
@@ -17,6 +17,13 @@ narrow fin's tip pushes the bump outward, passes it, and the bump springs
 back behind the fin. The narrow fins are the same on every bulb type, so the
 catches and the stop act on them only.
 
+In use: line the wide fin up with the wide opening and push the bulb in until
+all three fins are through the wall. That squeezes the seal, so it takes a
+firm push. Keep pushing and turn it clockwise, seen from the plug, about
+TWIST_DEG until it stops; the click near the end is the catches. Before the
+turn the bulb may sit loose. To take it out, turn it back firmly past the
+catches and pull.
+
 The holder prints standing on its open end, so the wall the fins rest on is
 the first layers on the bed. The catches stand on the bed too and are free on
 every other side. The ring the fins turn in has a 45 degree ceiling, and so do
@@ -24,16 +31,31 @@ the gaps around the catches and the inside of the closed end. The outside of
 the closed end is a round dome: it faces up, so it needs no support. No supports.
 
 Sources for the default dimensions:
-  - IEC 60061-1 sheet 7004-110-2 (cap PGJ19), read from GOST IEC 60061-1-2014:
-    fin tip radius r8 12.15-12.25, fins F at most 4.0 thick, narrow fin edges
-    B 7.8-8.0 and B1 3.3-3.5, wide fin B5 6.0 + B6 4.0 or B4 10.0, nose A1
-    at most 19.0, plate face E at least 3.0 behind the fins.
-  - IEC 60061-2 sheet 7005-110-3 (holder PGJ19), read from GOST IEC 60061-2-2017:
-    hole Z 19.5-20.0, openings r8 12.4-12.5, B 8.1-8.3, B1 3.7-3.9,
-    B5 6.1-6.2; wall at least 2.2 (2.4 for H16).
-  - UNECE R37 sheet H8/1 head outline (GOST R 41.37-99): at most 44.0 long.
-  - The operator's LED H11 (2026-10-15): fins 1.0 thick, plate 3.33 behind
-    the fins, seal face 1.38 behind them, 32 long.
+  - IEC 60061-1 sheet 7004-110-2 (cap PGJ19), read from GOST IEC 60061-1-2014,
+    PDF pages 230-232: nose A1 at most 19.0; fin tip radius r8 12.15-12.25;
+    fins F at most 4.0 in front of their back face; plate face E at least 3.0
+    behind that face (cap notes 5 and 10); that face's diameter C 25.1-25.5;
+    plate G 31.4-31.6; nose and relaxed spring Z at most 21.4. Narrow fins:
+    one straight edge B 7.8-8.0 from the centre line, the other B1 3.3-3.5
+    from the 60 degree line. Wide fin: B3 8.0 (-1), B5 6.0 + B6 4.0 (-2 and
+    -5), B4 10.0 (-3).
+  - IEC 60061-2 sheet 7005-110-3 (holder PGJ19), read from GOST IEC 60061-2-2017,
+    PDF pages 197-199: hole Z 19.5-20.0; openings r8 12.4-12.5, B 8.1-8.3,
+    B1 3.7-3.9, B5 6.1-6.2; wall E at least 2.2 (2.4 for H16), from the face
+    the seal presses on to three bearing pads about 3 x 3 mm, with no maximum;
+    a cup of bore C 31.9-32.1 around the bulb's plate; retaining bump H
+    0.25-0.35. The bulb's spring pushes the nose into a V-support with at
+    least 10 N, then at least 5 N presses the fins onto the socket.
+  - UNECE R37 sheet H8/1 maximum outline, read from GOST R 41.37-99, page 91:
+    Ø25 for the first 4.0 mm, then Ø19, glass Ø15, at most 44.0 long from the
+    fins' back face. H8 and H11 share this outline.
+  - The operator's LED H11, measured 2026-10-15 with the letters of
+    measure_cap.svg: fins F 1.0 thick; plate E 3.33 behind the fins, seal off;
+    with the seal on, its face 1.38 behind them, so the seal stands about 1.95
+    proud of the plate and any wall over 1.38 squeezes it; L about 32 long.
+    The car's socket already limits its fin width, fin reach and nose, so
+    those were not measured. The halogen was not measured: the holder follows
+    the socket standard, which takes every bulb in spec.
 
 Coordinates: z = 0 is the wall's inner face, where the fins' back faces rest;
 +z points into the holder, toward the bulb's tip; the wall is z = -WALL..0.
@@ -69,7 +91,8 @@ HEAD_LEN = 48.0      # wall's inner face to the start of the closed end: longest
 
 # ---- Wall and openings --------------------------------------------------------
 WALL = 2.4           # a car's wall is at least 2.2 (H16: 2.4); the plate is at least 3.0 behind the fins
-HOLE_D = 20.2        # nose hole; a car's is 19.5-20.0, and printed holes come out a little small
+HOLE_D = 20.2        # nose hole; a car's is 19.5-20.0, and printed holes come out a little small.
+                     # A halogen's spring (Z 21.4 relaxed) is pressed in about 0.6, as in a car.
 KEY_CLEAR = 0.4      # fin openings: this much bigger than the largest fin, each side
 KEY_R = 12.75        # fin openings reach this far from the centre
 
@@ -82,9 +105,9 @@ STOP_CLEAR = 0.3     # gap between the stop block and the narrow fin it stops
 STOP_IN = 10.6       # stop block's inner radius: clear of the head (Ø21 bore)
 
 # ---- Catches ----------------------------------------------------------------------
-CATCH_R = 11.8       # the bump reaches in to this radius: fin tips pass it with 0.35-0.7 to spare
+CATCH_R = 11.8       # the bump reaches in to this radius: fin tips pass it with 0.35-0.7 to spare; smaller grips harder
 CATCH_CLEAR = 0.3    # gap between the bump and the locked fin behind it
-BEAM_T = 1.0         # beam thickness; sets the click force
+BEAM_T = 1.0         # beam thickness; sets the click force: thicker is stiffer
 BEAM_ARC = 40.0      # beam length, degrees, from the free end to where it is fixed; shorter clicks harder
 BEAM_GAP = 0.9       # room behind the beam to bend outward (it moves at most CAR_FIN_R - CATCH_R)
 GAP = 0.6            # printed gap around the beams and bumps
