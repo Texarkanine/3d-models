@@ -1,0 +1,1 @@
+An update deploy waits until each new STL has a preview image, then edits Cults details and restores it so the public gallery rebuilds.
