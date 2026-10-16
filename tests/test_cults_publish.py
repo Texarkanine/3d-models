@@ -10,6 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from tools.cults_publish import (
+    _batch_ids_key,
     assemble_description,
     changelog_url,
     choose_action,
@@ -27,6 +28,8 @@ PUBLISH_TAG = "widget-v1.0.0"
 ATTRIBUTES = "*.png filter=lfs diff=lfs merge=lfs -text\n"
 SECRET = "test-secret"
 UNEXPECTED = {"errors": [{"message": "Unexpected error!"}]}
+RATTlinATOR_CREATION_ID = "Q3JlYXRpb24vZmlyZS1leHRpbmd1aXNoZXItcmF0dGxpbmF0b3I"
+H8_BULB_STORAGE_CREATION_ID = "Q3JlYXRpb24vaDgtaDktaDExLWgxNi1idWxiLXN0b3JhZ2U"
 
 
 def _type(text):
@@ -311,23 +314,6 @@ def _operation_names(transport):
     return names
 
 
-def _batch_ids_key(creation_id):
-    """Return the creationsBatch ids value Cults matches for a row id.
-
-    A global id decodes to Creation/<slug>, and Cults matches the slug.
-    Any other id is matched as itself.
-    """
-    try:
-        decoded = base64.b64decode(creation_id, validate=True).decode("utf-8")
-    except (ValueError, UnicodeDecodeError):
-        return creation_id
-    prefix = "Creation/"
-    slug = decoded[len(prefix):]
-    if decoded.startswith(prefix) and slug:
-        return slug
-    return creation_id
-
-
 def _owned_row(creation_id="local-1", *, name="Example part", blueprints=(), illustrations=(),
                details=""):
     return {
@@ -513,6 +499,18 @@ class ArgumentTests(unittest.TestCase):
     def test_missing_made_with_ai_argument_raises(self):
         with self.assertRaises(ValueError):
             ensure_made_with_ai({"name": {}})
+
+
+class BatchIdsKeyTests(unittest.TestCase):
+    def test_unpadded_global_id_resolves_to_slug(self):
+        self.assertEqual(_batch_ids_key(RATTlinATOR_CREATION_ID), "fire-extinguisher-rattlinator")
+        self.assertEqual(
+            _batch_ids_key(H8_BULB_STORAGE_CREATION_ID),
+            "h8-h9-h11-h16-bulb-storage",
+        )
+
+    def test_non_global_id_is_unchanged(self):
+        self.assertEqual(_batch_ids_key("local-1"), "local-1")
 
 
 class ChooseActionTests(unittest.TestCase):
@@ -830,6 +828,20 @@ class PublishTests(unittest.TestCase):
             _publish(root, transport)
         destroyed = [call[1]["id"] for call in transport.calls if "destroyBlueprint(" in call[0]]
         self.assertEqual(destroyed, ["b1", "b2"])
+
+    def test_unpadded_cults_id_looks_up_assets_by_slug(self):
+        row = _owned_row(
+            creation_id=RATTlinATOR_CREATION_ID,
+            name="Fire-Extinguisher Rattlinator",
+            blueprints=["b1"],
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id=RATTlinATOR_CREATION_ID)
+            transport = FakeCults(rows=[row])
+            _publish(root, transport)
+        asset_read = next(call for call in transport.calls if call[1].get("ids") is not None)
+        self.assertEqual(asset_read[1]["ids"], ["fire-extinguisher-rattlinator"])
 
     def test_chosen_id_missing_from_the_scan_refuses_before_a_mutation(self):
         with tempfile.TemporaryDirectory() as tmp:

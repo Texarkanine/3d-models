@@ -333,8 +333,9 @@ def _batch_ids_key(creation_id):
     """
     import base64
 
+    padded = creation_id + "=" * (-len(creation_id) % 4)
     try:
-        decoded = base64.b64decode(creation_id, validate=True).decode("utf-8")
+        decoded = base64.b64decode(padded, validate=True).decode("utf-8")
     except (ValueError, UnicodeDecodeError):
         return creation_id
     prefix = "Creation/"
