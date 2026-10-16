@@ -1,0 +1,1 @@
+To check a Cults listing after a deploy, query the API. The web page can lag the API by minutes, and its photo gallery is a looping carousel that repeats the first photos.
