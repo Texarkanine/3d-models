@@ -1,5 +1,0 @@
-PASS
-
-Findings (advisories only, none blocking):
-- DRY: `_gallery_state` repeats the query-and-match-row shape of `_listing_assets`; different queries and return shapes keep a shared helper low-value. Acceptable as-is.
-- Style: the preview poll loop could use for/else instead of the `state = None` sentinel; the current form is correct and covered by tests. Acceptable as-is.
