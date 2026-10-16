@@ -757,9 +757,17 @@ def _matching_ids(transport, auth, name, locale):
 
 
 def _manufacturing_argument(arguments):
+    """Return the schema argument that carries manufacturing instructions.
+
+    An argument whose name contains "manufactur" wins. Otherwise details
+    is that field on Cults. None means the caller puts the text in the
+    description.
+    """
     for name in arguments:
         if "manufactur" in name.lower():
             return name
+    if "details" in arguments:
+        return "details"
     return None
 
 

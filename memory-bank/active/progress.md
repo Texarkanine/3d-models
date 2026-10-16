@@ -118,3 +118,14 @@ Replace `{version}`, `{changelog_url}`, and `{license_name}` in the Cults boiler
     - It is a bug in one publisher: the manufacturing text is appended to the description
 * Insights
     - The publisher only sends manufacturing to a schema argument whose name contains "manufactur". Otherwise it writes a Manufacturing section into the description
+
+## 2026-10-15 - BUILD - COMPLETE
+
+* Work completed
+    - A failing update test expected manufacturing in `details` and not in the description
+    - `_manufacturing_argument` now returns `details` when no name contains "manufactur"
+    - Full suite: 80 tests passed
+* Decisions made
+    - An argument whose name contains "manufactur" still wins over `details`
+* Insights
+    - The gallery refresh reads `details` after the text update, so restoring it puts the manufacturing text back

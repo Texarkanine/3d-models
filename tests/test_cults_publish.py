@@ -987,6 +987,21 @@ class PublishTests(unittest.TestCase):
         self.assertNotIn("createIllustration", _operation_names(transport))
         self.assertNotIn("destroyBlueprint", _operation_names(transport))
 
+    def test_manufacturing_is_sent_as_details_not_in_the_description(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1", manufacturing="Print as shown")
+            transport = FakeCults(rows=[_owned_row()])
+            _publish(root, transport)
+        updates = [call[1] for call in transport.calls if "updateCreation(" in call[0]]
+        self.assertEqual(updates[0]["details"], "Print as shown")
+        self.assertNotIn("Print as shown", updates[0]["description"])
+        self.assertNotIn("Manufacturing", updates[0]["description"])
+        self.assertEqual(
+            [item["details"] for item in updates],
+            ["Print as shown", ".", "Print as shown"],
+        )
+
     def test_update_refreshes_the_gallery_after_old_assets_are_gone(self):
         """Cults rebuilds the public gallery only when a field changes.
 
