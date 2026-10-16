@@ -1,0 +1,1 @@
+Cults global creation ids may omit base64 padding; _batch_ids_key must pad before decode or update deploys fail.
