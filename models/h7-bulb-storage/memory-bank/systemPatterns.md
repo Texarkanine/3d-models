@@ -37,8 +37,6 @@ The arms are printed turned out `ARM_SPREAD` (1.5 degrees) about the bridge bar;
 
 A new clip feature must say which pose each of its checks uses.
 
-The test clips were PLA at 10% infill with the slicer's default walls, and they worked. The listing gives no material or infill advice: the parts work at slicer defaults, and people tune as they like.
-
 ## Test prints are notes, not tags
 
 Git tags mark releases only (`h7-bulb-storage-vX.Y.Z`, made by release-please). A test print gets no tag: a part can take several prints to get right. Record each print's outcome as a SumMem note for this model (`.summem/summem note --path models/h7-bulb-storage/...`). Earlier outcomes are in `README.txt` in git history, under the old depth names (0.5 mm higher than today's).
