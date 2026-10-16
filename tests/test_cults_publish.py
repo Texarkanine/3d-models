@@ -1,4 +1,5 @@
 """Publisher behavior: URLs, description, schema filtering, and Cults calls."""
+import base64
 import sys
 import tempfile
 import unittest
@@ -76,7 +77,8 @@ class FakeCults:
     """GraphQL stand-in. Honors search offset and limit.
 
     rows are creation records. matches is a shorthand: each id becomes a row
-    named listing_name with no assets. An ids variable filters to those rows.
+    named listing_name with no assets. An ids variable selects a row by the
+    slug of a global id, and by the row id when that id is not a global id.
     """
 
     def __init__(self, *, matches=None, rows=None, creation_id="creation-1", errors=None,
@@ -118,7 +120,7 @@ class FakeCults:
             rows = self.rows
             if variables.get("ids") is not None:
                 wanted = set(variables["ids"])
-                rows = [row for row in self.rows if row["id"] in wanted]
+                rows = [row for row in self.rows if _batch_ids_key(row["id"]) in wanted]
                 return {"data": {"myself": {"creationsBatch": {
                     "total": len(rows),
                     "results": [_row(row) for row in rows[:variables["limit"]]],
@@ -222,6 +224,23 @@ def _operation_names(transport):
                 names.append(name)
                 break
     return names
+
+
+def _batch_ids_key(creation_id):
+    """Return the creationsBatch ids value Cults matches for a row id.
+
+    A global id decodes to Creation/<slug>, and Cults matches the slug.
+    Any other id is matched as itself.
+    """
+    try:
+        decoded = base64.b64decode(creation_id, validate=True).decode("utf-8")
+    except (ValueError, UnicodeDecodeError):
+        return creation_id
+    prefix = "Creation/"
+    slug = decoded[len(prefix):]
+    if decoded.startswith(prefix) and slug:
+        return slug
+    return creation_id
 
 
 def _owned_row(creation_id="local-1", *, name="Example part", blueprints=(), illustrations=()):
@@ -518,6 +537,20 @@ class PublishTests(unittest.TestCase):
             _operation_names(transport),
             ["createBlueprint", "createIllustration", "updateCreation"],
         )
+
+    def test_global_creation_id_is_looked_up_by_slug(self):
+        slug = "h7-bulb-storage"
+        global_id = base64.b64encode(f"Creation/{slug}".encode()).decode()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id=global_id)
+            transport = FakeCults(rows=[_owned_row(global_id)])
+            got = _publish(root, transport)
+        self.assertEqual(got, "creation-1")
+        asset_read = next(call for call in transport.calls if call[1].get("ids") is not None)
+        self.assertEqual(asset_read[1]["ids"], [slug])
+        update = next(call[1] for call in transport.calls if "updateCreation(" in call[0])
+        self.assertEqual(update["id"], global_id)
 
     def test_update_omits_file_arguments_when_the_schema_lists_them(self):
         update_args = dict(UPDATE_ARGS, fileUrls="[String!]", imageUrls="[String!]")

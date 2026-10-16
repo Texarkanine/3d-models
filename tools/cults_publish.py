@@ -235,17 +235,36 @@ def _call_mutation(transport, auth, mutations, operation, payload):
     return body
 
 
+def _batch_ids_key(creation_id):
+    """Return the creationsBatch ids value for a stored creation id.
+
+    Cults matches the slug. A global id decodes to Creation/<slug>. Any other
+    id is sent unchanged.
+    """
+    import base64
+
+    try:
+        decoded = base64.b64decode(creation_id, validate=True).decode("utf-8")
+    except (ValueError, UnicodeDecodeError):
+        return creation_id
+    prefix = "Creation/"
+    slug = decoded[len(prefix):]
+    if decoded.startswith(prefix) and slug:
+        return slug
+    return creation_id
+
+
 def _listing_assets(transport, auth, creation_id):
     """Return blueprint ids and illustration ids for one creation.
 
-    The read is myself.creationsBatch filtered by that id. Raise ValueError
-    when no row carries the id.
+    The read is myself.creationsBatch filtered by the slug of that id. Raise
+    ValueError when no row's id equals the stored creation id.
     """
     data = _graphql(
         transport,
         auth,
         _ASSETS,
-        {"ids": [creation_id], "limit": 1, "offset": 0},
+        {"ids": [_batch_ids_key(creation_id)], "limit": 1, "offset": 0},
     )
     batch = data["myself"]["creationsBatch"] or {}
     for row in batch.get("results") or []:
