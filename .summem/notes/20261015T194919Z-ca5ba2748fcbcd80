@@ -1,0 +1,1 @@
+Cults updateCreation has no file or image URLs. createBlueprint(creationId, fileUrl) and createIllustration(creationId, imageUrl) add them; destroyBlueprint(id) and destroyIllustration(id) remove them. myself.creationsBatch takes ids. creation() takes a slug.

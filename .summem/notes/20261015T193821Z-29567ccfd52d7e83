@@ -1,0 +1,1 @@
+Cults schema lives in https://cults3d.com/graphiql. Unauthenticated POST to /graphql is HTTP 401 Basic. A third-party Discord writeup is not the schema.

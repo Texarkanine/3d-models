@@ -51,49 +51,97 @@ UPDATE_ARGS = {
     "id": "ID!",
     "name": "String",
     "description": "String",
-    "imageUrls": "[String!]",
-    "fileUrls": "[String!]",
     "licenseCode": "String",
     "madeWithAi": "Boolean",
     "downloadPrice": "Float",
 }
+ASSET_ARGS = {
+    "createBlueprint": {"creationId": "ID!", "fileUrl": "String!", "position": "Int"},
+    "createIllustration": {"creationId": "ID!", "imageUrl": "String!", "position": "Int"},
+    "destroyBlueprint": {"id": "ID!"},
+    "destroyIllustration": {"id": "ID!"},
+}
+
+
+def _row(item):
+    return {
+        "id": item["id"],
+        "name": item["name"],
+        "blueprints": [{"id": asset_id} for asset_id in item["blueprints"]],
+        "illustrations": [{"id": asset_id} for asset_id in item["illustrations"]],
+    }
 
 
 class FakeCults:
-    """GraphQL stand-in. Honors search offset and limit."""
+    """GraphQL stand-in. Honors search offset and limit.
 
-    def __init__(self, *, matches=None, creation_id="creation-1", errors=None,
-                 create_args=None, update_args=None, page_cap=None, listing_name="Example part"):
-        self.matches = list(matches or [])
+    rows are creation records. matches is a shorthand: each id becomes a row
+    named listing_name with no assets. An ids variable filters to those rows.
+    """
+
+    def __init__(self, *, matches=None, rows=None, creation_id="creation-1", errors=None,
+                 create_args=None, update_args=None, asset_args=None, omit_mutations=(),
+                 page_cap=None, listing_name="Example part", blueprint_errors=None):
         self.creation_id = creation_id
         self.errors = errors
+        self.blueprint_errors = blueprint_errors
         self.create_args = CREATE_ARGS if create_args is None else create_args
         self.update_args = UPDATE_ARGS if update_args is None else update_args
+        self.asset_args = ASSET_ARGS if asset_args is None else asset_args
+        self.omit_mutations = set(omit_mutations)
         self.page_cap = page_cap
-        self.listing_name = listing_name
+        if rows is None:
+            self.rows = [
+                {"id": item, "name": listing_name, "blueprints": [], "illustrations": []}
+                for item in (matches or [])
+            ]
+        else:
+            self.rows = rows
         self.calls = []
 
     def __call__(self, query, variables, auth):
         self.calls.append((query, variables, auth))
         if "__schema" in query:
-            return {"data": {"__schema": {"mutationType": {"fields": [
+            fields = [
                 {"name": "createCreation", "args": _args(self.create_args)},
                 {"name": "updateCreation", "args": _args(self.update_args)},
-            ]}}}}
+            ]
+            for name, spec in self.asset_args.items():
+                if name not in self.omit_mutations:
+                    fields.append({"name": name, "args": _args(spec)})
+            return {"data": {"__schema": {"mutationType": {"fields": fields}}}}
         if "licenses" in query:
             return {"data": {"licenses": [
                 {"code": "gpl", "name": "GNU General Public License"},
             ]}}
         if "creationsBatch" in query:
+            rows = self.rows
+            if variables.get("ids") is not None:
+                wanted = set(variables["ids"])
+                rows = [row for row in self.rows if row["id"] in wanted]
+                return {"data": {"myself": {"creationsBatch": {
+                    "total": len(rows),
+                    "results": [_row(row) for row in rows[:variables["limit"]]],
+                }}}}
             offset = variables["offset"]
             size = variables["limit"]
             if self.page_cap is not None:
                 size = min(size, self.page_cap)
-            chunk = self.matches[offset:offset + size]
+            chunk = rows[offset:offset + size]
             return {"data": {"myself": {"creationsBatch": {
-                "total": len(self.matches),
-                "results": [{"id": item, "name": self.listing_name} for item in chunk],
+                "total": len(rows),
+                "results": [_row(row) for row in chunk],
             }}}}
+        if "createBlueprint(" in query:
+            errors = self.blueprint_errors or []
+            blueprint = None if errors else {"id": "bp-new"}
+            return {"data": {"createBlueprint": {"blueprint": blueprint, "errors": errors}}}
+        if "createIllustration(" in query:
+            return {"data": {"createIllustration": {"illustration": {"id": "il-new"}, "errors": []}}}
+        if "destroyBlueprint(" in query:
+            return {"data": {"destroyBlueprint": {"errors": []}}}
+        if "destroyIllustration(" in query:
+            return {"data": {"destroyIllustration": {"errors": []}}}
         operation = "updateCreation" if "updateCreation(" in query else "createCreation"
         if self.errors:
             return {"data": {operation: {"creation": None, "errors": self.errors}}}
@@ -101,7 +149,7 @@ class FakeCults:
 
 
 def write_repo(root, *, license_code="gpl", category_id="cat", creation_id="",
-               manufacturing="", made_with_ai=True):
+               manufacturing="", made_with_ai=True, files=None, photos=True):
     (root / "author.yaml").write_text(
         "cults_nick: texarkanine\n"
         "locale: EN\n"
@@ -112,11 +160,15 @@ def write_repo(root, *, license_code="gpl", category_id="cat", creation_id="",
     (root / ".gitattributes").write_text(ATTRIBUTES)
     model = root / "widget"
     model.mkdir()
-    img = model / "img"
-    img.mkdir()
-    (img / "part.png").write_bytes(b"png")
+    if photos:
+        img = model / "img"
+        img.mkdir()
+        (img / "part.png").write_bytes(b"png")
     (model / "readme.png").write_bytes(b"png")
     id_line = "cults_creation_id:\n" if creation_id == "" else f"cults_creation_id: \"{creation_id}\"\n"
+    if files is None:
+        files = ["part.stl"]
+    files_block = "files: []\n" if not files else "files:\n" + "".join(f"  - {path}\n" for path in files)
     (model / "publish.yaml").write_text(
         "name: Example part\n"
         "description: A spare part.\n"
@@ -126,9 +178,8 @@ def write_repo(root, *, license_code="gpl", category_id="cat", creation_id="",
         f"category_id: {category_id}\n"
         "subcategory_ids:\n"
         "  - sub\n"
-        "files:\n"
-        "  - part.stl\n"
-        "images:\n"
+        + files_block
+        + "images:\n"
         "  - img/not-uploaded.png\n"
         + id_line
     )
@@ -146,8 +197,40 @@ def _publish(root, transport, **kwargs):
     )
 
 
+_MUTATION_NAMES = (
+    "createBlueprint",
+    "destroyBlueprint",
+    "createIllustration",
+    "destroyIllustration",
+    "createCreation",
+    "updateCreation",
+)
+
+
 def _mutations(transport):
-    return [query for query, _variables, _auth in transport.calls if "Creation(" in query]
+    return [
+        query for query, _variables, _auth in transport.calls
+        if any(f"{name}(" in query for name in _MUTATION_NAMES)
+    ]
+
+
+def _operation_names(transport):
+    names = []
+    for query, _variables, _auth in transport.calls:
+        for name in _MUTATION_NAMES:
+            if f"{name}(" in query:
+                names.append(name)
+                break
+    return names
+
+
+def _owned_row(creation_id="local-1", *, name="Example part", blueprints=(), illustrations=()):
+    return {
+        "id": creation_id,
+        "name": name,
+        "blueprints": list(blueprints),
+        "illustrations": list(illustrations),
+    }
 
 
 class FileUrlTests(unittest.TestCase):
@@ -311,6 +394,7 @@ class PublishTests(unittest.TestCase):
         self.assertIs(variables["madeWithAi"], True)
         self.assertIn("GNU General Public License", variables["description"])
         self.assertNotIn("downloadPrice", variables)
+        self.assertEqual(_operation_names(transport), ["createCreation"])
 
     def test_publish_raises_when_cults_returns_errors(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -363,14 +447,16 @@ class PublishTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             write_repo(root, creation_id="local-1")
-            transport = FakeCults()
+            transport = FakeCults(rows=[_owned_row()])
             got = _publish(root, transport)
         self.assertEqual(got, "creation-1")
         variables = next(call[1] for call in transport.calls if "updateCreation(" in call[0])
         self.assertEqual(variables["id"], "local-1")
-        self.assertEqual(_mutations(transport), [
-            next(query for query, _v, _a in transport.calls if "updateCreation(" in query)
-        ])
+        self.assertNotIn("fileUrls", variables)
+        self.assertEqual(
+            _operation_names(transport),
+            ["createBlueprint", "createIllustration", "updateCreation"],
+        )
 
     def test_one_remote_match_updates_that_creation(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -401,15 +487,161 @@ class PublishTests(unittest.TestCase):
         self.assertEqual(variables["manufacturingNotes"], "Layer height 0.2")
         self.assertNotIn("Layer height 0.2", variables["description"])
 
-    def test_update_without_file_arguments_refuses_before_a_mutation(self):
-        update_args = {
-            key: value for key, value in UPDATE_ARGS.items()
-            if key not in ("fileUrls", "imageUrls")
-        }
+    def test_update_without_file_arguments_sends_assets(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             write_repo(root, creation_id="local-1")
-            transport = FakeCults(update_args=update_args)
+            transport = FakeCults(rows=[_owned_row()])
+            got = _publish(root, transport)
+        self.assertEqual(got, "creation-1")
+        asset_read = next(call for call in transport.calls if call[1].get("ids") is not None)
+        self.assertEqual(asset_read[1]["ids"], ["local-1"])
+        blueprint = next(call for call in transport.calls if "createBlueprint(" in call[0])
+        self.assertIn("fileUrl", blueprint[1])
+        self.assertNotIn("position", blueprint[1])
+        self.assertIn("blueprint { id } errors", blueprint[0])
+        self.assertEqual(
+            blueprint[1]["fileUrl"],
+            f"https://raw.githubusercontent.com/{REPO}/{TAG}/widget/part.stl",
+        )
+        illustration = next(call for call in transport.calls if "createIllustration(" in call[0])
+        self.assertIn("illustration { id } errors", illustration[0])
+        self.assertEqual(
+            illustration[1]["imageUrl"],
+            f"https://media.githubusercontent.com/media/{REPO}/{TAG}/widget/img/part.png",
+        )
+        update = next(call for call in transport.calls if "updateCreation(" in call[0])
+        self.assertNotIn("fileUrls", update[1])
+        self.assertNotIn("imageUrls", update[1])
+        self.assertIn("A spare part.", update[1]["description"])
+        self.assertEqual(
+            _operation_names(transport),
+            ["createBlueprint", "createIllustration", "updateCreation"],
+        )
+
+    def test_update_omits_file_arguments_when_the_schema_lists_them(self):
+        update_args = dict(UPDATE_ARGS, fileUrls="[String!]", imageUrls="[String!]")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1")
+            transport = FakeCults(rows=[_owned_row()], update_args=update_args)
+            _publish(root, transport)
+        variables = next(call[1] for call in transport.calls if "updateCreation(" in call[0])
+        self.assertNotIn("fileUrls", variables)
+        self.assertNotIn("imageUrls", variables)
+
+    def test_update_replaces_previous_assets(self):
+        row = _owned_row(blueprints=["b1", "b2"], illustrations=["i1"])
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1")
+            transport = FakeCults(rows=[row])
+            _publish(root, transport)
+        destroyed = [
+            call[1]["id"] for call in transport.calls if "destroyBlueprint(" in call[0]
+        ]
+        destroyed += [
+            call[1]["id"] for call in transport.calls if "destroyIllustration(" in call[0]
+        ]
+        self.assertEqual(destroyed, ["b1", "b2", "i1"])
+        self.assertNotIn("bp-new", destroyed)
+        self.assertNotIn("il-new", destroyed)
+        self.assertEqual(
+            _operation_names(transport),
+            [
+                "createBlueprint",
+                "createIllustration",
+                "updateCreation",
+                "destroyBlueprint",
+                "destroyBlueprint",
+                "destroyIllustration",
+            ],
+        )
+
+    def test_stored_id_with_no_name_match_still_replaces_assets(self):
+        row = _owned_row(name="Old title", blueprints=["b1", "b2"])
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1")
+            transport = FakeCults(rows=[row])
+            _publish(root, transport)
+        destroyed = [call[1]["id"] for call in transport.calls if "destroyBlueprint(" in call[0]]
+        self.assertEqual(destroyed, ["b1", "b2"])
+
+    def test_chosen_id_missing_from_the_scan_refuses_before_a_mutation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1")
+            transport = FakeCults()
             with self.assertRaises(ValueError):
                 _publish(root, transport)
         self.assertEqual(_mutations(transport), [])
+
+    def test_missing_create_blueprint_refuses_before_a_mutation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1")
+            transport = FakeCults(rows=[_owned_row()], omit_mutations=["createBlueprint"])
+            with self.assertRaises(ValueError):
+                _publish(root, transport)
+        self.assertEqual(_mutations(transport), [])
+
+    def test_create_blueprint_without_file_url_refuses_before_a_mutation(self):
+        asset_args = dict(ASSET_ARGS)
+        asset_args["createBlueprint"] = {"creationId": "ID!", "position": "Int"}
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1")
+            transport = FakeCults(rows=[_owned_row()], asset_args=asset_args)
+            with self.assertRaises(ValueError):
+                _publish(root, transport)
+        self.assertEqual(_mutations(transport), [])
+
+    def test_empty_file_list_refuses_before_a_mutation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1", files=[])
+            transport = FakeCults(rows=[_owned_row()])
+            with self.assertRaises(ValueError):
+                _publish(root, transport)
+        self.assertEqual(_mutations(transport), [])
+
+    def test_empty_photo_list_refuses_before_a_mutation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1", photos=False)
+            transport = FakeCults(rows=[_owned_row()])
+            with self.assertRaises(ValueError):
+                _publish(root, transport)
+        self.assertEqual(_mutations(transport), [])
+
+    def test_update_without_description_refuses_before_a_mutation(self):
+        update_args = {key: value for key, value in UPDATE_ARGS.items() if key != "description"}
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1")
+            transport = FakeCults(rows=[_owned_row()], update_args=update_args)
+            with self.assertRaises(ValueError):
+                _publish(root, transport)
+        self.assertEqual(_mutations(transport), [])
+
+    def test_blueprint_errors_stop_before_destroy(self):
+        row = _owned_row(blueprints=["b1"])
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1")
+            transport = FakeCults(rows=[row], blueprint_errors=["Cults refused the file"])
+            with self.assertRaises(RuntimeError):
+                _publish(root, transport)
+        self.assertNotIn("destroyBlueprint", _operation_names(transport))
+
+    def test_update_errors_stop_before_destroy(self):
+        row = _owned_row(blueprints=["b1"])
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1")
+            transport = FakeCults(rows=[row], errors=["Cults refused the text"])
+            with self.assertRaises(RuntimeError):
+                _publish(root, transport)
+        self.assertIn("createBlueprint", _operation_names(transport))
+        self.assertNotIn("destroyBlueprint", _operation_names(transport))

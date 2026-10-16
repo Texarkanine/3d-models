@@ -1,0 +1,1 @@
+Cults URL last segment is a slug of the title at creation. A later title can diverge from that slug. Publisher matches the exact name, so a versioned title with a blank cults_creation_id opens a second listing. Put the version in the description.

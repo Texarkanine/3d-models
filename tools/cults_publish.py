@@ -146,6 +146,117 @@ def set_creation_id(document, creation_id):
     return "".join(lines)
 
 
+_ASSET_REQUIREMENTS = {
+    "createBlueprint": ("creationId", "fileUrl"),
+    "createIllustration": ("creationId", "imageUrl"),
+    "destroyBlueprint": ("id",),
+    "destroyIllustration": ("id",),
+}
+_ASSET_SELECTION = {
+    "createBlueprint": "blueprint { id } errors",
+    "createIllustration": "illustration { id } errors",
+    "destroyBlueprint": "errors",
+    "destroyIllustration": "errors",
+}
+_KEPT_MUTATIONS = ("createCreation", "updateCreation", *_ASSET_REQUIREMENTS)
+_ASSETS = """
+query Assets($ids: [String!], $limit: Int!, $offset: Int!) {
+  myself {
+    creationsBatch(ids: $ids, limit: $limit, offset: $offset) {
+      total
+      results {
+        id
+        blueprints { id }
+        illustrations { id }
+      }
+    }
+  }
+}
+"""
+
+
+def require_asset_mutations(mutations):
+    """Raise ValueError unless an update can add and remove files and photos.
+
+    mutations maps a mutation name to argument specs. createBlueprint must
+    accept creationId and fileUrl. createIllustration must accept creationId
+    and imageUrl. destroyBlueprint and destroyIllustration must accept id.
+    """
+    for name, required in _ASSET_REQUIREMENTS.items():
+        spec = mutations.get(name)
+        if spec is None:
+            raise ValueError(f"Cults schema is missing {name}")
+        for argument in required:
+            if argument not in spec:
+                raise ValueError(f"Cults schema {name} has no {argument} argument")
+
+
+def create_assets(*, transport, auth, mutations, creation_id, file_urls, image_urls):
+    """Add file_urls as blueprints and image_urls as illustrations.
+
+    creation_id is the existing Cults creation. A non-empty errors list
+    from Cults raises RuntimeError. This does not remove existing assets.
+    """
+    for url in file_urls:
+        _call_mutation(
+            transport, auth, mutations, "createBlueprint",
+            {"creationId": creation_id, "fileUrl": url},
+        )
+    for url in image_urls:
+        _call_mutation(
+            transport, auth, mutations, "createIllustration",
+            {"creationId": creation_id, "imageUrl": url},
+        )
+
+
+def destroy_assets(*, transport, auth, mutations, blueprint_ids, illustration_ids):
+    """Remove blueprint and illustration ids captured before the creates.
+
+    A non-empty errors list from Cults raises RuntimeError.
+    """
+    for asset_id in blueprint_ids:
+        _call_mutation(transport, auth, mutations, "destroyBlueprint", {"id": asset_id})
+    for asset_id in illustration_ids:
+        _call_mutation(transport, auth, mutations, "destroyIllustration", {"id": asset_id})
+
+
+def _call_mutation(transport, auth, mutations, operation, payload):
+    arguments = mutations[operation]
+    selected = {key: value for key, value in payload.items() if key in arguments}
+    result = _graphql(
+        transport,
+        auth,
+        _mutation(operation, arguments, selected, _ASSET_SELECTION[operation]),
+        selected,
+    )
+    body = result[operation]
+    if body.get("errors"):
+        raise RuntimeError(f"Cults {operation} failed: {body['errors']}")
+    return body
+
+
+def _listing_assets(transport, auth, creation_id):
+    """Return blueprint ids and illustration ids for one creation.
+
+    The read is myself.creationsBatch filtered by that id. Raise ValueError
+    when no row carries the id.
+    """
+    data = _graphql(
+        transport,
+        auth,
+        _ASSETS,
+        {"ids": [creation_id], "limit": 1, "offset": 0},
+    )
+    batch = data["myself"]["creationsBatch"] or {}
+    for row in batch.get("results") or []:
+        if row["id"] == creation_id:
+            return (
+                [item["id"] for item in row.get("blueprints") or []],
+                [item["id"] for item in row.get("illustrations") or []],
+            )
+    raise ValueError("Cults has no creation with this id")
+
+
 def publish(*, root, component, tag, repository, api_key, transport=None):
     """Create or update the Cults listing and return the creation id.
 
@@ -190,17 +301,17 @@ def publish(*, root, component, tag, repository, api_key, transport=None):
         manufacturing,
         manufacturing_argument=manufacturing_argument,
     )
+    file_urls = [
+        file_url(path, repository=repository, tag=tag, component=component, attributes=attributes)
+        for path in record.get("files") or []
+    ]
+    image_urls = [
+        file_url(path, repository=repository, tag=tag, component=component, attributes=attributes)
+        for path in _listing_photos(root / component)
+    ]
     payload = {
         "name": str(record["name"]).strip(),
         "description": description,
-        "fileUrls": [
-            file_url(path, repository=repository, tag=tag, component=component, attributes=attributes)
-            for path in record.get("files") or []
-        ],
-        "imageUrls": [
-            file_url(path, repository=repository, tag=tag, component=component, attributes=attributes)
-            for path in _listing_photos(root / component)
-        ],
         "locale": locale,
         "categoryId": str(record["category_id"]).strip(),
         "subCategoryIds": list(record.get("subcategory_ids") or []),
@@ -212,15 +323,36 @@ def publish(*, root, component, tag, repository, api_key, transport=None):
     tags = list(record.get("tags") or [])
     if tags:
         payload["tagNames"] = tags
+    previous = ([], [])
+    if action == "create":
+        payload["fileUrls"] = file_urls
+        payload["imageUrls"] = image_urls
+    else:
+        if not file_urls:
+            raise ValueError("files is empty")
+        if not image_urls:
+            raise ValueError("img is empty")
+        if "description" not in arguments:
+            raise ValueError("updateCreation has no description argument")
+        require_asset_mutations(mutations)
+        if "id" not in arguments:
+            raise ValueError("updateCreation has no id argument")
+        previous = _listing_assets(transport, auth, creation_id)
+        create_assets(
+            transport=transport,
+            auth=auth,
+            mutations=mutations,
+            creation_id=creation_id,
+            file_urls=file_urls,
+            image_urls=image_urls,
+        )
     selected = select_arguments(payload, arguments)
-    if "fileUrls" not in selected or "imageUrls" not in selected:
+    if action == "create" and ("fileUrls" not in selected or "imageUrls" not in selected):
         raise ValueError(f"{action} cannot carry fileUrls and imageUrls; refusing a partial publish")
     if ai_argument not in selected:
         raise ValueError("made-with-AI flag was dropped")
     operation = "createCreation" if action == "create" else "updateCreation"
     if action == "update":
-        if "id" not in arguments:
-            raise ValueError("updateCreation has no id argument")
         selected["id"] = creation_id
     result = _graphql(transport, auth, _mutation(operation, arguments, selected), selected)
     payload_result = result[operation]
@@ -229,6 +361,14 @@ def publish(*, root, component, tag, repository, api_key, transport=None):
     created = payload_result.get("creation") or {}
     if not created.get("id"):
         raise RuntimeError(f"Cults {operation} returned no creation id")
+    if action == "update":
+        destroy_assets(
+            transport=transport,
+            auth=auth,
+            mutations=mutations,
+            blueprint_ids=previous[0],
+            illustration_ids=previous[1],
+        )
     return created["id"]
 
 
@@ -315,7 +455,7 @@ def _mutation_arguments(transport, auth):
     data = _graphql(transport, auth, _INTROSPECT, {})
     found = {}
     for field in data["__schema"]["mutationType"]["fields"]:
-        if field["name"] in ("createCreation", "updateCreation"):
+        if field["name"] in _KEPT_MUTATIONS:
             found[field["name"]] = {
                 arg["name"]: _parse_type(arg["type"]) for arg in field["args"]
             }
@@ -374,14 +514,14 @@ def _manufacturing_argument(arguments):
     return None
 
 
-def _mutation(operation, arguments, selected):
+def _mutation(operation, arguments, selected, selection="creation { id } errors"):
     definitions = ", ".join(
         f"${name}: {arguments[name]['graphql_type']}" for name in selected
     )
     assignments = ", ".join(f"{name}: ${name}" for name in selected)
     return (
         f"mutation Publish({definitions}) "
-        f"{{ {operation}({assignments}) {{ creation {{ id }} errors }} }}"
+        f"{{ {operation}({assignments}) {{ {selection} }} }}"
     )
 
 
