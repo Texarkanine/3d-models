@@ -16,3 +16,15 @@ Replace `{version}`, `{changelog_url}`, and `{license_name}` in the Cults boiler
 * Insights
     - Photos already come from each model's `img/` directory. The publisher does not read `images`
     - `tags` is sent as `tagNames` when the list is non-empty
+
+## 2026-10-15 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote the Level 2 plan in `memory-bank/active/tasks.md`
+    - Mapped tests to `tests/test_cults_publish.py`
+* Decisions made
+    - `version_from_tag` requires the tag to start with `<component>-v`
+    - `fill_listing_text` replaces `{changelog_url}`, then `{license_name}`, then `{version}`
+    - The `images` decoy stays in the test fixture. No test asserts that the publish records lack the key
+* Insights
+    - A manufacturing schema argument bypasses the joined description, so `publish` must fill that string itself
