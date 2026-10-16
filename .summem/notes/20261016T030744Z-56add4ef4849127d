@@ -1,0 +1,1 @@
+Cults rebuilds a listing's page gallery only when the creation's updatedAt changes. Adding or deleting assets and updateCreation with unchanged values do not change it, so the page can keep deleted photos (#4).
