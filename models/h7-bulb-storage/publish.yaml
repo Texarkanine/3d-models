@@ -25,6 +25,6 @@ files:
   - h7_cover.step
   - clips/h7_clip_flange_0.5-1.0mm.stl
   - clips/h7_clip_flange_0.5-1.0mm.step
-  - clips/h7_clip_flange_0.0-0.5mm.stl
-  - clips/h7_clip_flange_0.0-0.5mm.step
+  - clips/h7_clip_flange_1.0-1.5mm.stl
+  - clips/h7_clip_flange_1.0-1.5mm.step
 cults_creation_id: "Q3JlYXRpb24vaDctYnVsYi1zdG9yYWdl"

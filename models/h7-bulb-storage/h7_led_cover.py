@@ -71,9 +71,9 @@ import cadquery as cq
 # ---- Bulb (measure yours and change these if needed) ----------------------
 FLANGE_D = 34.0      # flange plate diameter, PX26d O max; the tab's outer edge is on this circle
 FLANGE_T_MAX = 3.0   # deepest the back of the flange plate may sit behind the seat; sizes the tunnels
-PLATE_SETBACK = 1.0  # the bulb rests on lugs in front of its plate, so the back of the plate sits this
+PLATE_SETBACK = 0.5  # the bulb rests on lugs in front of its plate, so the back of the plate sits this
                      # much deeper than the plate is thick (PX26d: plate T 0.6-0.8, back Z at most 1.4).
-                     # From test prints: the operator's LED bulb, plate 0.85, takes the clip built for 1.75.
+                     # 0.5 makes the 0.5-1.0 clip, every PX26d plate's band, squeeze a back at 1.4.
 NECK_MAX_W = 26.0    # widest part of the bulb in the first 4.5 mm behind the flange
 FRONT_D = 26.4       # clearance for the ring just in front of the flange (PX26d M max 26.0)
 FRONT_LEN = 4.6      # length of that ring zone (std 4.1)
@@ -123,7 +123,7 @@ BRIDGE_T = 3.0       # thickness of the bridge and loop
 BRIDGE_W = 2.4       # width of the bridge bar
 LOOP_HOLE = 4.0      # screwdriver hole
 LOOP_RIM = 1.8
-CLIP_VARIANTS = [(0.0, 0.5), (0.5, 1.0)]  # flange plate thickness at its rim, mm
+CLIP_VARIANTS = [(0.5, 1.0), (1.0, 1.5)]  # flange plate thickness at its rim, mm
 
 # ---- Derived ----------------------------------------------------------------
 R_BORE = FLANGE_D / 2 + 0.5

@@ -16,7 +16,7 @@ h7 = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(h7)
 
 EPS = 1e-3          # mm³; overlaps below this are touching faces, not collisions
-lo, hi = 0.5, 1.0   # the clip band the operator's bulb takes (v2; its plate is 0.85 mm)
+lo, hi = 0.5, 1.0   # the clip band of a PX26d plate, and of the operator's 0.85 mm plate
 FAILED = []
 SECTIONS = {}
 
@@ -167,18 +167,22 @@ def key_seat():
 
 @section("F", "flange squeeze per clip band (bump contact only)")
 def squeeze():
+    def plate(lo_, hi_, z, label):
+        """Clip band lo_-hi_ on a plate whose back sits z behind the seat."""
+        fl = flange(z).union(cyl(12, -z - 4.2, -z))
+        i = h7.clip(lo_, hi_).intersect(fl)
+        if vol(i) > 1e-6:
+            b = bb(i)
+            sq = b.zmax - b.zmin
+            check(label, 0.05 <= sq <= 0.65, f"squeeze {sq:.2f} at x[{b.xmin:.1f},{b.xmax:.1f}]")
+        else:
+            check(label, False, "no contact")
+
     for lo_, hi_ in h7.CLIP_VARIANTS:
         for t in (lo_, hi_):
-            z = t + h7.PLATE_SETBACK  # the back of the plate, behind the seat
-            fl = flange(z).union(cyl(12, -z - 4.2, -z))
-            i = h7.clip(lo_, hi_).intersect(fl)
-            if vol(i) > 1e-6:
-                b = bb(i)
-                sq = b.zmax - b.zmin
-                check(f"{lo_}-{hi_} on a {t} mm plate", 0.05 <= sq <= 0.65,
-                      f"squeeze {sq:.2f} at x[{b.xmin:.1f},{b.xmax:.1f}]")
-            else:
-                check(f"{lo_}-{hi_} on a {t} mm plate", False, "no contact")
+            plate(lo_, hi_, t + h7.PLATE_SETBACK, f"{lo_}-{hi_} on a {t} mm plate")
+    # The listing sends a PX26d plate (T 0.6-0.8) to the 0.5-1.0 clip; its back sits at most 1.4.
+    plate(0.5, 1.0, 1.4, "0.5-1.0 on a PX26d plate, back at 1.4")
 
 
 @section("G", "heatsink and LED body")

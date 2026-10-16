@@ -23,7 +23,9 @@ Clip-path and key geometry is built for the +y side and mirrored with `both_side
 
 ## One clip per flange-plate band
 
-Flange plates vary between bulbs, so the clip is exported once per 0.5 mm band (`CLIP_VARIANTS`); only the spring bump height differs. Bands and file names are the plate thickness at its rim, which users can measure. The bulb rests on three lugs in front of the plate, so the bump presses on the back of the plate, `PLATE_SETBACK` deeper than the plate is thick (PX26d: plate T 0.6-0.8, back Z at most 1.4). `bump_height` builds for band + setback. The setback (1.0) comes from the operator's bulb, not the standard. Before 2026-10-16 the bands named that depth, so old names are 1.0 mm higher.
+Flange plates vary between bulbs, so the clip is exported once per 0.5 mm band (`CLIP_VARIANTS`); only the spring bump height differs. Bands and file names are the plate thickness at its rim, which users can measure. The bulb rests on three lugs in front of the plate, so the bump presses on the back of the plate, `PLATE_SETBACK` deeper than the plate is thick (PX26d: plate T 0.6-0.8, back Z at most 1.4). `bump_height` builds for band + setback. The setback (0.5) is set so the 0.5-1.0 clip, which takes every PX26d plate, still squeezes a back at 1.4; section F checks that plate. The operator's LED bulb (plate 0.85) takes both clips.
+
+The names moved twice on 2026-10-16; the shapes did not. Before then the bands named the depth of the back of the plate (old 1.0-1.5 and 1.5-2.0). The first rename assumed a 1.0 setback and called them 0.0-0.5 and 0.5-1.0, which sent a PX26d plate to a clip that never touches it. Today's 0.5-1.0 is that first 0.0-0.5 and the old 1.0-1.5; today's 1.0-1.5 is that first 0.5-1.0 and the old 1.5-2.0.
 
 ## The clip is a preloaded spring
 
@@ -39,6 +41,6 @@ The test clips were PLA at 10% infill with the slicer's default walls, and they 
 
 ## Test prints are notes, not tags
 
-Git tags mark releases only (`h7-bulb-storage-vX.Y.Z`, made by release-please). A test print gets no tag: a part can take several prints to get right. Record each print's outcome as a SumMem note for this model (`.summem/summem note --path models/h7-bulb-storage/...`). Earlier outcomes are in `README.txt` in git history, under the old clip names (1.0 mm higher than today's).
+Git tags mark releases only (`h7-bulb-storage-vX.Y.Z`, made by release-please). A test print gets no tag: a part can take several prints to get right. Record each print's outcome as a SumMem note for this model (`.summem/summem note --path models/h7-bulb-storage/...`). Earlier outcomes are in `README.txt` in git history, under the old depth names (0.5 mm higher than today's).
 
 The cover and the clips now in this directory are a matched set. The last clip change (test v2, arms printed spread) left the cover as it was.
