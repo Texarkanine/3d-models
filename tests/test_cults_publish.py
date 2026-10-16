@@ -57,6 +57,7 @@ UPDATE_ARGS = {
     "licenseCode": "String",
     "madeWithAi": "Boolean",
     "downloadPrice": "Float",
+    "details": "String",
 }
 ASSET_ARGS = {
     "createBlueprint": {"creationId": "ID!", "fileUrl": "String!", "position": "Int"},
@@ -66,12 +67,26 @@ ASSET_ARGS = {
 }
 
 
-def _row(item):
+def _row(item, *, hide_previews=False):
+    blueprints = []
+    for asset in item["blueprints"]:
+        if isinstance(asset, str):
+            asset = {"id": asset}
+        blueprints.append({
+            "id": asset["id"],
+            "fileName": asset.get("fileName", "part.stl"),
+            "fileExtension": asset.get("fileExtension", "stl"),
+            "imageUrl": None if hide_previews else asset.get("imageUrl"),
+        })
+    illustrations = []
+    for asset in item["illustrations"]:
+        illustrations.append({"id": asset if isinstance(asset, str) else asset["id"]})
     return {
         "id": item["id"],
         "name": item["name"],
-        "blueprints": [{"id": asset_id} for asset_id in item["blueprints"]],
-        "illustrations": [{"id": asset_id} for asset_id in item["illustrations"]],
+        "details": item.get("details", ""),
+        "blueprints": blueprints,
+        "illustrations": illustrations,
     }
 
 
@@ -90,7 +105,7 @@ class FakeCults:
     def __init__(self, *, matches=None, rows=None, creation_id="creation-1", errors=None,
                  create_args=None, update_args=None, asset_args=None, omit_mutations=(),
                  page_cap=None, listing_name="Example part", blueprint_errors=None,
-                 asset_failures=None):
+                 asset_failures=None, withhold_previews=0):
         self.creation_id = creation_id
         self.errors = errors
         self.blueprint_errors = blueprint_errors
@@ -100,6 +115,7 @@ class FakeCults:
         self.asset_args = ASSET_ARGS if asset_args is None else asset_args
         self.omit_mutations = set(omit_mutations)
         self.page_cap = page_cap
+        self.withhold_previews = withhold_previews
         if rows is None:
             self.rows = [
                 {"id": item, "name": listing_name, "blueprints": [], "illustrations": []}
@@ -107,7 +123,21 @@ class FakeCults:
             ]
         else:
             self.rows = rows
+        for row in self.rows:
+            row.setdefault("details", "")
+            row["blueprints"] = [self._blueprint(asset) for asset in row["blueprints"]]
         self.calls = []
+
+    @staticmethod
+    def _blueprint(asset):
+        if isinstance(asset, str):
+            return {
+                "id": asset,
+                "fileName": f"{asset}.stl",
+                "fileExtension": "stl",
+                "imageUrl": None,
+            }
+        return asset
 
     def __call__(self, query, variables, auth):
         self.calls.append((query, variables, auth))
@@ -129,9 +159,16 @@ class FakeCults:
             if variables.get("ids") is not None:
                 wanted = set(variables["ids"])
                 rows = [row for row in self.rows if _batch_ids_key(row["id"]) in wanted]
+                hide_previews = False
+                if "fileExtension" in query and self.withhold_previews > 0:
+                    self.withhold_previews -= 1
+                    hide_previews = True
                 return {"data": {"myself": {"creationsBatch": {
                     "total": len(rows),
-                    "results": [_row(row) for row in rows[:variables["limit"]]],
+                    "results": [
+                        _row(row, hide_previews=hide_previews)
+                        for row in rows[:variables["limit"]]
+                    ],
                 }}}}
             offset = variables["offset"]
             size = variables["limit"]
@@ -150,10 +187,15 @@ class FakeCults:
         if "createBlueprint(" in query:
             errors = self.blueprint_errors or []
             blueprint = None if errors else {"id": "bp-new"}
+            if blueprint is not None:
+                self._remember_blueprint(variables, blueprint["id"])
             return {"data": {"createBlueprint": {"blueprint": blueprint, "errors": errors}}}
         if "createIllustration(" in query:
             return {"data": {"createIllustration": {"illustration": {"id": "il-new"}, "errors": []}}}
         if "destroyBlueprint(" in query:
+            asset_id = variables.get("id")
+            for row in self.rows:
+                row["blueprints"] = [item for item in row["blueprints"] if item["id"] != asset_id]
             return {"data": {"destroyBlueprint": {"errors": []}}}
         if "destroyIllustration(" in query:
             return {"data": {"destroyIllustration": {"errors": []}}}
@@ -165,7 +207,25 @@ class FakeCults:
                 "creation": None,
                 "errors": ["Price must be greater than or equal to 0.5"],
             }}}
+        if operation == "updateCreation" and "details" in variables:
+            for row in self.rows:
+                if row["id"] == variables.get("id"):
+                    row["details"] = variables["details"]
         return {"data": {operation: {"creation": {"id": self.creation_id}, "errors": []}}}
+
+    def _remember_blueprint(self, variables, blueprint_id):
+        creation_id = variables.get("creationId")
+        row = next((item for item in self.rows if item["id"] == creation_id), None)
+        if row is None:
+            return
+        url = variables.get("fileUrl") or ""
+        extension = url.rsplit(".", 1)[-1].lower() if "." in url else ""
+        row["blueprints"].append({
+            "id": blueprint_id,
+            "fileName": url.rsplit("/", 1)[-1],
+            "fileExtension": extension,
+            "imageUrl": "https://preview.example/bp-new" if extension == "stl" else None,
+        })
 
 
 def write_repo(root, *, license_code="gpl", category_id="cat", creation_id="",
@@ -262,10 +322,12 @@ def _batch_ids_key(creation_id):
     return creation_id
 
 
-def _owned_row(creation_id="local-1", *, name="Example part", blueprints=(), illustrations=()):
+def _owned_row(creation_id="local-1", *, name="Example part", blueprints=(), illustrations=(),
+               details=""):
     return {
         "id": creation_id,
         "name": name,
+        "details": details,
         "blueprints": list(blueprints),
         "illustrations": list(illustrations),
     }
@@ -480,7 +542,13 @@ class PublishTests(unittest.TestCase):
         self.assertNotIn("fileUrls", variables)
         self.assertEqual(
             _operation_names(transport),
-            ["updateCreation", "createBlueprint", "createIllustration"],
+            [
+                "updateCreation",
+                "createBlueprint",
+                "createIllustration",
+                "updateCreation",
+                "updateCreation",
+            ],
         )
 
     def test_one_remote_match_updates_that_creation(self):
@@ -541,7 +609,13 @@ class PublishTests(unittest.TestCase):
         self.assertIn("A spare part.", update[1]["description"])
         self.assertEqual(
             _operation_names(transport),
-            ["updateCreation", "createBlueprint", "createIllustration"],
+            [
+                "updateCreation",
+                "createBlueprint",
+                "createIllustration",
+                "updateCreation",
+                "updateCreation",
+            ],
         )
 
     def test_free_update_sends_a_zero_price_with_the_license(self):
@@ -615,6 +689,8 @@ class PublishTests(unittest.TestCase):
                 "destroyBlueprint",
                 "destroyBlueprint",
                 "destroyIllustration",
+                "updateCreation",
+                "updateCreation",
             ],
         )
 
@@ -716,6 +792,8 @@ class PublishTests(unittest.TestCase):
                 "createIllustration",
                 "destroyBlueprint",
                 "destroyIllustration",
+                "updateCreation",
+                "updateCreation",
             ],
         )
         self.assertEqual(len(waits), 1)
@@ -781,3 +859,92 @@ class PublishTests(unittest.TestCase):
         self.assertNotIn("createBlueprint", _operation_names(transport))
         self.assertNotIn("createIllustration", _operation_names(transport))
         self.assertNotIn("destroyBlueprint", _operation_names(transport))
+
+    def test_update_refreshes_the_gallery_after_old_assets_are_gone(self):
+        """Cults rebuilds the public gallery only when a field changes.
+
+        The text update happens before the file swap, so it snapshots the
+        old photos. After the old assets are gone, details is changed and
+        restored, which is the edit that moved updatedAt.
+        """
+        row = _owned_row(blueprints=["b1"], illustrations=["i1"], details="kept")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1")
+            transport = FakeCults(rows=[row])
+            _publish(root, transport)
+        updates = [call[1] for call in transport.calls if "updateCreation(" in call[0]]
+        self.assertEqual([item.get("details") for item in updates], [None, ".", "kept"])
+        for item in updates[1:]:
+            self.assertEqual(item["id"], "local-1")
+            self.assertEqual(item["downloadPrice"], 0)
+            self.assertEqual(item["licenseCode"], "gpl")
+        names = _operation_names(transport)
+        self.assertLess(names.index("destroyIllustration"), len(names) - 2)
+
+    def test_update_without_details_argument_refuses_before_a_mutation(self):
+        update_args = {key: value for key, value in UPDATE_ARGS.items() if key != "details"}
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1")
+            transport = FakeCults(rows=[_owned_row()], update_args=update_args)
+            with self.assertRaises(ValueError):
+                _publish(root, transport)
+        self.assertEqual(_mutations(transport), [])
+
+    def test_update_waits_until_stl_previews_exist_before_refreshing_the_gallery(self):
+        """A gallery rebuild before a new STL preview exists leaves it out."""
+        waits = []
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1")
+            transport = FakeCults(rows=[_owned_row()], withhold_previews=1)
+            _publish(root, transport, sleep=waits.append)
+        image_reads = [i for i, call in enumerate(transport.calls) if "fileExtension" in call[0]]
+        bumps = [
+            i for i, call in enumerate(transport.calls)
+            if "updateCreation(" in call[0] and "details" in call[1]
+        ]
+        self.assertGreaterEqual(len(image_reads), 2)
+        self.assertEqual(len(waits), 1)
+        self.assertGreater(waits[0], 0)
+        self.assertEqual(len(bumps), 2)
+        self.assertGreater(bumps[0], image_reads[1])
+
+    def test_step_files_do_not_delay_the_gallery_refresh(self):
+        """The public gallery shows an STL preview, not a preview per file."""
+        waits = []
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1", files=["part.step"])
+            transport = FakeCults(rows=[_owned_row()], withhold_previews=5)
+            _publish(root, transport, sleep=waits.append)
+        self.assertEqual(waits, [])
+        updates = [call[1] for call in transport.calls if "updateCreation(" in call[0]]
+        self.assertEqual([item.get("details") for item in updates], [None, ".", ""])
+
+    def test_update_leaves_the_gallery_unchanged_when_stl_previews_never_arrive(self):
+        """Refreshing early would publish a gallery with no STL preview."""
+        waits = []
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1")
+            transport = FakeCults(rows=[_owned_row()], withhold_previews=100)
+            with self.assertRaises(RuntimeError):
+                _publish(root, transport, sleep=waits.append)
+        bumps = [
+            call for call in transport.calls
+            if "updateCreation(" in call[0] and "details" in call[1]
+        ]
+        self.assertEqual(bumps, [])
+        self.assertGreater(len(waits), 0)
+
+    def test_a_details_dot_still_changes_before_it_is_restored(self):
+        row = _owned_row(details=".")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1")
+            transport = FakeCults(rows=[row])
+            _publish(root, transport)
+        updates = [call[1] for call in transport.calls if "updateCreation(" in call[0]]
+        self.assertEqual([item.get("details") for item in updates], [None, "..", "."])

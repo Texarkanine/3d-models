@@ -169,6 +169,22 @@ query Assets($ids: [String!], $limit: Int!, $offset: Int!) {
   }
 }
 """
+_GALLERY = """
+query Gallery($ids: [String!], $limit: Int!, $offset: Int!) {
+  myself {
+    creationsBatch(ids: $ids, limit: $limit, offset: $offset) {
+      total
+      results {
+        id
+        details
+        blueprints { id fileName fileExtension imageUrl }
+      }
+    }
+  }
+}
+"""
+_PREVIEW_WAIT_SECONDS = 15
+_PREVIEW_ATTEMPTS = 13
 
 
 def require_asset_mutations(mutations):
@@ -285,6 +301,107 @@ def _listing_assets(transport, auth, creation_id):
     raise ValueError("Cults has no creation with this id")
 
 
+def _ready_stl(blueprint):
+    """Return whether this blueprint is an STL whose preview image exists."""
+    extension = (blueprint.get("fileExtension") or "").lower()
+    name = (blueprint.get("fileName") or "").lower()
+    if extension != "stl" and not name.endswith(".stl"):
+        return False
+    return bool(blueprint.get("imageUrl"))
+
+
+def _gallery_state(transport, auth, creation_id):
+    """Return details and blueprints for one creation.
+
+    Raise ValueError when no row's id equals the stored creation id.
+    """
+    data = _graphql(
+        transport,
+        auth,
+        _GALLERY,
+        {"ids": [_batch_ids_key(creation_id)], "limit": 1, "offset": 0},
+    )
+    batch = data["myself"]["creationsBatch"] or {}
+    for row in batch.get("results") or []:
+        if row["id"] == creation_id:
+            return row
+    raise ValueError("Cults has no creation with this id")
+
+
+def _bump_details(*, transport, auth, mutations, creation_id, license_code, details):
+    """Send one updateCreation that changes details.
+
+    downloadPrice and licenseCode go with it. A price without the license
+    resets the license, and a missing price fails the update.
+    """
+    arguments = mutations["updateCreation"]
+    payload = {
+        "id": creation_id,
+        "details": details,
+        "downloadPrice": 0,
+        "licenseCode": license_code,
+    }
+    selected = select_arguments(payload, arguments)
+    missing = [name for name in payload if name not in selected]
+    if missing:
+        raise RuntimeError(f"gallery refresh dropped {', '.join(missing)}")
+    result = _graphql(
+        transport, auth, _mutation("updateCreation", arguments, selected), selected,
+    )
+    body = result["updateCreation"]
+    if body.get("errors"):
+        raise RuntimeError(f"Cults updateCreation failed: {body['errors']}")
+    if not (body.get("creation") or {}).get("id"):
+        raise RuntimeError("Cults updateCreation returned no creation id")
+
+
+def _refresh_gallery(*, transport, auth, mutations, creation_id, license_code, stl_count, sleep):
+    """Rebuild the public gallery from the assets left after the file swap.
+
+    Cults rebuilds that gallery only when updatedAt changes. Adding and
+    deleting assets does not change it, and neither does updateCreation
+    with the same field values. details is set to a different value and
+    then restored.
+
+    An STL preview image appears after Cults has stored the file. The edit
+    waits until every STL from the tag has one. A gallery built earlier
+    stays without that preview.
+    """
+    ready = 0
+    state = None
+    for attempt in range(_PREVIEW_ATTEMPTS):
+        state = _gallery_state(transport, auth, creation_id)
+        ready = sum(
+            1 for blueprint in state.get("blueprints") or [] if _ready_stl(blueprint)
+        )
+        if ready >= stl_count:
+            break
+        if attempt == _PREVIEW_ATTEMPTS - 1:
+            state = None
+            break
+        sleep(_PREVIEW_WAIT_SECONDS)
+    if state is None:
+        raise RuntimeError(
+            f"Cults had {ready} STL previews after the file swap; the tag has {stl_count}"
+        )
+    current = state.get("details") or ""
+    sentinel = ".." if current == "." else "."
+    for details in (sentinel, current):
+        _bump_details(
+            transport=transport,
+            auth=auth,
+            mutations=mutations,
+            creation_id=creation_id,
+            license_code=license_code,
+            details=details,
+        )
+
+
+def _stl_count(file_urls):
+    """Return how many file URLs are STLs."""
+    return sum(1 for url in file_urls if url.lower().split("?", 1)[0].endswith(".stl"))
+
+
 def publish(*, root, component, tag, repository, api_key, transport=None, sleep=None):
     """Create or update the Cults listing and return the creation id.
 
@@ -297,6 +414,10 @@ def publish(*, root, component, tag, repository, api_key, transport=None, sleep=
     Every listing is free: downloadPrice is 0. updateCreation fails the
     price check when downloadPrice is absent, and a price sent without
     licenseCode resets the license to the Cults default.
+
+    On an update, the public gallery is rebuilt after the old assets are
+    gone and each STL preview exists. Cults rebuilds that gallery only
+    when a field changes, so details is edited and then restored.
     """
     from pathlib import Path
 
@@ -373,6 +494,8 @@ def publish(*, root, component, tag, repository, api_key, transport=None, sleep=
             raise ValueError("img is empty")
         if "description" not in arguments:
             raise ValueError("updateCreation has no description argument")
+        if "details" not in arguments:
+            raise ValueError("updateCreation has no details argument")
         require_asset_mutations(mutations)
         if "id" not in arguments:
             raise ValueError("updateCreation has no id argument")
@@ -410,6 +533,15 @@ def publish(*, root, component, tag, repository, api_key, transport=None, sleep=
             mutations=mutations,
             blueprint_ids=previous[0],
             illustration_ids=previous[1],
+        )
+        _refresh_gallery(
+            transport=transport,
+            auth=auth,
+            mutations=mutations,
+            creation_id=creation_id,
+            license_code=str(record["license_code"]).strip(),
+            stl_count=_stl_count(file_urls),
+            sleep=sleep,
         )
     return created["id"]
 
