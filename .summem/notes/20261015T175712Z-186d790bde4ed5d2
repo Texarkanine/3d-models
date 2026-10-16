@@ -1,1 +1,0 @@
-CadQuery: Workplane.section(z) slices along the normal of the workplane the solid came from (a revolve on XZ slices along y). To get an area at height z, intersect a thin slab.
