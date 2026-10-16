@@ -29,9 +29,9 @@
       "include-component-in-tag": true,
       "pull-request-header": ":service_dog: I have created a release \\*bark\\* \\*woof\\*"
     },
-    "models/h11-bulb-storage": {
+    "models/h8-h9-h11-h16-bulb-storage": {
       "release-type": "simple",
-      "component": "h11-bulb-storage",
+      "component": "h8-h9-h11-h16-bulb-storage",
       "include-component-in-tag": true,
       "pull-request-header": ":service_dog: I have created a release \\*bark\\* \\*woof\\*"
     }
