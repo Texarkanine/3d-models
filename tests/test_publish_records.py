@@ -7,7 +7,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 MODELS_DIR = Path("models")
-COMPONENTS = ("h7-bulb-storage", "fire-extinguisher-rattlinator")
+COMPONENTS = ("h7-bulb-storage", "fire-extinguisher-rattlinator", "h11-bulb-storage")
 
 
 class PublishRecordTests(unittest.TestCase):
