@@ -28,3 +28,25 @@ Replace `{version}`, `{changelog_url}`, and `{license_name}` in the Cults boiler
     - The `images` decoy stays in the test fixture. No test asserts that the publish records lack the key
 * Insights
     - A manufacturing schema argument bypasses the joined description, so `publish` must fill that string itself
+
+## 2026-10-15 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Ran Level 2 preflight against `tasks.md`, the publisher, the tests, the workflow, and both publish records
+    - First line of `.preflight-status`: `FAIL (fixable)`
+* Decisions made
+    - No plan edits: the TDD ordering check found nothing to swap or strike
+* Insights
+    - `PublishTests` pass `TAG = "h7-bulb-storage-v1.0.0"` with component `widget`, so `version_from_tag` would fail every existing publish test; the plan needs a unit-level substep that gives those tests a matching tag
+
+## 2026-10-15 - PLAN - COMPLETE
+
+* Work completed
+    - Revised step 3 so `PublishTests` use `widget-v1.0.0` and `_publish` can override the tag
+    - Scheduled the version check before any Cults request
+    - Scheduled the token contract in `systemPatterns.md`, and a `chore` commit that deletes only `images`
+* Decisions made
+    - Keep ordered `str.replace`. Do not switch to `re.sub`
+    - Do not stage the operator's uncommitted h7 manufacturing prose
+* Insights
+    - A `{changelog_url}#{version}` fragment will not scroll to a release-please heading. The publisher still adds no fragment

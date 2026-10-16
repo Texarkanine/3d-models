@@ -55,19 +55,20 @@ Replace `{version}`, `{changelog_url}`, and `{license_name}` in the Cults boiler
 
 - Files: `tools/cults_publish.py`, `tests/test_cults_publish.py`
 
-1. Stub tests: add empty `test_manufacturing_argument_is_filled` and `test_listing_name_is_not_filled` on `PublishTests`. Extend `write_repo` so a test can set `name`, `description`, and the boilerplate.
+1. Stub tests: add empty `test_manufacturing_argument_is_filled` and `test_listing_name_is_not_filled` on `PublishTests`. Extend `write_repo` so a test can set `name`, `description`, and the boilerplate. Before those new tests are implemented, give `PublishTests` a tag that matches component `widget`: `PUBLISH_TAG = "widget-v1.0.0"`. Leave `TAG = "h7-bulb-storage-v1.0.0"` for `FileUrlTests`. Change `_publish` to `kwargs.setdefault("tag", PUBLISH_TAG)` and stop passing `tag=TAG`, so a caller can override the tag. Point the `PublishTests` URL assertions that interpolate `TAG` next to `models/widget` at `PUBLISH_TAG`. Run the existing `PublishTests` and confirm they stay green. Do that before the new tests are filled in.
 2. Stub interface: no new public function. `publish` will call `version_from_tag`, `changelog_url`, and `fill_listing_text`.
-3. Write tests and run red: a `manufacturingNotes` variable is `Notes 1.0.2` when the yaml says `Notes {version}` and the tag is `widget-v1.0.2`. A name of `Example {version}` is sent unchanged. The description still contains the filled boilerplate.
-4. Write code and run green: `publish` derives the version and changelog URL, passes them into `assemble_description`, fills manufacturing before assigning the schema argument, and assigns `name` from the yaml with no substitution.
+3. Write tests and run red: call `_publish(..., tag="widget-v1.0.2")`. A `manufacturingNotes` variable is `Notes 1.0.2` when the yaml says `Notes {version}`. A name of `Example {version}` is sent unchanged. The description still contains the filled boilerplate.
+4. Write code and run green: at the top of `publish`, before `_mutation_arguments` or any other Cults request, derive the version and changelog URL. Pass them into `assemble_description`, fill manufacturing before assigning the schema argument, and assign `name` from the yaml with no substitution. Run the existing `PublishTests` with the new tests and confirm the old ones stay green.
 
 ### 4. Drop the unused images field — prose/policy
 
 - Files: `models/h7-bulb-storage/publish.yaml`, `models/fire-extinguisher-rattlinator/publish.yaml`, `memory-bank/systemPatterns.md`
 - No tests: prose/policy artifact
 
-1. Delete the `images` key from both `publish.yaml` files.
-2. In `memory-bank/systemPatterns.md`, stop listing `images` as a publish field. Keep the statement that listing photos are the files in `img/`.
+1. Delete only the `images` key from both `publish.yaml` files. In `models/h7-bulb-storage/publish.yaml`, leave the operator's uncommitted `manufacturing` prose as it is. Do not revert it, reformat the file, or stage that prose in this task's commit.
+2. In `memory-bank/systemPatterns.md`, stop listing `images` as a publish field. Keep the statement that listing photos are the files in `img/`. Record that `{version}`, `{changelog_url}`, and `{license_name}` are replaced in the boilerplate, the model description, and manufacturing, and that `name` is not replaced because a later publish finds the listing by it.
 3. Leave the `images: img/not-uploaded.png` decoy in `write_repo`. `test_publish_returns_the_creation_id` already asserts that path is not uploaded.
+4. Commit the `images` removal with `chore` so release-please does not cut a model release for deleting an unread field. Keep that commit separate from a commit whose subject would bump a model.
 
 ## Technology Validation
 
@@ -85,6 +86,9 @@ No new technology - validation not required
 - A tag suffix that does not belong to this component would publish the wrong version: `version_from_tag` requires the tag to start with `<component>-v` and refuses an empty suffix
 - Manufacturing sent as a Cults argument never passes through the joined description: step 3 fills that string in `publish` before the payload assignment
 - The changelog URL hardcodes `main`: that is the approved URL. A renamed default branch would 404 until this string changes
+- `PublishTests` today pass `h7-bulb-storage-v1.0.0` with component `widget`: step 3 points those tests at `widget-v1.0.0` and runs them green before `publish` starts refusing a mismatched tag
+- `{changelog_url}#{version}` does not scroll to a release-please heading. Those headings look like `## [1.0.2](…) (date)`, so the GitHub anchor is not `#1.0.2`. The publisher still adds no fragment. The operator writes the fragment
+- Keep `str.replace` in the planned order. A single-pass `re.sub` is not part of this plan
 
 ## Pre-Mortem
 
