@@ -335,12 +335,12 @@ class ArgumentTests(unittest.TestCase):
         )
         self.assertEqual(got, {"name": "A"})
 
-    def test_download_price_is_zero_when_non_null(self):
+    def test_download_price_is_omitted_when_non_null_and_unset(self):
         got = select_arguments(
             {},
             {"downloadPrice": {"non_null": True, "graphql_type": "Float!"}},
         )
-        self.assertEqual(got, {"downloadPrice": 0})
+        self.assertNotIn("downloadPrice", got)
 
     def test_download_price_is_omitted_when_nullable(self):
         got = select_arguments(
@@ -474,7 +474,7 @@ class PublishTests(unittest.TestCase):
         self.assertNotIn("fileUrls", variables)
         self.assertEqual(
             _operation_names(transport),
-            ["createBlueprint", "createIllustration", "updateCreation"],
+            ["updateCreation", "createBlueprint", "createIllustration"],
         )
 
     def test_one_remote_match_updates_that_creation(self):
@@ -535,8 +535,18 @@ class PublishTests(unittest.TestCase):
         self.assertIn("A spare part.", update[1]["description"])
         self.assertEqual(
             _operation_names(transport),
-            ["createBlueprint", "createIllustration", "updateCreation"],
+            ["updateCreation", "createBlueprint", "createIllustration"],
         )
+
+    def test_free_update_omits_download_price_when_the_argument_is_required(self):
+        update_args = dict(UPDATE_ARGS, downloadPrice="Float!")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id="local-1")
+            transport = FakeCults(rows=[_owned_row()], update_args=update_args)
+            _publish(root, transport)
+        variables = next(call[1] for call in transport.calls if "updateCreation(" in call[0])
+        self.assertNotIn("downloadPrice", variables)
 
     def test_global_creation_id_is_looked_up_by_slug(self):
         slug = "h7-bulb-storage"
@@ -582,9 +592,9 @@ class PublishTests(unittest.TestCase):
         self.assertEqual(
             _operation_names(transport),
             [
+                "updateCreation",
                 "createBlueprint",
                 "createIllustration",
-                "updateCreation",
                 "destroyBlueprint",
                 "destroyBlueprint",
                 "destroyIllustration",
@@ -676,5 +686,6 @@ class PublishTests(unittest.TestCase):
             transport = FakeCults(rows=[row], errors=["Cults refused the text"])
             with self.assertRaises(RuntimeError):
                 _publish(root, transport)
-        self.assertIn("createBlueprint", _operation_names(transport))
+        self.assertNotIn("createBlueprint", _operation_names(transport))
+        self.assertNotIn("createIllustration", _operation_names(transport))
         self.assertNotIn("destroyBlueprint", _operation_names(transport))

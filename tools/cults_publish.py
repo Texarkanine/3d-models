@@ -85,14 +85,11 @@ def select_arguments(payload, arguments):
     """Keep the payload keys that arguments lists.
 
     arguments maps an argument name to {"non_null": bool, "graphql_type": str}.
-    Keys the schema does not list are dropped. downloadPrice is 0 when that
-    argument is non-null and the payload did not set it.
+    Keys the schema does not list are dropped. A payload that does not set
+    downloadPrice leaves it out. Cults treats 0 as a paid price, and a paid
+    price must be at least 0.5. A free listing omits the argument.
     """
-    selected = {key: value for key, value in payload.items() if key in arguments}
-    price = arguments.get("downloadPrice")
-    if price and price.get("non_null") and "downloadPrice" not in selected:
-        selected["downloadPrice"] = 0
-    return selected
+    return {key: value for key, value in payload.items() if key in arguments}
 
 
 def ensure_made_with_ai(arguments):
@@ -357,14 +354,6 @@ def publish(*, root, component, tag, repository, api_key, transport=None):
         if "id" not in arguments:
             raise ValueError("updateCreation has no id argument")
         previous = _listing_assets(transport, auth, creation_id)
-        create_assets(
-            transport=transport,
-            auth=auth,
-            mutations=mutations,
-            creation_id=creation_id,
-            file_urls=file_urls,
-            image_urls=image_urls,
-        )
     selected = select_arguments(payload, arguments)
     if action == "create" and ("fileUrls" not in selected or "imageUrls" not in selected):
         raise ValueError(f"{action} cannot carry fileUrls and imageUrls; refusing a partial publish")
@@ -381,6 +370,14 @@ def publish(*, root, component, tag, repository, api_key, transport=None):
     if not created.get("id"):
         raise RuntimeError(f"Cults {operation} returned no creation id")
     if action == "update":
+        create_assets(
+            transport=transport,
+            auth=auth,
+            mutations=mutations,
+            creation_id=creation_id,
+            file_urls=file_urls,
+            image_urls=image_urls,
+        )
         destroy_assets(
             transport=transport,
             auth=auth,

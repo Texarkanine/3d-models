@@ -1,0 +1,1 @@
+A free Cults listing omits downloadPrice. updateCreation treated numeric 0 as a paid price and required >= 0.5. New files are added only after that update succeeds; the previous set is removed then.

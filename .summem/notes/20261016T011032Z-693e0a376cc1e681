@@ -1,0 +1,1 @@
+Cults updateCreation on h7 run 38833253910 rejected downloadPrice 0: price must be >= 0.5. Publisher sends 0 only when that argument is non-null. createBlueprint and createIllustration already ran, so destroy did not.
