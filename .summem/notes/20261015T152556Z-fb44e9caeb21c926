@@ -1,1 +1,0 @@
-Manual Cults deploy must be Run workflow from main with the tag input. The tag's own workflow is the old publisher. Cloudflare 1010 bans the Python-urllib user agent.
