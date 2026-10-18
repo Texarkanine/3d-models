@@ -1,9 +1,9 @@
 # Active Context
 
-**Current Task:** Cults unpadded creation id lookup
+**Current Task:** prong-covers (rework 1)
 
-**Phase:** BUILD - COMPLETE
+**Phase:** BUILD - IN-PROGRESS
 
-**What Was Done:** Level 1 fix in `_batch_ids_key`; tests added.
+**What Was Done:** Test print 1 committed (3532019 H7, 6944c72 H11). Operator feedback recorded in `projectbrief.md`.
 
-**Next Step:** Open PR; redeploy `fire-extinguisher-rattlinator-v1.0.2` after merge.
+**Next Step:** Build the compact H7 cap and the H11 cap with end catches and a deep insert; check them; hand STLs to the operator for test print 2.
