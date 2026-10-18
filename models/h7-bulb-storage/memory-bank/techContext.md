@@ -23,5 +23,5 @@ Parametric CAD in Python with CadQuery (OpenCascade kernel). The outputs are 3D-
   - `probe.py`: sizes, volumes and validity of the cover and every clip.
   - `render_sections.py <out_dir>`: section pictures with a mock bulb.
 - Exported STLs should be watertight.
-- The prong cover has no `check_fit.py` section yet: it is still a prototype. Its test is a print on the operator's LED plug.
+- Section M of `check_fit.py` puts mock tabs in the prong cover: nominal, the operator's LED plug, and two extremes. Only the four ridges may touch them, each 0.1 to 0.4 mm in. Test print 2 of the prong cover worked (2026-10-18).
 - The final test is a physical print on the operator's bulbs; a `h7_fit_test` print (collar and seat only) checks flange, key and clip quickly.

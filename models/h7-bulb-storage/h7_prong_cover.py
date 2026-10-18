@@ -28,6 +28,7 @@ Sources for the default dimensions:
   - Test print 1 (2026-10-18), a 25 mm spool with 9 mm springs: gripped
     the operator's LED plug well but was too big. These shorter, thinner
     springs keep about the same force.
+  - Test print 2 (2026-10-18), these defaults: works.
   - The operator's LED H7 plug, measured 2026-10-18: tabs 0.8 thick, 6.2
     wide, 10.3 long, 10.75 apart face to face (so 11.55 centre to centre),
     narrowing to 4.5 wide over the last 2.3 mm, with a hole about 2.5 across
