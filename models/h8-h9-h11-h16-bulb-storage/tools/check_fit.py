@@ -18,6 +18,9 @@ SRC = str(__import__("pathlib").Path(__file__).resolve().parent.parent / "h11_ho
 spec = importlib.util.spec_from_file_location("h11", SRC)
 h = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(h)
+spec = importlib.util.spec_from_file_location("cc", SRC.replace("h11_holder.py", "h11_connector_cap.py"))
+cc = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(cc)
 
 EPS = 1e-3     # mm²; overlaps below this are touching edges, not collisions
 FAILED = []
@@ -185,6 +188,76 @@ def sec_f():
         got = vol(body.intersect(cyl(30, z - 0.05, z + 0.05))) / 0.1   # area of a thin slice
         check(f"model matches the checked {label} (z {z})", abs(got - shape.area) / shape.area < 0.005,
               f"model {got:.1f} mm², checked shapes {shape.area:.1f} mm²")
+
+
+# Mock PGJ19 connector sockets for the connector cap (sheet 7004-110-2, letters as
+# there), in the cap's coordinates: mouth face at z = 0, socket toward -z, oval
+# along y, side bump on +x. Keys are (side, length) from the cavity wall: H11 has
+# one (T), H9 two (T1, T2).
+H11_KEYS = [(1, 5.6)]
+H9_KEYS = [(1, 3.8), (-1, 2.0)]
+SOCKETS = {
+    "smallest socket, H11 keys, shallow hooks": dict(Y=14.85, V=24.0, M=11.75, N=21.15, R=5.85, P=8.2, Q=17.65,
+                                                     L=5.25, W=28.15, J=2.5, keys=H11_KEYS),
+    "largest socket, H9 keys, deep hooks": dict(Y=15.15, V=24.6, M=12.05, N=21.45, R=6.15, P=8.5, Q=17.95,
+                                                L=6.75, W=28.45, J=2.9, keys=H9_KEYS),
+    "largest outside, smallest recess": dict(Y=15.15, V=24.6, M=11.75, N=21.15, R=5.85, P=8.2, Q=17.65,
+                                             L=5.25, W=28.45, J=2.5, keys=H11_KEYS),
+}
+HOOK_LEAN = 10.0   # degrees the hooks' catch faces lean back
+
+
+def socket(Y, V, M, N, R, P, Q, L, W, J, keys):
+    import cadquery as cq
+
+    s = cc.CAVITY_DEPTH
+    body = cc.oval(Y, V, -20, 0).cut(cc.oval(M, N, -R, 1)).cut(cc.oval(P, Q, -s, -R + 0.01))
+    # End hooks (view a): a 45 degree ramp out to W, then the catch face J in from the mouth.
+    y0, tip = V / 2, W / 2 - V / 2
+    deep = J + tip * math.tan(math.radians(HOOK_LEAN))
+    hook = (cq.Workplane("YZ", origin=(-cc.HOOK_W / 2, 0, 0))
+            .polyline([(y0 - 0.5, 0), (y0, 0), (y0 + tip, -tip), (y0 + tip, -deep), (y0, -J), (y0 - 0.5, -J)])
+            .close().extrude(cc.HOOK_W))
+    body = body.union(hook).union(hook.rotate((0, 0, 0), (0, 0, 1), 180))
+    # Side bump (view b), the standard's largest.
+    x0 = Y / 2
+    body = body.union(cq.Workplane("XZ", origin=(0, 1.3, 0))
+                      .polyline([(x0 - 0.5, -7.6), (x0 + 1.3, -7.6), (x0 + 1.8, -4.8), (x0, -3.76), (x0 - 0.5, -3.76)])
+                      .close().extrude(2.6))
+    for y in (cc.PIN_PITCH / 2, -cc.PIN_PITCH / 2):
+        body = body.union(cc.box(-1.4, 1.4, y - 0.4, y + 0.4, -s - 0.5, -L))
+    for side, length in keys:
+        x_wall = side * P / 2
+        x_tip = x_wall - side * length
+        body = body.union(cc.box(min(x_wall, x_tip), max(x_wall, x_tip), -0.925, 0.925, -s - 0.5, -R))
+    return body
+
+
+@section("G", "Connector cap on PGJ19 sockets (3D)")
+def sec_g():
+    plate = cc.oval(2 * cc.R_PLATE, cc.SOCKET_L + 2 * cc.PLATE_MARGIN, 0, cc.BACK)
+    insert = cc.insert()
+    one = cc.arm()
+    arms = one.union(one.rotate((0, 0, 0), (0, 0, 1), 180))
+    for name, s in SOCKETS.items():
+        sock = socket(**s)
+        clash = sum(v.Volume() for part in (plate, insert) for v in part.intersect(sock).solids().vals())
+        check(f"{name}: back plate and insert clear the socket", clash < EPS, f"overlap {clash:.4f} mm³")
+        hits = [v.BoundingBox() for v in arms.intersect(sock).solids().vals()]
+        on_hooks = all(max(abs(b.xmin), abs(b.xmax)) <= cc.HOOK_W / 2 + 0.01
+                       and min(abs(b.ymin), abs(b.ymax)) >= s["V"] / 2 for b in hits)
+        check(f"{name}: the arms touch both hooks and nothing else",
+              on_hooks and {b.ymin > 0 for b in hits} == {True, False},
+              f"{len(hits)} contacts: " + ", ".join(f"y {b.ymin:.2f}..{b.ymax:.2f} z {b.zmin:.2f}..{b.zmax:.2f}"
+                                                    for b in hits))
+        # The tooth's 45 degree face sits this far into the hook's corner: the preload
+        # that pulls the cap onto the socket.
+        reach = s["W"] / 2 - cc.C_END - cc.R_TOOTH
+        face = -cc.CATCH_Z + reach
+        corner = -(s["J"] + (s["W"] - s["V"]) / 2 * math.tan(math.radians(HOOK_LEAN)))
+        check(f"{name}: teeth press the hooks and reach under them",
+              0.3 <= face - corner <= 1.2 and reach >= 1.0,
+              f"face {face - corner:.2f} into the hook's corner; tooth {reach:.2f} under the hook's tip")
 
 
 if __name__ == "__main__":

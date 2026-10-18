@@ -37,6 +37,7 @@ Sources for the default dimensions:
   - Test print 1 (2026-10-18): a 4.5 mm plug in the mouth recess and one
     latch on the side bump landed but let the cap flop; its plug's 45 degree
     underside left a visible diagonal.
+  - Test print 2 (2026-10-18), these defaults: works.
 
 Coordinates (use position): z = 0 is the socket's mouth face, -z runs into
 the socket, +z away from the bulb. y runs along the oval, x across it.
