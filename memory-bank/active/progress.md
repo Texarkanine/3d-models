@@ -15,3 +15,15 @@ Caps for the electrical ends of stored bulbs: a friction cap for H7 tabs and a l
 * Insights
     - Test print 1, H7: works and grips; too big
     - Test print 1, H11: the hook lands but the cap flops: one catch, and a 4.5 mm plug with 0.25 clearance does not hold it square. The plug's 45 degree underside reads as a flaw
+
+## 2026-10-18 - BUILD (rework 1, test print 2) - COMPLETE
+
+* Work completed
+    - H7: spool replaced by a rounded block sized only by the springs (12.8 x 17.8 x 12.2, was 25 x 31). Springs 7 mm long and 0.9 thick, ridges at 1.6 mm: about 3.6 N each at 0.25 mm squeeze (21 MPa)
+    - H11: new cap. The insert fills the mouth recess (0.15 clearance) and runs 13 mm into the inner cavity, with pin slots and a full-width key slot (two towers). Two arms stand on the bed, each running up a long side and round one end of the oval to a 45 degree tooth behind that end's hook. About 2.8 N per arm at full deflection (16 MPa); cap 21.7 x 31.2 x 17. Prints on its back face
+    - Mock-socket check at both ends of the PGJ19 tolerances, H11 and H9 keys: only the teeth touch the hooks, 0.47-0.99 mm in (preload); each tooth still reaches 1.2-1.35 under the hook tip
+* Decisions made
+    - H11: clip the two end hooks (the standard's connector catches, note 4), not the side bump. The side bump is 1.8 tall and catching it in-plane needs an arm too long to fit beside the socket
+    - H11: 45 degree catch faces, so the cap takes up the hooks' tolerance with preload and pulls off without prising the arms
+* Insights
+    - Facing ridges and thin gaps that print shut, and spring roots poking through face chamfers, only show up in sections; render sections of every new face

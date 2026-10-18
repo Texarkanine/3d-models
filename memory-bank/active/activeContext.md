@@ -2,8 +2,8 @@
 
 **Current Task:** prong-covers (rework 1)
 
-**Phase:** BUILD - IN-PROGRESS
+**Phase:** BUILD - COMPLETE (awaiting test print 2)
 
-**What Was Done:** Test print 1 committed (3532019 H7, 6944c72 H11). Operator feedback recorded in `projectbrief.md`.
+**What Was Done:** H7 prong cover shrunk to a 12.8 x 17.8 x 12.2 block with shorter springs. H11 connector cap rebuilt: an insert that fills the socket, and two curved arms whose 45 degree teeth clip onto both end hooks. STLs are in the operator's Trinkets folders.
 
-**Next Step:** Build the compact H7 cap and the H11 cap with end catches and a deep insert; check them; hand STLs to the operator for test print 2.
+**Next Step:** Operator prints both. On the result, record a SumMem outcome note per model, then either tune (H7 `SQUEEZE`; H11 `ARM_T`, `CATCH_Z`, `INSERT_CLEAR`) or add `publish.yaml` files and listing text.
