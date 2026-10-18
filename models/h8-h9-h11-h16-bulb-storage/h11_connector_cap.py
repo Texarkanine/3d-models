@@ -1,43 +1,50 @@
-"""H11 (PGJ19) connector cap: a plug for the bulb's connector, with a latch.
+"""H11 (PGJ19) connector cap: a plug for the bulb's connector that clips on.
 
 Fits H8, H9, H11 and H16: their connectors are the same. The connector on
-the bulb is an oval socket with two pins recessed inside it, and a small
-bump on one long side for the car's plug to latch onto. The cap stands in
-for the car's plug while the bulb is stored: a short plug fills the mouth of
-the socket, short of the pins, and a lever reaches over the bump and hooks
-behind it, so the cap clicks on and stays put.
+the bulb is an oval socket with two pins recessed inside it and a small hook
+on each end of the oval, which the car's plug clips onto. The cap stands in
+for the car's plug while the bulb is stored.
 
-To take it off, squeeze the lever's tail toward the body of the cap, thumb
-on the lever, finger on the far side of the body, and pull. The lever is a
-see-saw: it hangs on two thin crossed leaves just behind the mouth, so
-pressing its tail lifts the hook. The leaves only bend; pulling on the cap
-stretches one and pushes the other end-on, so the hook holds firmly even
-though it lifts easily.
+An insert fills the socket the way the car's plug does: it fills the mouth
+recess and carries on into the inner cavity, around the pins, so the cap
+cannot rock. The insert has a slot for each pin and a slot across it for the
+keys between the pins, wide enough for every type's keys (H9's differ), so it
+splits into two towers deep inside.
 
-The cap prints standing on one end of the oval, so the lever, its hook and
-the leaves are all drawn in the bed's plane: they bend within the layers,
-where printed plastic is strongest, and the hook comes out sharp. The leaves
-start part way up and print as bridges. The plug's lower end is a 45 degree
-point inside the oval's round end, and its underside rises from the body at
-45 degrees. No supports.
+Two springy arms clip onto the hooks. Each arm runs along one long side of
+the oval and curves round one end, fixed at one end only, with a gap all
+round. A tooth on its free end rides over the hook and drops behind it. The
+tooth's catch face slopes at 45 degrees, so it pulls the cap onto the socket
+whatever the hook's exact size, and a firm pull lifts it out again: grip the
+cap and pull. A fingernail under an arm's free end helps.
+
+The cap prints standing on its back face, insert up. The arms stand on the
+bed and bend within the layers, where printed plastic is strongest; their
+teeth's catch faces are 45 degree overhangs. No supports.
 
 Sources for the default dimensions:
   - IEC 60061-1 sheet 7004-110-2 (cap PGJ19), read from GOST IEC 60061-1-2014,
     PDF pages 230-232, connector end: socket outside Y 14.85-15.15 by
     V 24.0-24.6, ends round (r3 = Y/2); mouth recess M 11.75-12.05 by
-    N 21.15-21.45, ends round, R 5.85-6.15 deep; pin tips L 5.25-6.75 in
-    from the mouth face; the keys between the pins stop at the recess, so the
-    cap fits every variant. Latch bump ("view b") on the middle of a long
-    side: XA 2.4-2.6 wide, catch face XE 7.4-7.6 from the mouth face and
-    XC 1.1-1.3 tall there, rising to XD 1.6-1.8, then a 58-62 degree slope
-    toward the mouth.
+    N 21.15-21.45, ends round, R 5.85-6.15 deep; inner cavity P 8.2-8.5 by
+    Q 17.65-17.95, at least S 15.85 deep; pins (ISO 8092-1 2.8 x 0.8) D 6.1
+    apart, tips L 5.25-6.75 in; keys U 1.55-1.85 wide between the pins, up
+    to T 5.6 long (H9: T1 and T2 from either side), ending at the recess.
+    Hooks ("view a", note 4: they hold the connector) on both ends of the
+    oval, about 2.4 wide, to W 28.15-28.45 across, catch face J 2.5-2.9 in
+    from the mouth face, leaning back about 10 degrees, with a 45 degree
+    ramp toward the mouth.
+  - Test print 1 (2026-10-18): a 4.5 mm plug in the mouth recess and one
+    latch on the side bump landed but let the cap flop; its plug's 45 degree
+    underside left a visible diagonal.
 
 Coordinates (use position): z = 0 is the socket's mouth face, -z runs into
-the socket, +z away from the bulb. The bump is on the +x side; y runs along
-the oval. to_print stands the cap on its -y end.
+the socket, +z away from the bulb. y runs along the oval, x across it.
+to_print stands the cap on its back face.
 
 Run:  python h11_connector_cap.py   (needs cadquery)
-Writes STEP (opens in Solid Edge) and STL (for the slicer), standing on end.
+Writes STEP (opens in Solid Edge) and STL (for the slicer), standing on its
+back face.
 """
 
 import math
@@ -46,64 +53,61 @@ from pathlib import Path
 import cadquery as cq
 
 # ---- Connector (PGJ19), the sizes that matter ----------------------------------
+SOCKET_W = 15.15     # outside width, Y max
+SOCKET_L = 24.6      # outside length, V max
 MOUTH_W = 11.75      # recess width, M min
 MOUTH_L = 21.15      # recess length, N min
+RECESS = 5.85        # recess depth, R min
+CAVITY_W = 8.2       # inner cavity width, P min
+CAVITY_L = 17.65     # inner cavity length, Q min
+CAVITY_DEPTH = 15.85 # mouth face to the cavity floor, S min
+PIN_PITCH = 6.1      # pins centre to centre, D
+PIN_W = 2.8          # pin width (across the oval)
+PIN_T = 0.8          # pin thickness
 PIN_DEPTH = 5.25     # pin tips are at least this far in from the mouth face, L min
-SOCKET_W = 15.15     # outside width, Y max
-SOCKET_W_MIN = 14.85 # outside width, Y min: the bump side sits lowest
-SOCKET_L = 24.6      # outside length, V max
-CATCH_Z = 7.6        # bump's catch face from the mouth face, XE max (7.4-7.6)
-CATCH_H = 1.1        # bump height at its catch face, XC min (1.1-1.3)
-BUMP_H = 1.8         # bump's highest point, XD max (1.6-1.8)
+KEY_W = 1.85         # keys between the pins, U max
+HOOK_TIP_MIN = 28.15 / 2   # hook tips from the centre, W min
+HOOK_TIP_MAX = 28.45 / 2   # W max
+HOOK_W = 2.4         # hook width across the oval (read off the drawing)
 
-# ---- Fit ------------------------------------------------------------------------
-PLUG_CLEAR = 0.25    # plug to recess, each side
-PLUG_LEN = 4.5       # plug length into the recess; stays clear of the pins
-PLUG_TIP = 0.3       # half-width of the flat at the bottom point of the plug, as printed
-HOOK_CLEAR = 0.15    # hook behind the catch face when the cap is fully on
-HOOK_GAP = 0.3       # hook tip above the socket's side
-HOOK_FLAT = 0.8      # flat on the hook tip
-HOOK_LEAD = 40.0     # slope the hook rides up the bump on, degrees from the socket's side
-HOOK_UNDERCUT = 5.0  # catch face leans back this much, so a pull draws the hook in
-LEVER_CLEAR = 0.3    # lever above the bump's highest point
-LEVER_T = 2.0        # lever thickness
-LIFT = 1.9           # hook lift when the tail is squeezed fully
+# ---- Insert ------------------------------------------------------------------------
+INSERT_CLEAR = 0.15  # insert to recess and cavity, each side
+INSERT_LEN = 13.0    # insert length into the socket; the cavity floor is at least 15.85 in
+PIN_CLEAR = 0.5      # pin slots, each side: the cap does not touch the pins
+KEY_CLEAR = 0.3      # key slot, each side
+TIP_EDGE = 0.6       # chamfer on the insert's tip
 
-# ---- Body and pivot -----------------------------------------------------------------
-BODY_LEN = 15.0      # body and lever reach this far out from the mouth face
-BODY_HALF_W = 8.35   # body half-width across x; its +x face is the tail's stop
-END_SKIN = 1.5       # body wall between the mouth face and the pivot pocket
-LEAF_T = 0.8         # leaf thickness (two lines of a 0.4 nozzle)
-LEAF_H = 6.0         # height of each leaf along y
-LEAF_SPAN = 5.5      # each leaf runs this far across x (and as far along z), at 45 degrees
-LEAF_SEP = 1.0       # gap between the two leaves where they cross
-POCKET_CLEAR = 1.2   # pocket round the leaves
-EDGE = 1.5           # rounds the body and lever at the grip end
-E_PLA = 3000.0       # MPa, printed PLA, for the lever estimates printed on each run
+# ---- Arms -----------------------------------------------------------------------------
+BACK = 4.0           # back plate thickness: what you grip to pull the cap off
+PLATE_MARGIN = 1.0   # back plate past the socket's outline
+ARM_T = 1.1          # arm thickness; sets the grip
+ARM_GAP = 0.6        # printed gap between the arms and the back plate, at least
+HOOK_CLEAR = 0.25    # arms outside the hook tips
+ENGAGE = 1.2         # tooth reaches this far below the smallest hook's tip
+CATCH_Z = 3.6        # tooth's catch face meets its tip this far in from the mouth face
+TOOTH_LEN = 1.4      # tooth along the socket, past its catch face
+TOOTH_SPAN = 44.0    # degrees of arc the tooth covers, centred on the hook
+ROOT_Y = -2.0        # arm root, along the long side (the +x arm; the other is turned half a turn)
+FREE_DEG = 125.0     # arm's free end, degrees round the end of the oval from the long side
+E_PLA = 3000.0       # MPa, printed PLA, for the arm estimates printed on each run
 
 # ---- Derived ---------------------------------------------------------------------
-X_SIDE = SOCKET_W / 2                        # the socket's bump side
-X_HOOK = X_SIDE + HOOK_GAP                   # hook tip
-X_IN = X_SIDE + BUMP_H + LEVER_CLEAR         # lever inner face
-X_OUT = X_IN + LEVER_T
-Z_CATCH = -(CATCH_Z + HOOK_CLEAR)            # hook catch face, at the tip
-HALF_L = SOCKET_L / 2 + 0.1                  # half-length of the cap along y
-X_POCKET = X_IN - LEAF_SPAN                  # pocket's back wall, where the leaves start
-Z_PIVOT = END_SKIN + POCKET_CLEAR + LEAF_SPAN / 2   # where the leaves cross
-X_PIVOT = X_IN - LEAF_SPAN / 2
-Z_HOOK = Z_CATCH - HOOK_FLAT / 2             # middle of the hook tip
-THETA = LIFT / (Z_PIVOT - Z_HOOK)            # lever turn for a full squeeze, radians
-TAIL_GAP = X_IN - BODY_HALF_W                # room for the tail to move in
-Z_FRONT = Z_CATCH - HOOK_FLAT - (X_IN - X_HOOK) / math.tan(math.radians(HOOK_LEAD))
+C_END = SOCKET_L / 2 - SOCKET_W / 2          # centres of the oval's round ends
+R_PLATE = SOCKET_W / 2 + PLATE_MARGIN        # back plate: an oval this much bigger
+R_IN = HOOK_TIP_MAX - C_END + HOOK_CLEAR     # arm inner face, from the end's centre
+R_OUT = R_IN + ARM_T
+R_TOOTH = HOOK_TIP_MIN - C_END - ENGAGE      # tooth tip
+Z_ARM = -(CATCH_Z + TOOTH_LEN)               # far end of the arms
+RECESS_Z = -(RECESS - 0.25)                  # where the insert steps down to the cavity
+PIN_TOP = -(PIN_DEPTH - 0.5)                 # pin slots reach this close to the mouth
+LIFT = HOOK_TIP_MAX + 0.1 - (C_END + R_TOOTH)  # arm deflection to pass the largest hook
 
-CATCH_MIN = SOCKET_W_MIN / 2 + CATCH_H - X_HOOK  # least the hook overlaps the catch face
-
-assert CATCH_MIN >= 0.5, "hook must catch at least 0.5 of the smallest bump on the narrowest socket"
-assert THETA * (BODY_LEN - Z_PIVOT) <= TAIL_GAP + 0.01, "the tail must reach the full lift before it stops"
-assert LIFT >= X_SIDE + BUMP_H - X_HOOK + 0.2, "a full squeeze must lift the hook clear of the bump"
-assert PLUG_LEN <= PIN_DEPTH - 0.5, "plug must stay clear of the pins"
-assert END_SKIN >= 1.0, "pocket must leave the face over the mouth solid"
-assert BODY_HALF_W >= X_SIDE + 0.5, "body must cover the whole mouth face"
+assert C_END + R_TOOTH >= SOCKET_L / 2 + 0.3, "tooth must clear the socket's end"
+assert R_IN - R_PLATE >= ARM_GAP, "arms need a printed gap round the back plate"
+assert INSERT_LEN <= CAVITY_DEPTH - 1.5, "insert must stop short of the cavity floor"
+assert PIN_TOP > RECESS_Z, "pin slots must reach up past the step"
+assert R_TOOTH * math.sin(math.radians(TOOTH_SPAN / 2)) >= HOOK_W / 2 + 1.5, \
+    "tooth must cover the hook with room to spare across the oval"
 
 
 def box(x0, x1, y0, y1, z0, z1):
@@ -111,81 +115,78 @@ def box(x0, x1, y0, y1, z0, z1):
             .translate((x0, y0, z0)))
 
 
-def xz_prism(points, y0, y1):
-    """An (x, z) polygon extruded along y from y0 to y1."""
-    # The XZ workplane's normal is -y, so draw at y = y1 and extrude toward -y.
-    return (cq.Workplane("XZ", origin=(0, y1, 0)).polyline(points).close().extrude(y1 - y0))
+def oval(w, l, z0, z1):
+    """Stadium w across (x) by l long (y), round ends, from z0 to z1."""
+    return cq.Workplane("XY").workplane(offset=z0).slot2D(l, w, angle=90).extrude(z1 - z0)
 
 
-def plug():
-    """Oval plug for the mouth recess. Its -y end, the bottom as printed, is a 45 degree point."""
-    hw = MOUTH_W / 2 - PLUG_CLEAR
-    hl = MOUTH_L / 2 - PLUG_CLEAR
-    yc = hl - hw                               # centres of the round ends
-    tip = -yc - (hw - PLUG_TIP)                # flat of the point
-    outline = (cq.Workplane("XY").moveTo(-hw, -yc).lineTo(-hw, yc)
-               .threePointArc((0, hl), (hw, yc)).lineTo(hw, -yc)
-               .lineTo(PLUG_TIP, tip).lineTo(-PLUG_TIP, tip).close())
-    body = outline.extrude(-PLUG_LEN).faces("<Z").chamfer(0.5)
-    # The point would hang out from the body as printed: slope its underside
-    # up at 45 degrees from the mouth face instead.
-    chin = (cq.Workplane("YZ", origin=(-hw - 1, 0, 0))
-            .polyline([(tip - 1, 1), (tip, 0), (tip + PLUG_LEN + 1, -PLUG_LEN - 1), (tip - 1, -PLUG_LEN - 1)])
-            .close().extrude(2 * hw + 2))
-    return body.cut(chin)
+def insert():
+    w, l = MOUTH_W - 2 * INSERT_CLEAR, MOUTH_L - 2 * INSERT_CLEAR
+    cw, cl = CAVITY_W - 2 * INSERT_CLEAR, CAVITY_L - 2 * INSERT_CLEAR
+    body = oval(w, l, RECESS_Z, 0).union(
+        oval(cw, cl, -INSERT_LEN, RECESS_Z + 0.01).faces("<Z").chamfer(TIP_EDGE))
+    pins = cq.Workplane("XY")
+    for y in (PIN_PITCH / 2, -PIN_PITCH / 2):
+        pins = pins.union(box(-PIN_W / 2 - PIN_CLEAR, PIN_W / 2 + PIN_CLEAR,
+                              y - PIN_T / 2 - PIN_CLEAR, y + PIN_T / 2 + PIN_CLEAR,
+                              -INSERT_LEN - 1, PIN_TOP))
+    keys = box(-SOCKET_W, SOCKET_W, -KEY_W / 2 - KEY_CLEAR, KEY_W / 2 + KEY_CLEAR, -INSERT_LEN - 1, RECESS_Z)
+    return body.cut(pins).cut(keys)
 
 
-def lever():
-    """Lever and hook, drawn in x-z and standing the whole height of the cap."""
-    z_root = Z_CATCH - (X_IN - X_HOOK) * math.tan(math.radians(HOOK_UNDERCUT))
-    pts = [
-        (X_IN, BODY_LEN), (X_OUT - EDGE, BODY_LEN), (X_OUT, BODY_LEN - EDGE),
-        (X_OUT, Z_FRONT + 0.8), (X_OUT - 0.8, Z_FRONT),
-        (X_IN, Z_FRONT),                          # lead-in starts at the lever's face
-        (X_HOOK, Z_CATCH - HOOK_FLAT), (X_HOOK, Z_CATCH),
-        (X_IN, z_root),                           # catch face, undercut
-    ]
-    return xz_prism(pts, -HALF_L, HALF_L)
+def arm():
+    """The arm round the +y end: up the +x side from ROOT_Y, round the end to FREE_DEG."""
+    def at(r, deg):
+        a = math.radians(deg)
+        return (r * math.cos(a), C_END + r * math.sin(a))
 
+    mid = FREE_DEG / 2
+    outline = (cq.Workplane("XY").workplane(offset=Z_ARM)
+               .moveTo(R_IN, ROOT_Y).lineTo(R_IN, C_END)
+               .threePointArc(at(R_IN, mid), at(R_IN, FREE_DEG))
+               .lineTo(*at(R_OUT, FREE_DEG))
+               .threePointArc(at(R_OUT, mid), (R_OUT, C_END))
+               .lineTo(R_OUT, ROOT_Y).close())
+    body = outline.extrude(BACK - Z_ARM)
+    # Root: the arm's end joins the back plate, clear of the socket's side.
+    root = box(SOCKET_W / 2 + 0.25, R_OUT, ROOT_Y - 1.5, ROOT_Y + 0.01, Z_ARM, BACK)
 
-def leaves():
-    """Two thin leaves crossing at 45 degrees between the pocket wall and the lever."""
-    def leaf(z_wall, z_lever, y0, y1):
-        a, b = (X_POCKET, z_wall), (X_IN, z_lever)
-        ln = math.dist(a, b)
-        ux, uz = (b[0] - a[0]) / ln, (b[1] - a[1]) / ln
-        nx, nz = -uz * LEAF_T / 2, ux * LEAF_T / 2
-        ext = 0.6                                 # run into the wall and the lever
-        p0 = (a[0] - ux * ext, a[1] - uz * ext)
-        p1 = (b[0] + ux * ext, b[1] + uz * ext)
-        pts = [(p0[0] + nx, p0[1] + nz), (p1[0] + nx, p1[1] + nz),
-               (p1[0] - nx, p1[1] - nz), (p0[0] - nx, p0[1] - nz)]
-        return xz_prism(pts, y0, y1)
-
-    lo, hi = Z_PIVOT - LEAF_SPAN / 2, Z_PIVOT + LEAF_SPAN / 2
-    s = LEAF_SEP / 2
-    return leaf(lo, hi, -s - LEAF_H, -s).union(leaf(hi, lo, s, s + LEAF_H))
+    # Tooth: an (r, z) profile turned through TOOTH_SPAN about the end's centre.
+    # Its catch face slopes at 45 degrees from the tip out to the arm.
+    lead = 0.4
+    profile = [(R_TOOTH, -CATCH_Z), (R_IN + 0.2, -CATCH_Z + (R_IN + 0.2 - R_TOOTH)),
+               (R_IN + 0.2, Z_ARM), (R_TOOTH + lead, Z_ARM), (R_TOOTH, Z_ARM + lead)]
+    tooth = (cq.Workplane("XZ").polyline(profile).close()
+             .revolve(TOOTH_SPAN, (0, 0, 0), (0, 1, 0)))
+    # The revolve sweeps counterclockwise (seen from +z) from the +x axis; turn it to straddle 90 degrees.
+    tooth = tooth.rotate((0, 0, 0), (0, 0, 1), 90 - TOOTH_SPAN / 2).translate((0, C_END, 0))
+    return body.union(root).union(tooth)
 
 
 def cap():
-    body = box(-BODY_HALF_W, BODY_HALF_W, -HALF_L, HALF_L, 0, BODY_LEN).edges("|Y and >Z").fillet(EDGE)
-    pocket = box(X_POCKET, BODY_HALF_W + 1, -(LEAF_SEP / 2 + LEAF_H + POCKET_CLEAR / 2),
-                 LEAF_SEP / 2 + LEAF_H + POCKET_CLEAR / 2,
-                 Z_PIVOT - LEAF_SPAN / 2 - POCKET_CLEAR, Z_PIVOT + LEAF_SPAN / 2 + POCKET_CLEAR)
-    return body.cut(pocket).union(plug()).union(leaves()).union(lever())
+    plate = oval(2 * R_PLATE, SOCKET_L + 2 * PLATE_MARGIN, 0, BACK).edges(">Z").chamfer(0.8)
+    one = arm()
+    arms = one.union(one.rotate((0, 0, 0), (0, 0, 1), 180))
+    return plate.union(insert()).union(arms)
 
 
 def to_print(part):
-    # Stand on the -y end: model y becomes print z.
-    return part.rotate((0, 0, 0), (1, 0, 0), 90).translate((0, 0, HALF_L))
+    # Back face on the bed, insert up: half a turn about x.
+    return part.rotate((0, 0, 0), (1, 0, 0), 180).translate((0, 0, BACK))
 
 
-def lever_numbers():
-    """Rough squeeze force (N) at the tail and leaf bending stress (MPa) at a full squeeze."""
-    leaf_len = LEAF_SPAN * math.sqrt(2)
-    stiffness = 2 * E_PLA * (LEAF_H * LEAF_T ** 3 / 12) / leaf_len   # N mm per radian, both leaves
-    force = stiffness * THETA / (BODY_LEN - 1.0 - Z_PIVOT)
-    stress = E_PLA * (LEAF_T / 2) * THETA / leaf_len
+def arm_numbers():
+    """Rough arm force (N) at full deflection and bending stress (MPa), for tuning.
+
+    The arm is a straight run of length L_s up the side, then a quarter turn of
+    radius R to the tooth, loaded outward at the tooth.
+    """
+    r = (R_IN + R_OUT) / 2
+    l_s = C_END - ROOT_Y
+    i = (BACK - Z_ARM) * ARM_T ** 3 / 12
+    flex = r ** 2 * (math.pi / 4 * r + l_s) / (E_PLA * i)   # deflection per newton
+    force = LIFT / flex
+    stress = force * r * (ARM_T / 2) / i
     return force, stress
 
 
@@ -196,8 +197,10 @@ def export(shape, stem, out):
 
 if __name__ == "__main__":
     out = Path(__file__).resolve().parent
-    export(to_print(cap()), "h11_connector_cap", out)
-    force, stress = lever_numbers()
-    print(f"cap {2 * BODY_HALF_W:.1f} x {2 * HALF_L:.1f} body, {BODY_LEN - Z_FRONT:.1f} long with the lever; "
-          f"hook catches at least {CATCH_MIN:.2f} of the bump; "
-          f"full squeeze lifts it {LIFT} with about {force:.1f} N ({stress:.0f} MPa in the leaves)")
+    part = cap()
+    export(to_print(part), "h11_connector_cap", out)
+    bb = part.val().BoundingBox()
+    force, stress = arm_numbers()
+    print(f"cap {bb.xlen:.1f} x {bb.ylen:.1f} x {bb.zlen:.1f}; insert {INSERT_LEN} deep; "
+          f"teeth reach {ENGAGE}-{ENGAGE + HOOK_TIP_MAX - HOOK_TIP_MIN:.2f} under the hooks; "
+          f"each arm lifts {LIFT:.2f} to pass with about {force:.1f} N ({stress:.0f} MPa)")

@@ -25,7 +25,7 @@
 - An LED H11 without a spring nub stays locked in storage and comes out with a firm twist back.
 - Prints in one obvious orientation with no supports. The face the fins press against is clean.
 - Files open in a slicer (STL) and in Solid Edge Community Edition (STEP).
-- The connector cap clicks onto any connector within the standard, stays on in a bag, and comes off with a squeeze and a pull.
+- The connector cap clicks onto any connector within the standard, sits square without rocking, stays on in a bag, and comes off with a firm pull.
 
 ## Key Constraints
 
