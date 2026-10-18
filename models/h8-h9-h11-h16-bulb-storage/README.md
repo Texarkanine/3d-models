@@ -1,6 +1,6 @@
 # H11 bulb storage
 
-A printed holder that stores a spare H11 headlamp bulb, halogen or LED, with the same push-and-twist lock as a car's socket. H8, H9 and H16 bulbs fit too. To print one, use the [Cults listing](https://cults3d.com/en/3d-model/gadget/h11-bulb-storage). This directory is the source.
+A printed holder that stores a spare H11 headlamp bulb, halogen or LED, with the same push-and-twist lock as a car's socket. H8, H9 and H16 bulbs fit too. To print one, use the [Cults listing](https://cults3d.com/en/3d-model/gadget/h8-h9-h11-h16-bulb-storage). This directory is the source.
 
 ## Where things are
 
