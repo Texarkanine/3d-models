@@ -3,6 +3,8 @@ description: |
   Holds a spare H7 bulb by the flange. The head is enclosed, the back of the bulb stays free.
   
   Slide a clip into the slot to hold the bulb securely.
+
+  A prong cover keeps the bulb's two tabs clean and straight. Press it onto the tabs, and pull it off by its sides.
 manufacturing: |
   ### Material
 
@@ -10,7 +12,7 @@ manufacturing: |
 
   ### Printing
 
-  Print as shown - tube down. No supports needed.
+  Print as shown - tube down. The prong cover prints slotted end down. No supports needed.
 
   Several clips are provided for different bulb flange thicknesses. The flange is the thinnest part of the ring around the bulb's base. The thinner your flange, the thicker the clip you'll need. Print the clip labelled with the thickness of your bulb's flange's outer rim.
 
@@ -27,4 +29,6 @@ files:
   - clips/h7_clip_flange_0.5-1.0mm.step
   - clips/h7_clip_flange_1.0-1.5mm.stl
   - clips/h7_clip_flange_1.0-1.5mm.step
+  - h7_prong_cover.stl
+  - h7_prong_cover.step
 cults_creation_id: "Q3JlYXRpb24vaDctYnVsYi1zdG9yYWdl"
