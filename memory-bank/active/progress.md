@@ -27,3 +27,14 @@ Caps for the electrical ends of stored bulbs: a friction cap for H7 tabs and a l
     - H11: 45 degree catch faces, so the cap takes up the hooks' tolerance with preload and pulls off without prising the arms
 * Insights
     - Facing ridges and thin gaps that print shut, and spring roots poking through face chamfers, only show up in sections; render sections of every new face
+
+## 2026-10-18 - QA (test print 2) - PASS
+
+* Operator: "Those both work!" Both caps are accepted for the listings; the operator prints a set and adds the listing photos.
+* No `/niko-qa` subagent ran: the test prints were the QA.
+
+## 2026-10-18 - REFLECT - COMPLETE
+
+* The mock-tab and mock-socket checks became `check_fit.py` sections M (H7) and G (H11); both suites and the 83 repository tests pass; rebuilt STLs match the committed ones byte for byte
+* Both caps added to their models' `publish.yaml` (files, description, printing)
+* Reflection: `reflection/reflection-prong-covers.md`

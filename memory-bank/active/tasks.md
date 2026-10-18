@@ -14,4 +14,7 @@
 ## Wrap-up
 - [x] Update both models' memory-bank notes
 - [x] Copy STLs to the operator's print folders
-- [ ] Test print 2 (operator)
+- [x] Test print 2 (operator): both work
+- [x] `check_fit.py` sections for both caps
+- [x] Add both caps to their `publish.yaml`
+- [ ] Listing photos (operator)

@@ -2,8 +2,8 @@
 
 **Current Task:** prong-covers (rework 1)
 
-**Phase:** BUILD - COMPLETE (awaiting test print 2)
+**Phase:** REFLECT COMPLETE
 
-**What Was Done:** H7 prong cover shrunk to a 12.8 x 17.8 x 12.2 block with shorter springs. H11 connector cap rebuilt: an insert that fills the socket, and two curved arms whose 45 degree teeth clip onto both end hooks. STLs are in the operator's Trinkets folders.
+**What Was Done:** Test print 2 of both caps worked. The mock checks became `check_fit.py` sections (H7 M, H11 G), both caps are in their models' `publish.yaml`, and the H11 README links the renamed Cults listing. Reflection in `reflection/reflection-prong-covers.md`.
 
-**Next Step:** Operator prints both. On the result, record a SumMem outcome note per model, then either tune (H7 `SQUEEZE`; H11 `ARM_T`, `CATCH_Z`, `INSERT_CLEAR`) or add `publish.yaml` files and listing text.
+**Next Step:** Archive, then open the pull request. The operator adds listing photos.
