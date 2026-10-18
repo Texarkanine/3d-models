@@ -41,6 +41,8 @@ A new clip feature must say which pose each of its checks uses.
 
 `h7_prong_cover.py` builds a separate part that shares no values with the cover and clip, so it changes and prints on its own. It is built in print orientation, slotted face down.
 
+- **The block is only as big as the springs.** Its size comes from the springs and their gaps plus `WALL`; there is no outline parameter. Test print 1 was a 25 mm spool: it gripped well but was too big for the job.
+
 - **The grip comes from springs, not from how the slot prints.** Each tab is pinched between two thin walls fixed at one end with a gap all round. They stand on the bed and bend within the layers, like the H11 holder's catches. `SQUEEZE` sets the grip; the script prints a force and stress estimate on each run.
 - **The two ridges in a slot sit at different heights.** Facing ridges leave a gap of the tab thickness minus twice the squeeze, about 0.3 mm, which prints shut.
 - **The cover floats on its four springs.** A tab off its nominal spacing changes how the squeeze splits between its two springs, not the total grip.

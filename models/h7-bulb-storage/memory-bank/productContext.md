@@ -26,7 +26,7 @@
 - One clip choice per flange-thickness band latches firmly and releases cleanly.
 - Prints in one obvious orientation with no supports, or only easy-break supports on faces that do no work.
 - Files open in a slicer (STL) and in Solid Edge Community Edition (STEP).
-- The prong cover presses onto any tabs within the standard by hand, stays on in a bag, and pulls off by its waist.
+- The prong cover presses onto any tabs within the standard by hand, stays on in a bag, and pulls off by hand. It is little bigger than the plug it covers.
 
 ## Key Constraints
 

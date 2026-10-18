@@ -4,9 +4,9 @@ It keeps the tabs clean and straight while the bulb is stored. It fits any
 bulb or LED plug with the standard H7 tabs: two flat 6.3 x 0.8 tabs, faces
 parallel, 11.5 apart centre to centre.
 
-The cover is a spool, round all the way round, so it can be held at any
-turn: pinch the waist between two fingers and pull. Its flat end has a slot
-for each tab. Each tab is pinched between two springs, one on each face.
+The cover is a small rounded block, no bigger than its springs need, so it
+reads as an extension of the plug that happens to cover the tabs. Grip its
+sides and pull. Its flat end has a slot for each tab. Each tab is pinched between two springs, one on each face.
 The springs are thin walls joined to the cover at one end only, with a gap
 all round, so they bend sideways like leaf springs. A rounded ridge on each
 spring presses the tab; the grip comes from how far the tab pushes the
@@ -25,6 +25,9 @@ Sources for the default dimensions:
     nominal apart; tab length X at least 8 behind the base, tab tips Y 15-16
     and the base V at least 6 behind the reference plane; note 9 sends the
     other tab sizes to ISO 8092-1 (6.3 x 0.8).
+  - Test print 1 (2026-10-18), a 25 mm spool with 9 mm springs: gripped
+    the operator's LED plug well but was too big. These shorter, thinner
+    springs keep about the same force.
   - The operator's LED H7 plug, measured 2026-10-18: tabs 0.8 thick, 6.2
     wide, 10.3 long, 10.75 apart face to face (so 11.55 centre to centre),
     narrowing to 4.5 wide over the last 2.3 mm, with a hole about 2.5 across
@@ -39,7 +42,6 @@ Writes STEP (opens in Solid Edge) and STL (for the slicer), standing on the
 slotted end.
 """
 
-import math
 from pathlib import Path
 
 import cadquery as cq
@@ -53,30 +55,26 @@ TAB_LEN = 10.3       # longest tab behind the base: PX26d allows 10 (Y 16 - V 6)
 # ---- Springs ------------------------------------------------------------------
 SQUEEZE = 0.25       # how far the tab pushes each spring back; sets the grip
 SLOT_CLEAR = 0.25    # gap between each spring and the tab, away from the ridge
-SPRING_T = 1.1       # spring thickness
+SPRING_T = 0.9       # spring thickness
 SPRING_H = 9.0       # spring height from the face; tabs are at least 8 long
-SPRING_L = 9.0       # spring length from its root to the ridge; longer is softer
+SPRING_L = 7.0       # spring length from its root to the ridge; longer is softer
 RIDGE_W = 2.4        # ridge width along the spring
-RIDGE_X = 2.0        # ridge centre, from the tab centre toward the spring's free end
+RIDGE_X = 1.6        # ridge centre, from the tab centre toward the spring's free end
 RIDGE_SPLIT = 4.75   # the inner spring's ridge ends below this height, the outer one's starts above it
 RIDGE_GAP_Z = 0.5    # height between the end of one ridge and the start of the other
-GAP = 0.7            # printed gap round the springs
+GAP = 0.6            # printed gap round the springs
 TOP_GAP = 1.2        # gap above the springs: their roof is a bridge and may sag
 END_CLEAR = 0.3      # slot ends past the tab's edges
 DEPTH_CLEAR = 0.7    # slot deeper than the longest tab, so the face rests on the base
 LEAD = 0.3           # 45 degree lead-in on the springs at the slot mouth
 E_PLA = 3000.0       # MPa, printed PLA, for the grip estimate printed on each run
 
-# ---- Body: a spool, round all the way round --------------------------------------
-END_R = 12.5         # radius of both ends
-WAIST_R = 8.5        # radius of the waist
-HEAD_LEN = 12.0      # straight part of the slotted end
-WAIST_LEN = 8.0      # straight part of the waist
-TAIL_LEN = 3.0       # straight part of the pull end
-EDGE = 0.6           # chamfer round the slotted face (also takes the first layer's squash)
-TOP_EDGE = 1.0       # chamfer round the pull end
-OUT_FILLET = 2.0     # rounds the shoulders
-IN_FILLET = 3.0      # rounds the waist
+# ---- Body: a rounded block -------------------------------------------------------------
+WALL = 1.0           # outside the gaps round the springs
+END_WALL = 1.2       # above the tab tips
+CORNER_R = 1.0       # rounds the block's long edges; more would thin the wall at the springs' corners
+EDGE = 0.4           # chamfer round the slotted face (also takes the first layer's squash)
+TOP_EDGE = 0.8       # chamfer round the far end
 
 # ---- Derived ----------------------------------------------------------------
 Y_C = TAB_PITCH / 2                          # tab centre plane, +y tab
@@ -88,20 +86,18 @@ Y_IN = Y_C - S - SPRING_T - GAP              # inner edge of the gaps round the 
 Y_OUT = Y_C + S + SPRING_T + GAP             # outer edge
 Z_ROOF = SPRING_H + TOP_GAP                  # roof over the springs
 Z_TIP = TAB_LEN + DEPTH_CLEAR                # top of the slot
-DROP = END_R - WAIST_R                       # 45 degree shoulder and flare
-Z_WAIST = HEAD_LEN + DROP
-Z_FLARE = Z_WAIST + WAIST_LEN
-Z_TOP = Z_FLARE + DROP + TAIL_LEN
+HALF_X = max(-X_ROOT, X_FREE + GAP) + WALL    # block half-width along the tabs
+HALF_Y = Y_OUT + WALL                        # block half-width across them
+Z_TOP = Z_TIP + END_WALL
 
 assert S - RIDGE < TAB_T / 2, "ridges must press the tab"
-assert math.hypot(X_ROOT, Y_OUT) <= END_R - EDGE - 1.0, "springs need 1 mm of wall outside them"
 assert Y_IN >= 1.5, "the two tabs' springs need wall between them"
 assert X_ROOT < -X_FREE, "springs must reach past the far end of the tab"
 assert RIDGE_X + RIDGE_W / 2 <= TAB_W / 2, "ridge must press the flat of the tab"
 assert min(RIDGE_SPLIT - LEAD - 0.2, SPRING_H - RIDGE_SPLIT) - RIDGE_GAP_Z / 2 >= 2 * RIDGE + 1.0, \
     "each ridge needs 1 mm of full height between its sloped ends"
 assert 2 * S - RIDGE >= 0.6, "slot beside a ridge must be wide enough to print open"
-assert max(Z_ROOF, Z_TIP) + 1.0 <= HEAD_LEN, "slots need 1 mm of roof under the shoulder"
+assert Z_ROOF < Z_TIP, "the tab-tip slots must rise through the roof over the springs"
 
 
 def box(x0, x1, y0, y1, z0, z1):
@@ -109,40 +105,9 @@ def box(x0, x1, y0, y1, z0, z1):
             .translate((x0, y0, z0)))
 
 
-def rounded_outline(points, radii):
-    """(r, z) corners joined by lines, with an arc of the given radius at each corner (0: sharp).
-
-    Returns a closed CadQuery wire on the XZ plane, ready to revolve about z.
-    """
-    wp = cq.Workplane("XZ").moveTo(*points[0])
-    for i in range(1, len(points) - 1):
-        p, r = points[i], radii[i]
-        if r == 0:
-            wp = wp.lineTo(*p)
-            continue
-        a, b = points[i - 1], points[i + 1]
-        u1 = [(a[k] - p[k]) / math.dist(a, p) for k in (0, 1)]
-        u2 = [(b[k] - p[k]) / math.dist(b, p) for k in (0, 1)]
-        phi = math.acos(u1[0] * u2[0] + u1[1] * u2[1])  # angle between the two sides
-        t = r / math.tan(phi / 2)
-        half = math.hypot(u1[0] + u2[0], u1[1] + u2[1])
-        bis = [(u1[k] + u2[k]) / half for k in (0, 1)]
-        c = [p[k] + bis[k] * r / math.sin(phi / 2) for k in (0, 1)]
-        wp = (wp.lineTo(p[0] + u1[0] * t, p[1] + u1[1] * t)
-              .threePointArc((c[0] - bis[0] * r, c[1] - bis[1] * r),
-                             (p[0] + u2[0] * t, p[1] + u2[1] * t)))
-    return wp.lineTo(*points[-1]).close()
-
-
-def spool():
-    corners = [
-        (0, 0), (END_R - EDGE, 0), (END_R, EDGE),
-        (END_R, HEAD_LEN), (WAIST_R, Z_WAIST),
-        (WAIST_R, Z_FLARE), (END_R, Z_FLARE + DROP),
-        (END_R, Z_TOP - TOP_EDGE), (END_R - TOP_EDGE, Z_TOP), (0, Z_TOP),
-    ]
-    radii = [0, 0, 0, OUT_FILLET, IN_FILLET, IN_FILLET, OUT_FILLET, 0, 0, 0]
-    return rounded_outline(corners, radii).revolve(360, (0, 0, 0), (0, 1, 0))
+def block():
+    return (box(-HALF_X, HALF_X, -HALF_Y, HALF_Y, 0, Z_TOP).edges("|Z").fillet(CORNER_R)
+            .faces("<Z").chamfer(EDGE).faces(">Z").chamfer(TOP_EDGE))
 
 
 def ridge(y_face, toward, z0, z1):
@@ -162,8 +127,8 @@ def tab_features():
     gaps = box(X_ROOT, X_FREE + GAP, Y_IN, Y_OUT, -1, Z_ROOF)
     low = (LEAD + 0.2, RIDGE_SPLIT - RIDGE_GAP_Z / 2)
     high = (RIDGE_SPLIT + RIDGE_GAP_Z / 2, SPRING_H)
-    springs = (box(X_ROOT - 1, X_FREE, Y_C - S - SPRING_T, Y_C - S, 0, SPRING_H)
-               .union(box(X_ROOT - 1, X_FREE, Y_C + S, Y_C + S + SPRING_T, 0, SPRING_H))
+    springs = (box(X_ROOT - WALL / 2, X_FREE, Y_C - S - SPRING_T, Y_C - S, 0, SPRING_H)
+               .union(box(X_ROOT - WALL / 2, X_FREE, Y_C + S, Y_C + S + SPRING_T, 0, SPRING_H))
                .union(ridge(Y_C - S, 1, *low)).union(ridge(Y_C + S, -1, *high)))
     # Lead-in: a 45 degree chamfer on the spring faces at the slot mouth.
     w0 = S + LEAD + 1
@@ -180,7 +145,7 @@ def cover():
         return shape.union(shape.rotate((0, 0, 0), (0, 0, 1), 180))
 
     gaps, springs, lead_in, tip = (both(f) for f in tab_features())
-    return spool().cut(gaps).union(springs).cut(lead_in).cut(tip)
+    return block().cut(gaps).union(springs).cut(lead_in).cut(tip)
 
 
 def grip():
@@ -200,5 +165,5 @@ if __name__ == "__main__":
     out = Path(__file__).resolve().parent
     export(cover(), "h7_prong_cover", out)
     force, stress = grip()
-    print(f"spool Ø{2 * END_R:.1f}, waist Ø{2 * WAIST_R:.1f}, {Z_TOP:.1f} long; slots {Z_TIP:.1f} deep; "
+    print(f"block {2 * HALF_X:.1f} x {2 * HALF_Y:.1f} x {Z_TOP:.1f}; slots {Z_TIP:.1f} deep; "
           f"each spring about {force:.1f} N at {SQUEEZE} mm squeeze ({stress:.0f} MPa)")
