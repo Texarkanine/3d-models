@@ -37,6 +37,16 @@ The arms are printed turned out `ARM_SPREAD` (1.5 degrees) about the bridge bar;
 
 A new clip feature must say which pose each of its checks uses.
 
+## The prong cover
+
+`h7_prong_cover.py` builds a separate part that shares no values with the cover and clip, so it changes and prints on its own. It is built in print orientation, slotted face down.
+
+- **The grip comes from springs, not from how the slot prints.** Each tab is pinched between two thin walls fixed at one end with a gap all round. They stand on the bed and bend within the layers, like the H11 holder's catches. `SQUEEZE` sets the grip; the script prints a force and stress estimate on each run.
+- **The two ridges in a slot sit at different heights.** Facing ridges leave a gap of the tab thickness minus twice the squeeze, about 0.3 mm, which prints shut.
+- **The cover floats on its four springs.** A tab off its nominal spacing changes how the squeeze splits between its two springs, not the total grip.
+- **Keep the half-turn symmetry.** Each slot runs past its tab toward the springs' roots, the two tabs' slots in opposite directions, so together they hold the cover's position along the tabs.
+- The roof over the springs is a bridge. `TOP_GAP` keeps a sagging roof off the spring tops; a roof joined to them would stiffen the springs and load them across the layers.
+
 ## Test prints are notes, not tags
 
 Git tags mark releases only (`h7-bulb-storage-vX.Y.Z`, made by release-please). A test print gets no tag: a part can take several prints to get right. Record each print's outcome as a SumMem note for this model (`.summem/summem note --path models/h7-bulb-storage/...`). Earlier outcomes are in `README.txt` in git history, under the old depth names (0.5 mm higher than today's).

@@ -11,6 +11,7 @@ Parametric CAD in Python with CadQuery (OpenCascade kernel). The outputs are 3D-
 - `python h7_led_cover.py` regenerates every output in place, already turned to print orientation: `h7_cover` and `h7_fit_test` at this directory, and one `clips/h7_clip_flange_<band>mm` per entry in `CLIP_VARIANTS`, each as `.step` and `.stl`. Clips are exported from `printed_clip()` (arms spread as printed); `clip()` is the clip as held in use.
 - Each run rewrites STEP headers: the timestamp in `FILE_NAME`, and an export counter in `PRODUCT` that shifts when the export order changes. If a STEP file's only changes are in its header, restore it (`git checkout -- <file>`) rather than commit it.
 - Outputs are committed. Regenerate and commit them with any change to the script.
+- `python h7_prong_cover.py` regenerates `h7_prong_cover` (`.step` and `.stl`) in place, slotted face down, and prints its size and the springs' estimated force. It needs only `cadquery`.
 - `measure_flange.svg` (flange diagram for users) is drawn by `tools/make_svg.py <output.svg>`. Redraw it when the key or bore parameters change.
 
 ## Testing Process
@@ -22,4 +23,5 @@ Parametric CAD in Python with CadQuery (OpenCascade kernel). The outputs are 3D-
   - `probe.py`: sizes, volumes and validity of the cover and every clip.
   - `render_sections.py <out_dir>`: section pictures with a mock bulb.
 - Exported STLs should be watertight.
+- The prong cover has no `check_fit.py` section yet: it is still a prototype. Its test is a print on the operator's LED plug.
 - The final test is a physical print on the operator's bulbs; a `h7_fit_test` print (collar and seat only) checks flange, key and clip quickly.
