@@ -53,6 +53,8 @@ def anchors(m, patch, z):
             k = max(2, int(np.linalg.norm(b - a) / 0.25))
             for t in np.linspace(0, 1, k, endpoint=False):
                 pts.append(a + t * (b - a))
+    if not pts:
+        return "outline not traced; check by eye"
     pts = np.array(pts)
     centre = patch.vertices[:, :2].mean(0)
     # step 0.3 mm outward from the patch, away from its centre

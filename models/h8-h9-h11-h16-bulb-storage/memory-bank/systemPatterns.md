@@ -31,6 +31,16 @@ Each fact has one home. Sizes and the sources behind them live in the script (it
 
 The holder prints standing on its open end. The wall the fins press against is the first layers on the bed, so that face comes out flat. The slot the fins turn in has a ceiling that slopes at 45 degrees. It must never be a flat ring: nothing holds a flat ring up from below in any orientation.
 
+## The connector cap
+
+`h11_connector_cap.py` builds a separate part that shares no values with the holder. Its coordinates are the connector's: z = 0 at the mouth face, the latch bump on +x.
+
+- It stands in for the car's plug. A short plug fills the mouth's recess and stops short of the pins; the keys between the pins stop at the recess, so one cap fits all four types. A lever hooks behind the bump the standard draws on the connector's side (view b of sheet 7004-110-2).
+- The lever is a see-saw on two thin leaves crossed at 45 degrees. Squeezing its tail turns it and lifts the hook. A pull on the cap loads the leaves end-on, so the hook holds hard although it lifts easily. A single leaf would bend sideways under a pull and snap.
+- The body's face under the tail stops the squeeze at `LIFT`, which also caps the strain in the leaves.
+- The hook's catch face leans back `HOOK_UNDERCUT`, so a pull draws the hook in rather than lifting it.
+- It prints standing on one end of the oval, so the lever, hook and leaves bend within the layers and the hook's profile comes out sharp. The leaves print as bridges at different heights (`LEAF_SEP`); a bridge sagging onto the other leaf would join them where they cross. The plug's underside rises from the body at 45 degrees, so nothing hangs.
+
 ## Why not the old case
 
 The operator's earlier H11 case (someone else's design, not in this repository) taught these limits:
