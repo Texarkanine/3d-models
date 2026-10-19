@@ -43,7 +43,7 @@ Coordinates (use position): z = 0 is the socket's mouth face, -z runs into
 the socket, +z away from the bulb. y runs along the oval, x across it.
 to_print stands the cap on its back face.
 
-Run:  python h11_connector_cap.py   (needs cadquery)
+Run:  python h11_prong_cover.py   (needs cadquery)
 Writes STEP (opens in Solid Edge) and STL (for the slicer), standing on its
 back face.
 """
@@ -199,7 +199,7 @@ def export(shape, stem, out):
 if __name__ == "__main__":
     out = Path(__file__).resolve().parent
     part = cap()
-    export(to_print(part), "h11_connector_cap", out)
+    export(to_print(part), "h11_prong_cover", out)
     bb = part.val().BoundingBox()
     force, stress = arm_numbers()
     print(f"cap {bb.xlen:.1f} x {bb.ylen:.1f} x {bb.zlen:.1f}; insert {INSERT_LEN} deep; "

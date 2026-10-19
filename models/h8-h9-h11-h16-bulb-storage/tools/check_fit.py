@@ -18,7 +18,7 @@ SRC = str(__import__("pathlib").Path(__file__).resolve().parent.parent / "h11_ho
 spec = importlib.util.spec_from_file_location("h11", SRC)
 h = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(h)
-spec = importlib.util.spec_from_file_location("cc", SRC.replace("h11_holder.py", "h11_connector_cap.py"))
+spec = importlib.util.spec_from_file_location("cc", SRC.replace("h11_holder.py", "h11_prong_cover.py"))
 cc = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(cc)
 

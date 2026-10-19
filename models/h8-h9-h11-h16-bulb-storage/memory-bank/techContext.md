@@ -10,7 +10,7 @@ Parametric CAD in Python with CadQuery (OpenCascade kernel), as in `h7-bulb-stor
 ## Build Tools
 
 - `python h11_holder.py` regenerates `h11_holder` and `h11_fit_test` (`.step` and `.stl`) in place, standing on the open end. Outputs are committed; regenerate and commit them with any change to the script. Each run rewrites STEP headers (a timestamp); if a STEP file's only changes are in its header, restore it rather than commit it.
-- `python h11_connector_cap.py` regenerates `h11_connector_cap` (`.step` and `.stl`) in place, standing on its back face, and prints how far the teeth reach under the hooks and the arms' force and stress. It needs only `cadquery`.
+- `python h11_prong_cover.py` regenerates `h11_prong_cover` (`.step` and `.stl`) in place, standing on its back face, and prints how far the teeth reach under the hooks and the arms' force and stress. It needs only `cadquery`.
 - `tools/make_svg.py <output.svg>` draws `measure_cap.svg`: the PGJ19 cap at its largest sizes, the letters to measure, and the four wide-fin variants. Redraw it when the standard's numbers or the defaults change.
 
 ## Testing Process

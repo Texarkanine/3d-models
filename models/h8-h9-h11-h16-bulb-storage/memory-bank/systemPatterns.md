@@ -33,7 +33,7 @@ The holder prints standing on its open end. The wall the fins press against is t
 
 ## The connector cap
 
-`h11_connector_cap.py` builds a separate part that shares no values with the holder. Its coordinates are the connector's: z = 0 at the mouth face, -z into the socket, y along the oval.
+`h11_prong_cover.py` builds a separate part that shares no values with the holder. Its coordinates are the connector's: z = 0 at the mouth face, -z into the socket, y along the oval.
 
 - **It clips onto the hooks on the oval's ends**, the ones the standard says hold the car's connector (view a and note 4 of sheet 7004-110-2). Test print 1 hooked only the side bump (view b) with one latch, and the cap flopped. One catch at one side cannot hold a cap square.
 - **The insert fills the socket**, mouth recess and inner cavity, so the cap cannot rock. Test print 1's 4.5 mm plug in the recess alone let it rock. The insert's pin slots stop short of the pins' tips and never touch them. The key slot runs right across the insert, so it takes every type's keys and splits the insert into two towers deep inside.
