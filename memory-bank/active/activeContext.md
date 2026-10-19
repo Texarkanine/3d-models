@@ -1,12 +1,14 @@
 # Active Context
 
 ## Current Task: cults-creation-lookup
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
 
-- Classified the Cults update lookup failure as Level 1. It is one bug in the publisher: `creationsBatch(ids:)` matches `creation.identifier`, a slug does not filter, and `limit: 1` then returns the newest design.
+- The asset read and the gallery read now page this account's designs and keep the row whose `id` equals the stored `cults_creation_id`. They do not send `creationsBatch` `ids`. `updateCreation` still receives that stored id.
+- A newer design listed first no longer hides the stored design. A page that contains only a different design still stops before `updateCreation`.
+- The catalog suite passed: 82 tests.
 
 ## Next Step
 
-- Load the Level 1 workflow and build the fix.
+- Level 1 QA.

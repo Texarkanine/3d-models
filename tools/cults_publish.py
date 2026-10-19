@@ -221,9 +221,9 @@ _ASSET_SELECTION = {
 _KEPT_MUTATIONS = ("createCreation", "updateCreation", *_ASSET_REQUIREMENTS)
 _ASSET_RETRY_WAITS = (10, 30, 60)
 _ASSETS = """
-query Assets($ids: [String!], $limit: Int!, $offset: Int!) {
+query Assets($limit: Int!, $offset: Int!) {
   myself {
-    creationsBatch(ids: $ids, limit: $limit, offset: $offset) {
+    creationsBatch(limit: $limit, offset: $offset) {
       total
       results {
         id
@@ -235,9 +235,9 @@ query Assets($ids: [String!], $limit: Int!, $offset: Int!) {
 }
 """
 _GALLERY = """
-query Gallery($ids: [String!], $limit: Int!, $offset: Int!) {
+query Gallery($limit: Int!, $offset: Int!) {
   myself {
-    creationsBatch(ids: $ids, limit: $limit, offset: $offset) {
+    creationsBatch(limit: $limit, offset: $offset) {
       total
       results {
         id
@@ -325,46 +325,45 @@ def _call_mutation(transport, auth, mutations, operation, payload):
     return body
 
 
-def _batch_ids_key(creation_id):
-    """Return the creationsBatch ids value for a stored creation id.
+def _find_own_row(transport, auth, creation_id, query):
+    """Return the creationsBatch row whose id equals creation_id.
 
-    Cults matches the slug. A global id decodes to Creation/<slug>. Any other
-    id is sent unchanged.
+    The list is this account's designs. creationsBatch ids filters on
+    creation.identifier, which is Creation/<number>. creation.id is
+    Creation/<slug>, and a slug does not filter, so this read does not
+    send ids. limit 1 would then be the newest design. Raise ValueError
+    when no row's id equals creation_id.
     """
-    import base64
-
-    padded = creation_id + "=" * (-len(creation_id) % 4)
-    try:
-        decoded = base64.b64decode(padded, validate=True).decode("utf-8")
-    except (ValueError, UnicodeDecodeError):
-        return creation_id
-    prefix = "Creation/"
-    slug = decoded[len(prefix):]
-    if decoded.startswith(prefix) and slug:
-        return slug
-    return creation_id
+    offset = 0
+    total = None
+    while total is None or offset < total:
+        data = _graphql(
+            transport, auth, query, {"limit": _PAGE, "offset": offset},
+        )
+        batch = data["myself"]["creationsBatch"] or {}
+        total = batch.get("total") or 0
+        rows = batch.get("results") or []
+        if not rows:
+            break
+        for row in rows:
+            if row["id"] == creation_id:
+                return row
+        offset += len(rows)
+        if offset > 10000:
+            raise RuntimeError("stopped scanning Cults creations past 10000")
+    raise ValueError("Cults has no creation with this id")
 
 
 def _listing_assets(transport, auth, creation_id):
     """Return blueprint ids and illustration ids for one creation.
 
-    The read is myself.creationsBatch filtered by the slug of that id. Raise
-    ValueError when no row's id equals the stored creation id.
+    Raise ValueError when no row's id equals the stored creation id.
     """
-    data = _graphql(
-        transport,
-        auth,
-        _ASSETS,
-        {"ids": [_batch_ids_key(creation_id)], "limit": 1, "offset": 0},
+    row = _find_own_row(transport, auth, creation_id, _ASSETS)
+    return (
+        [item["id"] for item in row.get("blueprints") or []],
+        [item["id"] for item in row.get("illustrations") or []],
     )
-    batch = data["myself"]["creationsBatch"] or {}
-    for row in batch.get("results") or []:
-        if row["id"] == creation_id:
-            return (
-                [item["id"] for item in row.get("blueprints") or []],
-                [item["id"] for item in row.get("illustrations") or []],
-            )
-    raise ValueError("Cults has no creation with this id")
 
 
 def _ready_stl(blueprint):
@@ -381,17 +380,7 @@ def _gallery_state(transport, auth, creation_id):
 
     Raise ValueError when no row's id equals the stored creation id.
     """
-    data = _graphql(
-        transport,
-        auth,
-        _GALLERY,
-        {"ids": [_batch_ids_key(creation_id)], "limit": 1, "offset": 0},
-    )
-    batch = data["myself"]["creationsBatch"] or {}
-    for row in batch.get("results") or []:
-        if row["id"] == creation_id:
-            return row
-    raise ValueError("Cults has no creation with this id")
+    return _find_own_row(transport, auth, creation_id, _GALLERY)
 
 
 def _bump_details(*, transport, auth, mutations, creation_id, license_code, details):

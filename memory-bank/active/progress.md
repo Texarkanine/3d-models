@@ -15,3 +15,16 @@ An update deploy must select the Cults design whose `creation.id` is the stored 
     - The lookup stops using `creationsBatch(ids:)`
 * Insights
     - The slug and padding fixes succeeded when the target was the only design or the newest one, because `limit: 1` returns that first row
+
+## 2026-10-19 - BUILD - COMPLETE
+
+* Work completed
+    - The test double no longer treats `ids` as a slug filter
+    - An update whose stored id is not the newest design selects that design
+    - A page that contains only a different design stops before `updateCreation`
+    - Catalog suite: 82 tests passed
+* Decisions made
+    - Find the row by `creation.id` across the unfiltered account list
+    - Do not store or send `creation.identifier`
+* Insights
+    - `limit: 1` on an unfiltered list made the newest design look like a successful lookup

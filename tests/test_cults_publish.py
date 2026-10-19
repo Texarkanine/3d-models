@@ -1,5 +1,4 @@
 """Publisher behavior: URLs, description, schema filtering, and Cults calls."""
-import base64
 import itertools
 import json
 import sys
@@ -10,7 +9,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from tools.cults_publish import (
-    _batch_ids_key,
     assemble_description,
     changelog_url,
     choose_action,
@@ -100,9 +98,11 @@ def _row(item, *, hide_previews=False):
 class FakeCults:
     """GraphQL stand-in. Honors search offset and limit.
 
-    rows are creation records. matches is a shorthand: each id becomes a row
-    named listing_name with no assets. An ids variable selects a row by the
-    slug of a global id, and by the row id when that id is not a global id.
+    rows are creation records, newest first when a test orders them that way.
+    matches is a shorthand: each id becomes a row named listing_name with no
+    assets. An ids variable does not narrow the list: Cults applies that
+    filter to creation.identifier, and a slug or creation.id leaves every
+    design in place. limit and offset then slice that list.
     Like Cults, updateCreation without downloadPrice fails the price check.
     asset_failures maps createBlueprint or createIllustration to an iterator
     of failure responses; each call of that mutation takes the next one
@@ -163,28 +163,18 @@ class FakeCults:
             ]}}
         if "creationsBatch" in query:
             rows = self.rows
-            if variables.get("ids") is not None:
-                wanted = set(variables["ids"])
-                rows = [row for row in self.rows if _batch_ids_key(row["id"]) in wanted]
-                hide_previews = False
-                if "fileExtension" in query and self.withhold_previews > 0:
-                    self.withhold_previews -= 1
-                    hide_previews = True
-                return {"data": {"myself": {"creationsBatch": {
-                    "total": len(rows),
-                    "results": [
-                        _row(row, hide_previews=hide_previews)
-                        for row in rows[:variables["limit"]]
-                    ],
-                }}}}
-            offset = variables["offset"]
+            offset = variables.get("offset") or 0
             size = variables["limit"]
             if self.page_cap is not None:
                 size = min(size, self.page_cap)
+            hide_previews = False
+            if "fileExtension" in query and self.withhold_previews > 0:
+                self.withhold_previews -= 1
+                hide_previews = True
             chunk = rows[offset:offset + size]
             return {"data": {"myself": {"creationsBatch": {
                 "total": len(rows),
-                "results": [_row(row) for row in chunk],
+                "results": [_row(row, hide_previews=hide_previews) for row in chunk],
             }}}}
         for name, failures in self.asset_failures.items():
             if f"{name}(" in query:
@@ -501,18 +491,6 @@ class ArgumentTests(unittest.TestCase):
             ensure_made_with_ai({"name": {}})
 
 
-class BatchIdsKeyTests(unittest.TestCase):
-    def test_unpadded_global_id_resolves_to_slug(self):
-        self.assertEqual(_batch_ids_key(RATTlinATOR_CREATION_ID), "fire-extinguisher-rattlinator")
-        self.assertEqual(
-            _batch_ids_key(H8_BULB_STORAGE_CREATION_ID),
-            "h8-h9-h11-h16-bulb-storage",
-        )
-
-    def test_non_global_id_is_unchanged(self):
-        self.assertEqual(_batch_ids_key("local-1"), "local-1")
-
-
 class ChooseActionTests(unittest.TestCase):
     def test_no_local_id_and_no_match_creates(self):
         self.assertEqual(choose_action("", []), ("create", None))
@@ -712,8 +690,7 @@ class PublishTests(unittest.TestCase):
             transport = FakeCults(rows=[_owned_row()])
             got = _publish(root, transport)
         self.assertEqual(got, "creation-1")
-        asset_read = next(call for call in transport.calls if call[1].get("ids") is not None)
-        self.assertEqual(asset_read[1]["ids"], ["local-1"])
+        self.assertFalse(any("ids" in call[1] for call in transport.calls))
         blueprint = next(call for call in transport.calls if "createBlueprint(" in call[0])
         self.assertIn("fileUrl", blueprint[1])
         self.assertNotIn("position", blueprint[1])
@@ -764,19 +741,39 @@ class PublishTests(unittest.TestCase):
                 _publish(root, transport)
         self.assertEqual(_mutations(transport), [])
 
-    def test_global_creation_id_is_looked_up_by_slug(self):
-        slug = "h7-bulb-storage"
-        global_id = base64.b64encode(f"Creation/{slug}".encode()).decode()
+    def test_update_selects_the_stored_id_when_a_newer_design_is_first(self):
+        """The account lists a newer design first. The stored creation.id is
+        still the design that is updated, and that design's files are the
+        ones removed.
+        """
+        stored = H8_BULB_STORAGE_CREATION_ID
+        rows = [
+            _owned_row(RATTlinATOR_CREATION_ID, name="Newer part", blueprints=["newer-bp"]),
+            _owned_row(stored, name="Example part", blueprints=["stored-bp"]),
+        ]
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            write_repo(root, creation_id=global_id)
-            transport = FakeCults(rows=[_owned_row(global_id)])
+            write_repo(root, creation_id=stored)
+            transport = FakeCults(rows=rows)
             got = _publish(root, transport)
         self.assertEqual(got, "creation-1")
-        asset_read = next(call for call in transport.calls if call[1].get("ids") is not None)
-        self.assertEqual(asset_read[1]["ids"], [slug])
+        self.assertFalse(any("ids" in call[1] for call in transport.calls))
         update = next(call[1] for call in transport.calls if "updateCreation(" in call[0])
-        self.assertEqual(update["id"], global_id)
+        self.assertEqual(update["id"], stored)
+        destroyed = [call[1]["id"] for call in transport.calls if "destroyBlueprint(" in call[0]]
+        self.assertEqual(destroyed, ["stored-bp"])
+
+    def test_update_refuses_when_the_only_design_returned_is_a_different_one(self):
+        """A page that does not contain the stored id is not a match for it."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_repo(root, creation_id=H8_BULB_STORAGE_CREATION_ID)
+            transport = FakeCults(rows=[
+                _owned_row(RATTlinATOR_CREATION_ID, name="Newer part", blueprints=["newer-bp"]),
+            ])
+            with self.assertRaises(ValueError):
+                _publish(root, transport)
+        self.assertEqual(_mutations(transport), [])
 
     def test_update_omits_file_arguments_when_the_schema_lists_them(self):
         update_args = dict(UPDATE_ARGS, fileUrls="[String!]", imageUrls="[String!]")
@@ -829,7 +826,7 @@ class PublishTests(unittest.TestCase):
         destroyed = [call[1]["id"] for call in transport.calls if "destroyBlueprint(" in call[0]]
         self.assertEqual(destroyed, ["b1", "b2"])
 
-    def test_unpadded_cults_id_looks_up_assets_by_slug(self):
+    def test_unpadded_creation_id_matches_the_stored_row(self):
         row = _owned_row(
             creation_id=RATTlinATOR_CREATION_ID,
             name="Fire-Extinguisher Rattlinator",
@@ -840,8 +837,9 @@ class PublishTests(unittest.TestCase):
             write_repo(root, creation_id=RATTlinATOR_CREATION_ID)
             transport = FakeCults(rows=[row])
             _publish(root, transport)
-        asset_read = next(call for call in transport.calls if call[1].get("ids") is not None)
-        self.assertEqual(asset_read[1]["ids"], ["fire-extinguisher-rattlinator"])
+        self.assertFalse(any("ids" in call[1] for call in transport.calls))
+        destroyed = [call[1]["id"] for call in transport.calls if "destroyBlueprint(" in call[0]]
+        self.assertEqual(destroyed, ["b1"])
 
     def test_chosen_id_missing_from_the_scan_refuses_before_a_mutation(self):
         with tempfile.TemporaryDirectory() as tmp:
