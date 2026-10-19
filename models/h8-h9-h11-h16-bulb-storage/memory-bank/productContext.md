@@ -10,6 +10,7 @@
 - Store a spare bulb in a glovebox, bag, bin or car without harming the glass or the LEDs.
 - Put a bulb in and take it out by hand, many times, with the same push-and-twist as a headlamp socket.
 - Fit a non-standard bulb by measuring it (`measure_cap.svg`) and changing a few dimensions before printing.
+- Keep the pins in the bulb's connector clean in storage, with a separate cap that latches on like the car's plug.
 
 ## Key Benefits
 
@@ -24,6 +25,7 @@
 - An LED H11 without a spring nub stays locked in storage and comes out with a firm twist back.
 - Prints in one obvious orientation with no supports. The face the fins press against is clean.
 - Files open in a slicer (STL) and in Solid Edge Community Edition (STEP).
+- The connector cap clicks onto any connector within the standard, sits square without rocking, stays on in a bag, and comes off with a firm pull.
 
 ## Key Constraints
 

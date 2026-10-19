@@ -11,6 +11,7 @@
 - Put a bulb in and take it out by hand, many times. Fingers, needle-nose pliers or a small screwdriver are acceptable tools.
 - Pack several covers side by side in a box, where they stay put.
 - Fit a non-standard bulb by measuring it and changing a few dimensions before printing.
+- Keep the bulb's two tabs, or the tabs on an LED bulb's plug, clean and straight in storage, with a separate prong cover.
 
 ## Key Benefits
 
@@ -25,6 +26,7 @@
 - One clip choice per flange-thickness band latches firmly and releases cleanly.
 - Prints in one obvious orientation with no supports, or only easy-break supports on faces that do no work.
 - Files open in a slicer (STL) and in Solid Edge Community Edition (STEP).
+- The prong cover presses onto any tabs within the standard by hand, stays on in a bag, and pulls off by hand. It is little bigger than the plug it covers.
 
 ## Key Constraints
 

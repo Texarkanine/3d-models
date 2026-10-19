@@ -1,8 +1,10 @@
 name: H8 H9 H11 H16 Bulb Storage
 description: |
-  Holds a spare headlight bulb by its fins. The head is enclosed. Works with filament and LED bulbs. Fits H8, H9, H11 and H16 bulbs, as they all use the same PGJ19 cap/connector.
+  Holds a spare headlight bulb by its fins with the head enclosed. Works with filament and LED bulbs. Fits H8, H9, H11 and H16 bulbs, as they all use the same PGJ19 cap/connector.
 
   Push the bulb in and twist it, like a headlamp socket. Two springy catches click behind the fins and hold it, so LED bulbs without the halogen's spring clip lock too.
+
+  An optional connector cap keeps dirt out of the bulb's connector. It clicks on like the car's plug and comes off with a firm pull. It is *not* water-tight. You could apply some dielectric grease if you were going to put it into long-term storage & wanted some protection for the pins' metal; a little dab would probably not leak out.
 manufacturing: |
   ### Material
 
@@ -10,7 +12,10 @@ manufacturing: |
 
   ### Printing
 
-  Print as shown - open end down, tube up. No supports needed.
+  Print as shown:
+  
+  + **Cover:** open end down, tube up. No supports needed.
+  + **Connector Cap:** flat back down. No supports needed.
 tags:
   - h8
   - h9
@@ -29,4 +34,6 @@ subcategory_ids:
 files:
   - h11_holder.stl
   - h11_holder.step
+  - h11_prong_cover.stl
+  - h11_prong_cover.step
 cults_creation_id: "Q3JlYXRpb24vaDgtaDktaDExLWgxNi1idWxiLXN0b3JhZ2U"

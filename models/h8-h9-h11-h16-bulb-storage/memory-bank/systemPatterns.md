@@ -31,6 +31,16 @@ Each fact has one home. Sizes and the sources behind them live in the script (it
 
 The holder prints standing on its open end. The wall the fins press against is the first layers on the bed, so that face comes out flat. The slot the fins turn in has a ceiling that slopes at 45 degrees. It must never be a flat ring: nothing holds a flat ring up from below in any orientation.
 
+## The connector cap
+
+`h11_prong_cover.py` builds a separate part that shares no values with the holder. Its coordinates are the connector's: z = 0 at the mouth face, -z into the socket, y along the oval.
+
+- **It clips onto the hooks on the oval's ends**, the ones the standard says hold the car's connector (view a and note 4 of sheet 7004-110-2). Test print 1 hooked only the side bump (view b) with one latch, and the cap flopped. One catch at one side cannot hold a cap square.
+- **The insert fills the socket**, mouth recess and inner cavity, so the cap cannot rock. Test print 1's 4.5 mm plug in the recess alone let it rock. The insert's pin slots stop short of the pins' tips and never touch them. The key slot runs right across the insert, so it takes every type's keys and splits the insert into two towers deep inside.
+- **Each arm is a spring standing on the bed**, fixed at one end with a gap all round, like the holder's catches: it runs up a long side, then curves round an end of the oval to a tooth. The straight run along the side makes the arm softer, so it bends further for the same stress.
+- **The tooth's catch face slopes at 45 degrees**, so it takes up the play from the hooks' tolerance by pulling the cap onto the socket, and a firm pull lifts it out. `CATCH_Z` is set so the face presses even the shallowest hook. On the deepest one it still sits short of the hook's tip. A square face would lock until both arms were prised open.
+- It prints standing on its back face. The arms stand on the bed and bend within the layers. The teeth's catch faces are 45 degree overhangs, and nothing else hangs. Test print 1's plug had a 45 degree underside, printed on its side, and it showed as a diagonal on the part.
+
 ## Why not the old case
 
 The operator's earlier H11 case (someone else's design, not in this repository) taught these limits:

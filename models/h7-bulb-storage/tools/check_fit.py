@@ -1,8 +1,9 @@
-"""Fit checks for the cover and clip: the pass/fail test suite.
+"""Fit checks for the cover, clip and prong cover: the pass/fail test suite.
 
 Builds the cover, the clips and mock bulbs from h7_led_cover.py and checks how
-they meet. Each check prints PASS or FAIL with its numbers; the script exits 1
-if any check fails. Sections are lettered; name some to run only those.
+they meet; section M puts mock tabs in the prong cover from h7_prong_cover.py.
+Each check prints PASS or FAIL with its numbers; the script exits 1 if any
+check fails. Sections are lettered; name some to run only those.
 
 usage: check_fit.py [SECTION ...]   e.g. check_fit.py H J   (default: all)
 """
@@ -14,6 +15,9 @@ SRC = str(__import__("pathlib").Path(__file__).resolve().parent.parent / "h7_led
 spec = importlib.util.spec_from_file_location("h7", SRC)
 h7 = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(h7)
+spec = importlib.util.spec_from_file_location("pc", SRC.replace("h7_led_cover.py", "h7_prong_cover.py"))
+pc = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(pc)
 
 EPS = 1e-3          # mm³; overlaps below this are touching faces, not collisions
 lo, hi = 0.5, 1.0   # the clip band of a PX26d plate, and of the operator's 0.85 mm plate
@@ -285,6 +289,33 @@ def preload():
         check(f"clip {lo_}-{hi_}: each arm presses its far tunnel wall 0.7-0.9 mm", ok, f"preload {got} mm")
         check(f"clip {lo_}-{hi_}: nothing else overlaps", not other, f"other {other}")
         print(f"        (bump corner, rigid printed pose only: {max(corner, default=0):.2f} mm)")
+
+
+# Tabs for the prong cover: width, thickness, centre to centre, length behind the base.
+# Nominal PX26d, the operator's LED plug, and the two extremes the cover allows for;
+# the short one is PX26d's X min of 8.
+TABS = {"nominal 6.3 x 0.8, 11.5 apart": (6.3, 0.8, 11.5, 10.3),
+        "operator's LED 6.2 x 0.8, 11.55 apart": (6.2, 0.8, 11.55, 10.3),
+        "wide 6.4 x 0.84, 11.7 apart": (6.4, 0.84, 11.7, 10.0),
+        "narrow 6.2 x 0.77, 11.3 apart, 8 long": (6.2, 0.77, 11.3, 8.0)}
+
+
+@section("M", "prong cover: only the ridges touch the tabs")
+def prong_cover():
+    cover = pc.cover()
+    near, far = pc.RIDGE_X - pc.RIDGE_W / 2 - 0.05, pc.RIDGE_X + pc.RIDGE_W / 2 + 0.05
+    for name, (w, t, p, length) in TABS.items():
+        tab = cq.Workplane("XY").box(w, t, length, centered=(True, True, False))
+        tabs = tab.translate((0, p / 2, 0)).union(tab.translate((0, -p / 2, 0)))
+        touch = [s.BoundingBox() for s in cover.intersect(tabs).solids().vals()]
+        on_ridges = all(near <= min(abs(b.xmin), abs(b.xmax)) and max(abs(b.xmin), abs(b.xmax)) <= far
+                        for b in touch)
+        check(f"{name}: four contacts, each on a ridge", len(touch) == 4 and on_ridges,
+              f"{len(touch)} contacts, ridges at |x| {near:.2f}-{far:.2f}")
+        # Each ridge sits this far into its tab: how far the tab pushes that spring back.
+        depths = [b.ylen for b in touch] or [0.0]
+        check(f"{name}: each ridge presses 0.1-0.4 mm", 0.1 <= min(depths) and max(depths) <= 0.4,
+              f"{min(depths):.2f}-{max(depths):.2f} mm (SQUEEZE {pc.SQUEEZE})")
 
 
 def main(argv):

@@ -3,6 +3,8 @@ description: |
   Holds a spare H7 bulb by the flange. The head is enclosed, the back of the bulb stays free.
   
   Slide a clip into the slot to hold the bulb securely.
+
+  A prong cover keeps the bulb's two tabs clean and straight. Press it onto the tabs, and pull it off by its sides. It is *not* water-tight. You could apply some dielectric grease if you were going to put it into long-term storage... but because the cavity for the connectors are so small, it would probably get grease all over your pocket, toolgox, or glovebox, etc, if it's going to bump into anything else while stored. So on a shelf? Sure, grease it for maximum storage. As a live spare? Pass.
 manufacturing: |
   ### Material
 
@@ -10,7 +12,11 @@ manufacturing: |
 
   ### Printing
 
-  Print as shown - tube down. No supports needed.
+  Print as shown:
+  
+  + **Cover:** Tube down. No supports needed.
+  + **Clip:** Nubs on the legs up. No supports needed.
+  + **Connector Cap:** Slotted end down. No supports needed.
 
   Several clips are provided for different bulb flange thicknesses. The flange is the thinnest part of the ring around the bulb's base. The thinner your flange, the thicker the clip you'll need. Print the clip labelled with the thickness of your bulb's flange's outer rim.
 
@@ -27,4 +33,6 @@ files:
   - clips/h7_clip_flange_0.5-1.0mm.step
   - clips/h7_clip_flange_1.0-1.5mm.stl
   - clips/h7_clip_flange_1.0-1.5mm.step
+  - h7_prong_cover.stl
+  - h7_prong_cover.step
 cults_creation_id: "Q3JlYXRpb24vaDctYnVsYi1zdG9yYWdl"
