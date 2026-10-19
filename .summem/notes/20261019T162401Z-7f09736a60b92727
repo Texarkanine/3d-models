@@ -1,0 +1,1 @@
+Release-please gives a commit to every package whose path it touches, with every conventional line in its body (2273ffb put 4 lines in both h7 and h11 notes). No scope filter or additional-paths. Empty commits go to all packages; rebase-merge splits files per commit.

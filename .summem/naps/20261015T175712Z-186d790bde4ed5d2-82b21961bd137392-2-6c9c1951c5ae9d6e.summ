@@ -1,1 +1,0 @@
-CadQuery: Workplane.section(z) follows the workplane normal (an XZ revolve slices along y); an area at height z is a thin slab. Shapely polylines bloat STEP and coincident cones are invalid; use true circles and offset touching cones by 0.2.

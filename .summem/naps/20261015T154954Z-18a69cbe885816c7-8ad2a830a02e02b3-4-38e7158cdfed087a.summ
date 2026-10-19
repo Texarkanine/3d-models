@@ -1,0 +1,1 @@
+Model AGENTS.md is on the add-a-model checklist; root README lists no models; don't test Cults User-Agent. CadQuery section(z) follows workplane normal (XZ revolve slices along y). Use true circles, not Shapely polylines; offset touching cones 0.2.
