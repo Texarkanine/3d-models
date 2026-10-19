@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/Texarkanine/3d-models/compare/h7-bulb-storage-v1.0.4...h7-bulb-storage-v1.1.0) (2026-10-19)
+
+
+### Features
+
+* add caps that protect stored bulbs' contacts ([2273ffb](https://github.com/Texarkanine/3d-models/commit/2273ffbb4f3f0b793a469d862fc9094a99666474))
+
 ## [1.0.4](https://github.com/Texarkanine/3d-models/compare/h7-bulb-storage-v1.0.3...h7-bulb-storage-v1.0.4) (2026-10-16)
 
 
