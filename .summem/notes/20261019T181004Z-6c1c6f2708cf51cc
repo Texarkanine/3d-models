@@ -1,0 +1,1 @@
+Cults creationsBatch ids filters on creation.identifier (Creation/<number>), not creation.id (Creation/<slug>). A slug does not filter and returns every design. The 2026-10-15 and 2026-10-19 schemas are identical.

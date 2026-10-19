@@ -1,0 +1,1 @@
+2026-10-19 Cults creationsBatch ids ignores a slug and returns every design; a global id still matches none. creation(slug:) still returns the stored id. Update deploy with limit 1 then sees only the newest design.

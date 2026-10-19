@@ -1,0 +1,1 @@
+Release-please reads BEGIN_COMMIT_OVERRIDE from the merged PR body on each run. A run that already started does not see a later edit; the next push to main does.

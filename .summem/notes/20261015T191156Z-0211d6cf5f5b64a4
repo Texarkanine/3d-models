@@ -1,1 +1,0 @@
-A squash that touches two model directories gives both packages one changelog line: release-please reads only the subject.

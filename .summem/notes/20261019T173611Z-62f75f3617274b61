@@ -1,0 +1,1 @@
+Operator keeps each commit to one model so a release-please changelog does not pick up another model's lines.
