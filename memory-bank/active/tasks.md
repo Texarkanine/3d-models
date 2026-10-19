@@ -8,3 +8,9 @@
 - Why the earlier fixes held: they were checked when the target was the only design, or the newest one.
 - What changed: the asset read and the gallery read page this account's designs and keep the row whose `id` equals the stored `cults_creation_id`. They do not send `ids`. `updateCreation` still receives that stored id.
 - Files: `tools/cults_publish.py`, `tests/test_cults_publish.py`
+
+## QA Results
+
+- Status: PASS
+- Findings: None blocking. `_find_own_row` cleanly pages unfiltered `creationsBatch` results and matches `creation.id` directly, removing `_batch_ids_key` and `ids` filtering without touching `updateCreation` or `publish.yaml`. All 82 catalog tests pass.
+

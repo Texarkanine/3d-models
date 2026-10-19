@@ -28,3 +28,15 @@ An update deploy must select the Cults design whose `creation.id` is the stored 
     - Do not store or send `creation.identifier`
 * Insights
     - `limit: 1` on an unfiltered list made the newest design look like a successful lookup
+
+## 2026-10-19 - QA - COMPLETE
+
+* Work completed
+    - Reviewed `tools/cults_publish.py` and `tests/test_cults_publish.py` against `projectbrief.md` and `tasks.md`
+    - Verified all 82 catalog unit tests pass
+    - Recorded `PASS` in `memory-bank/active/.qa-validation-status`
+* Decisions made
+    - Approved implementation as-is with no blocking or advisory findings
+* Insights
+    - Extracting `_find_own_row` unified pagination for `_listing_assets` and `_gallery_state` while matching the pagination guard used in `_matching_ids`
+
