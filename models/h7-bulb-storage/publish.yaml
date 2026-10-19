@@ -21,7 +21,15 @@ manufacturing: |
   Several clips are provided for different bulb flange thicknesses. The flange is the thinnest part of the ring around the bulb's base. The thinner your flange, the thicker the clip you'll need. Print the clip labelled with the thickness of your bulb's flange's outer rim.
 
   The pictured LED bulbs have an 0.85mm thick flange, so they use the `h7_clip_flange_0.5-1.0mm.stl` clip.
-tags: []
+tags:
+  - h7
+  - px26d
+  - headlight bulb
+  - fog light
+  - led headlight
+  - spare bulb
+  - bulb holder
+  - bulb storage
 license_code: gpl
 category_id: Q2F0ZWdvcnkvMjU
 subcategory_ids:
