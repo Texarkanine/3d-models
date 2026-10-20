@@ -2,5 +2,5 @@
   "models/h7-bulb-storage": "1.1.1",
   "models/fire-extinguisher-rattlinator": "1.0.2",
   "models/h8-h9-h11-h16-bulb-storage": "1.1.0",
-  "models/jerry-can-buffer": "0.0.0"
+  "models/jerry-can-buffer": "1.0.0"
 }
