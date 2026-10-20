@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/Texarkanine/3d-models/compare/h7-bulb-storage-v1.1.0...h7-bulb-storage-v1.1.1) (2026-10-19)
+
+
+### Documentation
+
+* add tags to cults3d listing ([78ee40b](https://github.com/Texarkanine/3d-models/commit/78ee40b4aeef8ebb7e8d618705f69caac46a3278))
+
 ## [1.1.0](https://github.com/Texarkanine/3d-models/compare/h7-bulb-storage-v1.0.4...h7-bulb-storage-v1.1.0) (2026-10-19)
 
 
