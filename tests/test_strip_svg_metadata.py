@@ -2,6 +2,7 @@
 import sys
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -29,6 +30,26 @@ INKSCAPE = """<?xml version="1.0" encoding="UTF-8"?>
   <rect id="r" width="5" height="5" inkscape:label="box" />
 </svg>
 """
+
+COMMENT_AND_ELEMENTS = """<?xml version="1.0" encoding="UTF-8"?>
+<!-- see <metadata> and <sodipodi:namedview> below -->
+<svg xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd">
+  <metadata>hello</metadata>
+  <sodipodi:namedview id="nv"></sodipodi:namedview>
+  <rect width="1" height="1"/>
+</svg>
+"""
+
+COMMENT_ONLY = """<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg">
+  <!-- see <metadata> below -->
+  <rect width="1" height="1"/>
+</svg>
+"""
+
+UNPARSED = COMMENT_AND_ELEMENTS.replace(
+    "<rect", "<text>a&nbsp;b</text>\n  <rect", 1)
 
 
 class StripTests(unittest.TestCase):
@@ -63,6 +84,19 @@ class StripTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             strip(text)
 
+    def test_metadata_mentioned_in_a_comment_stays_in_the_comment(self):
+        ET.fromstring(COMMENT_AND_ELEMENTS.encode("utf-8"))
+        result = strip(COMMENT_AND_ELEMENTS)
+        self.assertIn("<!-- see <metadata> and <sodipodi:namedview> below -->", result)
+        self.assertNotIn(">hello</metadata>", result)
+        self.assertNotIn('id="nv"', result)
+        self.assertIn("<svg", result)
+        self.assertIn("<rect", result)
+        ET.fromstring(result.encode("utf-8"))
+
+    def test_comment_only_mention_is_unchanged(self):
+        self.assertEqual(strip(COMMENT_ONLY), COMMENT_ONLY)
+
 
 class MainTests(unittest.TestCase):
     def test_files_are_rewritten_in_place(self):
@@ -83,6 +117,22 @@ class MainTests(unittest.TestCase):
             self.assertEqual(main([str(bad), str(good)]), 1)
             self.assertEqual(bad.read_text(encoding="utf-8"), text)
             self.assertEqual(good.read_text(encoding="utf-8"), strip(INKSCAPE))
+
+    def test_unparsed_file_is_not_written(self):
+        with self.assertRaises(ValueError):
+            strip(UNPARSED)
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "a.svg"
+            path.write_text(UNPARSED, encoding="utf-8")
+            self.assertEqual(main([str(path)]), 1)
+            self.assertEqual(path.read_text(encoding="utf-8"), UNPARSED)
+
+    def test_empty_file_is_not_written(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "a.svg"
+            path.write_text("", encoding="utf-8")
+            self.assertEqual(main([str(path)]), 1)
+            self.assertEqual(path.read_text(encoding="utf-8"), "")
 
 
 if __name__ == "__main__":

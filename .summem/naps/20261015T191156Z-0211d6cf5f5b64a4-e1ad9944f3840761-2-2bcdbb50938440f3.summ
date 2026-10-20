@@ -1,1 +1,0 @@
-Commit touching two models lands in both changelogs. Cults URL tail is the creation-time title slug; a later title can diverge. Publisher matches the exact name, so a versioned title with a blank cults_creation_id opens a second listing. Keep the version in the description.
