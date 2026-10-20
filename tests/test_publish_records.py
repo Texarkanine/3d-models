@@ -11,6 +11,7 @@ COMPONENTS = (
     "h7-bulb-storage",
     "fire-extinguisher-rattlinator",
     "h8-h9-h11-h16-bulb-storage",
+    "jerry-can-buffer",
 )
 
 

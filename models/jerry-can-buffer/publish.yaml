@@ -1,0 +1,45 @@
+name: Jerry Can Cage Bumper
+description: |
+  Bumpers that slip onto the frame of a metal jerry can cage/holder to cushion the can and prevent metal-on-metal contact.
+
+  The model is 1 inch long, intended to be stretched along the length to fit the frame of *your* jerry can holder. For my cage, I found the following worked:
+
+  | Quantity | Length (in) | Length (mm) |
+  |----------|-------------|-------------|
+  | 4        | 1 5/8       | 41.3        |
+  | 4        | 1 7/8       | 47.6        |
+  | 4        | 5           | 127         |
+
+  You can print more or fewer, as needed. You can pretty easily cut a longer piece down to a smaller size. You can combine multiple smaller pieces to fill a single larger length.
+
+  Fits around jerry can cages whose frames' cross-sections are 1" high x 3/32" thick. You have some leeway on thickness but not on height.
+manufacturing: |
+  
+  ### Material
+
+  TPU 90 or softer (required).
+
+  TPU 95 will probably be too difficult to attach, and risk cracking around bends.
+
+  ### Printing
+
+  **If your print bed moves along the X or Y axis,** (a.k.a. a "bed-slinger" such as an Ender 3 or Prusa MK4), then align the long part of the model's contact with the bed with the motion of the bed (see attached photos), so that tall prints have a reduced chance of falling over.
+
+  Otherwise, print as shown - vertically.
+
+  I would recommend dialing in your TPU print settings - including, if you have a bed-slinger, **bed adhesion** so tall variants don't fall over - before printing a full set.
+tags:
+  - gas can
+  - jerry can
+  - jerry can buffer
+  - jerry can bumper
+  - overlanding
+  - off-road
+license_code: gpl
+category_id: Q2F0ZWdvcnkvMjU
+subcategory_ids:
+  - Q2F0ZWdvcnkvODY
+files:
+  - jerry-can-buffer.stl
+  - jerry-can-buffer.step
+cults_creation_id:
