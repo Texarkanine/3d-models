@@ -37,3 +37,12 @@ The comment mask must ignore a `<!--` that is not a real comment, inside CDATA o
 * Insights
     - Matching CDATA and processing instructions ahead of comments in a single regex alternation keeps the comment masker non-overlapping and simple without affecting literal tag handling inside CDATA.
 
+## 2026-10-20 - PUSH - COMPLETE
+
+* Work completed
+    - Pushed `fix-svg-stripper-comments` (`6177502..dfe4305`).
+* Decisions made
+    - This task does not update the devblog copy of the stripper.
+* Insights
+    - A reader who copies the reprint post's file still gets the mask that can hide a real metadata element.
+
