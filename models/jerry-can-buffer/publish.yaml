@@ -23,10 +23,11 @@ manufacturing: |
 
   ### Printing
 
-  **If your print bed moves along the X or Y axis,** (a.k.a. a "bed-slinger" such as an Ender 3 or Prusa MK4), then align the long part of the model's contact with the bed with the motion of the bed, so that tall prints have a reduced chance of falling over. See Xth picture.
+  **If your print bed moves along the X or Y axis,** (a.k.a. a "bed-slinger" such as an Ender 3 or Prusa MK4), then align the long part of the model's contact with the bed with the motion of the bed (see attached photos), so that tall prints have a reduced chance of falling over.
 
   Otherwise, print as shown - vertically.
 
+  I would recommend dialing in your TPU print settings - including, if you have a bed-slinger, **bed adhesion** so tall variants don't fall over - before printing a full set.
 tags:
   - gas can
   - jerry can
