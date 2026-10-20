@@ -1,0 +1,1 @@
+tools/strip_svg_metadata.py copies CDATA and processing instructions through the comment mask, so a <!-- inside them cannot hide metadata. The devblog copy is behind until the reprint post is updated.

@@ -26,3 +26,14 @@ The comment mask must ignore a `<!--` that is not a real comment, inside CDATA o
     - Literal tag text inside CDATA is still visible to the element patterns.
 * Insights
     - The CDATA case rewrites the file and would have exited 0 with `<metadata>` still present. The processing-instruction case returned the original text, metadata included.
+
+## 2026-10-20 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed `tools/strip_svg_metadata.py` and `tests/test_strip_svg_metadata.py` against `projectbrief.md` and `tasks.md`.
+    - Recorded QA validation status in `memory-bank/active/.qa-validation-status`.
+* Decisions made
+    - Approved implementation as-is (PASS) with no blocking or advisory findings.
+* Insights
+    - Matching CDATA and processing instructions ahead of comments in a single regex alternation keeps the comment masker non-overlapping and simple without affecting literal tag handling inside CDATA.
+

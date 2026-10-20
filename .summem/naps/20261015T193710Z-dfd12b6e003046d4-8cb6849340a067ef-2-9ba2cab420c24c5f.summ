@@ -1,0 +1,1 @@
+Cults schema lives at https://cults3d.com/graphiql. Unauthenticated POST /graphql is HTTP 401 Basic; a Discord writeup is not the schema. Changelog URL is models/<component>/CHANGELOG.md, with {version} and {changelog_url} interpolated.
