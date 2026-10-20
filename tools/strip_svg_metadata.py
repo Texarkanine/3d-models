@@ -8,19 +8,29 @@ _ELEMENTS = [
     for name in ("metadata", "sodipodi:namedview")
 ]
 _ATTRIBUTE = re.compile(r"""\s+(?:inkscape|sodipodi):[\w.-]+\s*=\s*(?:"[^"]*"|'[^']*')""")
-_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
+_LITERAL_OR_COMMENT = re.compile(
+    r"<!\[CDATA\[.*?\]\]>|<\?.*?\?>|<!--.*?-->",
+    re.DOTALL,
+)
 _COMMENT_TOKEN = "\x00COMMENT{}END\x00"
 
 
 def _mask_comments(text):
-    """Replace each complete comment with a token so tag patterns cannot see inside it."""
+    """Replace each complete comment with a token so tag patterns cannot see inside it.
+
+    CDATA and processing instructions are matched first and copied through, so a
+    <!-- that begins inside them is not a comment and cannot hide a later element.
+    """
     comments = []
 
     def hold(match):
-        comments.append(match.group(0))
+        token = match.group(0)
+        if not token.startswith("<!--"):
+            return token
+        comments.append(token)
         return _COMMENT_TOKEN.format(len(comments) - 1)
 
-    return _COMMENT.sub(hold, text), comments
+    return _LITERAL_OR_COMMENT.sub(hold, text), comments
 
 
 def _restore_comments(text, comments):
@@ -35,6 +45,7 @@ def strip(text):
 
     Everything else, including comments, <title>, and <desc>, is unchanged.
     Tags named inside a comment stay in that comment.
+    A <!-- inside CDATA or a processing instruction is not a comment.
     Raise ValueError when text does not parse, or when stripping would leave
     text that does not parse.
     """

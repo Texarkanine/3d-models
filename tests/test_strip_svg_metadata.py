@@ -48,6 +48,20 @@ COMMENT_ONLY = """<?xml version="1.0" encoding="UTF-8"?>
 </svg>
 """
 
+CDATA_COMMENT_START = """<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" inkscape:export-filename="/home/someone/a.png">
+<text><![CDATA[<!--]]></text>
+<metadata>Someone</metadata>
+<!-- note -->
+</svg>
+"""
+
+PI_COMMENT_START = """<svg xmlns="http://www.w3.org/2000/svg">
+<?note <!-- ?>
+<metadata>Someone</metadata>
+<!-- note -->
+</svg>
+"""
+
 UNPARSED = COMMENT_AND_ELEMENTS.replace(
     "<rect", "<text>a&nbsp;b</text>\n  <rect", 1)
 
@@ -96,6 +110,21 @@ class StripTests(unittest.TestCase):
 
     def test_comment_only_mention_is_unchanged(self):
         self.assertEqual(strip(COMMENT_ONLY), COMMENT_ONLY)
+
+    def test_comment_start_inside_cdata_does_not_hide_metadata(self):
+        result = strip(CDATA_COMMENT_START)
+        self.assertNotIn("export-filename", result)
+        self.assertNotIn("<metadata>", result)
+        self.assertIn("<![CDATA[<!--]]>", result)
+        self.assertIn("<!-- note -->", result)
+        ET.fromstring(result.encode("utf-8"))
+
+    def test_comment_start_inside_a_processing_instruction_does_not_hide_metadata(self):
+        result = strip(PI_COMMENT_START)
+        self.assertNotIn("<metadata>", result)
+        self.assertIn("<?note <!-- ?>", result)
+        self.assertIn("<!-- note -->", result)
+        ET.fromstring(result.encode("utf-8"))
 
 
 class MainTests(unittest.TestCase):

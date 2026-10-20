@@ -1,11 +1,12 @@
 # Active Context
 
 ## Current Task: svg-comment-mask
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
 - Classified the approved fix as Level 1: one bug in `tools/strip_svg_metadata.py`, isolated to the comment mask.
-- The false `<!--` is inside CDATA in the review comment, and inside a processing instruction in the same matcher.
+- A `<!--` inside CDATA or a processing instruction is copied through. A real `<metadata>` element after it is removed.
+- Two new tests failed on the old mask and pass now. Full suite: 88 tests, OK.
 
 ## Next Step
-- Load the Level 1 workflow and enter Build.
+- Level 1 QA.

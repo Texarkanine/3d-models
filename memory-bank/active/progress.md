@@ -14,3 +14,15 @@ The comment mask must ignore a `<!--` that is not a real comment, inside CDATA o
     - Literal tag text inside CDATA stays out of this fix.
 * Insights
     - The mask this branch added is what hides the metadata element. The element pattern still matches `<metadata>` when that span is not masked.
+
+## 2026-10-20 - BUILD - COMPLETE
+
+* Work completed
+    - Added failing tests for a `<!--` inside CDATA and inside a processing instruction.
+    - Matched CDATA and processing instructions before comments and copied those spans through.
+    - Full suite: 88 tests, OK.
+* Decisions made
+    - One pattern matches CDATA, processing instructions, and comments. Only a match that starts with `<!--` is masked.
+    - Literal tag text inside CDATA is still visible to the element patterns.
+* Insights
+    - The CDATA case rewrites the file and would have exited 0 with `<metadata>` still present. The processing-instruction case returned the original text, metadata included.
