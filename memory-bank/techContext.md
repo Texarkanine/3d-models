@@ -5,7 +5,7 @@ The catalog has no CAD toolchain. Each model directory documents its own in that
 ## Environment Setup
 
 - Git. GitHub Actions runs release-please. No local dependency install is required to cut a release.
-- Run `uvx pre-commit install` once per clone. The pre-commit hook strips metadata from staged images: ExifTool for raster formats and `tools/strip_svg_metadata.py` for SVG. ExifTool is built from CPAN on first use, so Perl and `cpan` must be on `PATH`. A commit whose images the hook rewrites stops once; stage the rewritten files and commit again.
+- Run `uv tool install pre-commit` once per machine (or `pipx install pre-commit`), then `pre-commit install` once per clone. The pre-commit hook strips metadata from staged images: ExifTool for raster formats and `tools/strip_svg_metadata.py` for SVG. ExifTool is built from CPAN on first use, so Perl and `cpan` must be on `PATH`. A commit whose images the hook rewrites stops once; stage the rewritten files and commit again.
 - The Cults API key will be a GitHub Actions secret. It is not stored in the repository. `author.yaml` holds the Cults nickname, locale, `made_with_ai`, and the shared description boilerplate.
 
 ## Build Tools

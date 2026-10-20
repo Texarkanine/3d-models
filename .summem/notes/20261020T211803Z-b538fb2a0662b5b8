@@ -1,0 +1,1 @@
+tools/strip_svg_metadata.py refuses unparsed SVG and ignores tags inside comments, same bytes as the devblog copy. The reprint post tells readers to copy this file.

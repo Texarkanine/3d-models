@@ -1,1 +1,0 @@
-Issues: #11 move models under models/ first. #12 then interpolates {version} and {changelog_url} in the Cults boilerplate. Changelog URL uses models/<component>/CHANGELOG.md.
