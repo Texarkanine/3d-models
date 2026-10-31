@@ -22,7 +22,7 @@ Design and publish-ready a slide-on TPU 95A grip for the curved handle of a Comm
 * Work completed
     - Compared a plain interference bore, longitudinal crush ribs, circumferential rings, and a clearance bore with glue.
 * Decisions made
-    - Longitudinal crush ribs on a clearance bore with relieved corners. Two ribs per face sit near the corners, clear of the holes and the insert. The valleys carry glue and let air out. W bites harder than T. The fit test tunes `BORE_CLEAR` and the bites.
+    - Longitudinal crush ribs on a clearance bore whose corners clear the steel. Two ribs per face sit near the corners, clear of the holes and the insert. The valleys carry glue and let air out. W bites harder than T. The fit test tunes `BORE_CLEAR` and the bites.
 * Insights
     - The steel's W taper keeps the W ribs from biting until the last few millimetres. T barely tapers, so T contact rubs the whole way and must stay light.
 
@@ -35,3 +35,17 @@ Design and publish-ready a slide-on TPU 95A grip for the curved handle of a Comm
 * Insights
     - An ellipse around a rectangular steel needs too much wall to clear the corners, and breaks the 5 mm convex limit at B.
     - The closing gap was measured only at B. Constant walls keep the closest approach at B, so no shape rests on a gap nobody measured.
+
+## 2026-10-31 - PLAN - COMPLETE
+
+* Work completed
+    - Component analysis, test plan (check_fit sections A to E plus the catalog record test), 7-step implementation plan, challenges and pre-mortem.
+    - Technology validation: a CadQuery loft of rounded-rectangle sections along a quartic centre line, with a lofted ribbed bore. Result: a valid single solid in 2.7 s, a watertight STL, standing on z = 0.
+* Decisions made
+    - `steel.py` (pure Python) holds the measured steel as a `Handle`. `grips.py` builds from any `Handle`, so the straight grip reuses it. `reduce_curve.py` is folded into `steel.py` and check_fit section A.
+    - The centre line is a quartic least-squares fit (worst residual 0.08 mm). A is placed so the chord from A to B is the measured 83.15.
+    - The bore's closed end is a gable computed from the tip's lean, so both faces are at least 45 degrees in print.
+    - Ship a fit test: the grip's first `FIT_LEN` mm.
+* Insights
+    - The grip is symmetric in both W and T, so a mirrored tracing cannot matter.
+    - The fit test proves only the open end. The full grip is the test of the curve.

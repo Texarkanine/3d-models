@@ -50,7 +50,7 @@ All walls are measured from the steel face, so changing the bore clearance or ri
 
 - `WALL_SIDE` 3.8: the walls in the plane of the handles, on the convex and concave sides.
 - `WALL_FACE` 2.5: the walls across the plane, on the faces with the holes.
-- `CORNER_R` 5.0: outside corner radius. Assert at least 2 mm of material over each relieved bore corner.
+- `CORNER_R` 5.0: outside corner radius. Assert at least 2 mm of material over each bore corner.
 - `FLARE` 1.0 per side, over the last `FLARE_LEN` 5.0 mm at the open end, widest at the open end. Assert that the convex wall at B, `WALL_SIDE + FLARE`, is at most 5.0.
 - **Closed end:** domed. The sections shrink over the last few millimetres along a quarter-circle law. The dome is built from lofted sections rather than a fillet, because fillets on lofted B-spline faces are unreliable in OpenCascade. The cap stays at least `END` 3.0 thick over the peak of the bore's roof.
 - **Construction:** loft the outside sections along the same centre line as the bore, then subtract the bore with its ribs.

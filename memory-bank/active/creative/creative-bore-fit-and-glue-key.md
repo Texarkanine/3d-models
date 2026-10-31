@@ -34,7 +34,7 @@
 | Glue surface after smoothing | Only from the added grooves | Built in: 0.3 mm valleys along the full length | Built in | Built in |
 | Glue and air escape while sliding on | Poor | Good: the valleys vent along the length | Poor: each ring traps glue | Good |
 | Prints standing up | Fine | Fine: ribs are vertical walls | Each groove roof is an overhang, tilted up to 15 degrees by the curve | Fine |
-| Insert or corner unknowns | Corners bind | Corners relieved, ribs sit on firm steel near the corners | Corners bind | Not affected |
+| Insert or corner unknowns | Corners bind | Corners clear, ribs sit on firm steel near the corners | Corners bind | Not affected |
 | Tuning after a fit test | One number, but sensitive | Two numbers (clearance, rib reach), forgiving | Several | Not applicable |
 
 Key insights:
@@ -54,8 +54,8 @@ Key insights:
 ## Implementation Notes
 
 - **Bore outline:** the steel's W(s) × T(s) rectangle plus a clearance `BORE_CLEAR` on each side (starting value 0.3), following the centre line.
-- **Corners:** relieved with a radius larger than any likely steel bend, so a corner never bears.
-- **Ribs:** two on each of the four faces, each sitting `RIB_INSET` from its corner, past the corner relief. On the faces with holes, they stay clear of a 3 mm hole on the centre line, even at W ≈ 6.3 near A.
+- **Corners:** the bore's corners stay tight, so even a sharp steel corner clears them. A rounded bore corner of radius r leaves r − √2(r − c) at the diagonal, where c is the clearance. Keep the radius at most 0.5 with c = 0.3, which leaves at least 0.2, and assert at least 0.15. Correction, 2026-10-31: an earlier note said to round the corners large. That pushes the bore into the steel's corner instead of clearing it.
+- **Ribs:** two on each of the four faces, each sitting `RIB_INSET` from its corner (start at 1.5, so a rib bears on the flat even if the steel's bend radius is about 1). On the faces with holes, they stay clear of a 3 mm hole on the centre line, even at W ≈ 6.3 near A.
 - **Rib profile:** a trapezoid, about 1.2 mm at the base and 0.5 mm at the tip.
 - **Rib reach:** the ribs reach past the steel face by an interference set separately for each direction. Start with `RIB_BITE_W` 0.3 and `RIB_BITE_T` 0.15 per side; T is lighter because it rubs the whole length.
 - **Rib ends:** the ribs run from the open end to just short of the bore's closed end, and are cut square there.
