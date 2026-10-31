@@ -9,7 +9,7 @@ corners, flared a little at the open end and domed at the closed end.
 Inside: the bore is the steel plus BORE_CLEAR on every side, with tight
 corners so even a sharp steel corner clears it. Eight lengthwise ribs, two
 on each face near the corners, reach RIB_BITE past the steel's face. They
-locate the grip on the steel. The 0.3 mm valleys between them give glue
+locate the grip on the steel. The valleys between them, BORE_CLEAR deep, give glue
 something to fill and key into, and they stay there if the outside is
 vapor-smoothed. Glue and air escape along the valleys when you push the grip
 on. The ribs are glue keys, not crush ribs: test prints decide whether the grip
@@ -83,7 +83,7 @@ def rrect(plane, w, t, r, du=0.0):
     return wire.fillet2D(r, wire.Vertices())
 
 
-def stations(start, stop, step=SECTION_STEP):
+def loft_positions(start, stop, step=SECTION_STEP):
     """Evenly spaced s values from start to stop, inclusive, no gap over step."""
     n = max(1, math.ceil(abs(stop - start) / step))
     return [start + (stop - start) * k / n for k in range(n + 1)]
@@ -92,7 +92,7 @@ def stations(start, stop, step=SECTION_STEP):
 def steel_solid(h):
     """Mock bare steel from A to B: sharp W x T rectangles along the centre line."""
     secs = [cq.Workplane(section_plane(h, s)).rect(h.width(s), h.thickness(s)).val()
-            for s in stations(h.length, 0.0)]
+            for s in loft_positions(h.length, 0.0)]
     return cq.Solid.makeLoft(secs)
 
 
@@ -120,7 +120,7 @@ def bore(h):
     """The cavity: steel plus BORE_CLEAR from B to END_CLEAR past A, then the roof."""
     secs = [rrect(section_plane(h, s), h.width(s) + 2 * BORE_CLEAR,
                   h.thickness(s) + 2 * BORE_CLEAR, BORE_CORNER_R)
-            for s in stations(h.length, -END_CLEAR)]
+            for s in loft_positions(h.length, -END_CLEAR)]
     body = cq.Solid.makeLoft(secs)
     r, _ = roof(h)
     end = section_plane(h, -END_CLEAR)
@@ -145,7 +145,7 @@ def rib_wire(plane, u, v, du, dv, height):
 
 def ribs(h):
     """Eight lengthwise ribs from B to A, fading into the wall over END_CLEAR past A."""
-    ss = stations(h.length, 0.0) + [-END_CLEAR]
+    ss = loft_positions(h.length, 0.0) + [-END_CLEAR]
     out = []
     for side in (1, -1):
         for off in (1, -1):
@@ -178,7 +178,7 @@ def outside(h):
     for k in range(4):                          # flare: quadratic, smooth into the body
         d = FLARE_LEN * k / 4
         add(h.length - d, FLARE * (1 - d / FLARE_LEN) ** 2)
-    for s in stations(h.length - FLARE_LEN, s_dome):
+    for s in loft_positions(h.length - FLARE_LEN, s_dome):
         add(s, 0.0)
     for deg in (20, 38, 54, 67, 78, 90):       # dome: quarter circle of radius DOME_LEN
         phi = math.radians(deg)
@@ -238,10 +238,11 @@ def check_design(h):
 
 def sizes(h, printed):
     gap, wall = check_design(h)
-    bb = printed.BoundingBox()
+    verts, _ = printed.tessellate(0.01, 0.1)   # BoundingBox() is loose on lofted faces
+    span = [max(getattr(v, a) for v in verts) - min(getattr(v, a) for v in verts) for a in "xyz"]
     L = h.length
-    print(f"{h.name} grip: {bb.zlen:.1f} tall standing up, footprint {bb.xlen:.1f} x {bb.ylen:.1f}, "
-          f"volume {printed.Volume() / 1000:.1f} cm3")
+    print(f"{h.name} grip: stands {span[2]:.1f} tall on its open end; leaning, it spans "
+          f"{span[0]:.1f} x {span[1]:.1f}; volume {printed.Volume() / 1000:.1f} cm3")
     for name, s, grow in (("open end (B)", L, FLARE), ("body near B", L - FLARE_LEN, 0.0),
                           ("at A", 0.0, 0.0)):
         w, t = h.width(s), h.thickness(s)

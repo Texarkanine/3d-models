@@ -12,7 +12,7 @@ Parametric CAD in Python with CadQuery (OpenCascade kernel), as in the bulb stor
 - `python grips.py` regenerates `curved_grip` and `curved_grip_fit_test` (`.step` and `.stl`) in place, standing on the open end, and prints the main sizes. It takes about 15 seconds. Outputs are committed; regenerate and commit them with any change to `grips.py` or `steel.py`. Each run rewrites STEP headers (a timestamp); if a STEP file's only changes are in its header, restore it rather than commit it.
 - `python steel.py` prints the centre line's fit to the tracing, the traced widths against the caliper widths, each station's chord and arc position, and W and T at A, the holes and B.
 - `python tools/plot_curve.py` redraws `reference/curve-rebuilt.png` from `steel.py`, to compare with the tracing photo.
-- Lofts: the bore and the outside are smooth lofts through cross-sections square to the centre line, every `SECTION_STEP` or less. The ribs and the roof are ruled lofts; a smooth loft overshoots where a rib fades out. `Wire.fillet2D` needs every corner radius under half the shorter side; `grips.rrect` caps it at 0.45 of it.
+- Lofts: the bore and the outside are smooth lofts through cross-sections square to the centre line, every `SECTION_STEP` or less. The ribs and the roof are ruled lofts; a smooth loft overshoots where a rib fades out. `Wire.fillet2D` needs every corner radius under half the shorter side; `grips.rrect` caps it below that, so sections that shrink (the dome) keep a valid radius.
 
 ## Testing Process
 

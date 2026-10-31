@@ -282,8 +282,8 @@ The geometry, the `steel.py` maths (polyfit, arc length, chord conversion, roof 
 
 ### Blocking: Build must rerun to fix
 
-- [ ] Q1. `M/README.md` repeats `FIT_LEN`: "The fit test is the grip's first 15 mm". Say what the fit test is without the number, as the h11 README does ("the open end alone"). Source of the norm: the root SumMem note of 2026-10-16 ("A model README only orients source readers … Copies drift, and the operator will not maintain them"), and the h7/h11 rule that the README "never needs updating when a parameter changes".
-- [ ] Q2. `M/memory-bank/systemPatterns.md` copies the tunable `grips.py` values in parentheses and in prose:
+- [x] Q1. (Fixed in build rework: "the open end alone".) `M/README.md` repeats `FIT_LEN`: "The fit test is the grip's first 15 mm". Say what the fit test is without the number, as the h11 README does ("the open end alone"). Source of the norm: the root SumMem note of 2026-10-16 ("A model README only orients source readers … Copies drift, and the operator will not maintain them"), and the h7/h11 rule that the README "never needs updating when a parameter changes".
+- [x] Q2. (Fixed in build rework: parameters named, values left in `grips.py`; measured limits and assertion thresholds kept.) `M/memory-bank/systemPatterns.md` copies the tunable `grips.py` values in parentheses and in prose:
   - `BORE_CLEAR` (0.3), corner radius 0.5, "clears it by 0.2", `RIB_BITE` (0.1), "0.3 valleys";
   - `RIB_INSET` (1.5), `END_CLEAR` (1.0), `WALL_SIDE` (3.8), `WALL_FACE` (2.5), `CORNER_R` (4.8);
   - `FLARE` (1.0), `FLARE_LEN` (5), "wall at B is therefore 4.8", `DOME_LEN` (5), `ROOF_ANGLE` (50 degrees), "0.2 mm ridge", `FIT_LEN` 15 mm.
@@ -314,4 +314,4 @@ The geometry, the `steel.py` maths (polyfit, arc length, chord conversion, roof 
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA: run 1 FAIL (fixable). Rerun Build for Q1 and Q2 (docs only), then QA again.
+- [ ] QA: run 1 FAIL (fixable). Build rework fixed Q1, Q2, A-1, A-2, A-6 and the scratch run line; QA run 2 pending.

@@ -96,3 +96,16 @@ Design and publish-ready a slide-on TPU 95A grip for the curved handle of a Comm
     - Geometry, maths and print orientation are accepted as they are. Six non-blocking advisories are in `tasks.md`, among them the misleading "footprint" in `sizes()` and the `stations` naming overload.
 * Insights
     - The operator has said these values will be tuned after each test print. Copies of them in prose go stale at the first retune, which is why the one-home rule exists.
+
+## 2026-10-31 - BUILD (QA rework) - COMPLETE
+
+* Work completed
+    - Q1: the README describes the fit test as "the open end alone", without its length.
+    - Q2: `systemPatterns.md` rewritten so that each fact has one home. It names parameters and keeps the reasoning, the measured limits (the 9 mm gap, the 5 mm wall at B) and the assertion thresholds. The values stay in `grips.py`, and the readings in `steel.py`.
+    - A-1: `sizes()` measures the tessellated part, not the loose bounding box. It reports the height as 92.3 and labels the leaning part's span as a span, not a footprint.
+    - A-2: `grips.stations()` renamed `loft_positions()`. A-6: the docstring says the valleys are `BORE_CLEAR` deep. The scratch `verify.py` run line now lists every package it needs.
+    - Rebuild: STLs byte-identical, STEP header-only changes restored; catalog suite 88 OK.
+* Decisions made
+    - A-3 (keep `steel_solid`) and A-5 (`publish.yaml` files stay open) unchanged, per QA and the operator. A-4 (ribs may cross a hole's edge) goes to the reflection.
+* Insights
+    - CadQuery's `BoundingBox()` on lofted B-spline faces is loose by about 0.3 mm. Measure sizes from a tessellation.

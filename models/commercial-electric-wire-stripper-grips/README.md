@@ -8,7 +8,7 @@ Replacement grips for a Commercial Electric wire stripper and crimper whose rubb
 | --- | --- |
 | `steel.py` | The measured bare steel: the operator's readings, and the centre line, width and thickness that the grips are built around. |
 | `grips.py` | CadQuery source. Every design dimension is set here. The docstring explains how a grip works and prints. |
-| `curved_grip.*`, `curved_grip_fit_test.*` | Files the script makes, standing on the open end. They are committed so people can print without Python. The fit test is the grip's first 15 mm, a quick print to check the bore on the steel. |
+| `curved_grip.*`, `curved_grip_fit_test.*` | Files the script makes, standing on the open end. They are committed so people can print without Python. The fit test is the open end alone, a quick print to check the bore on the steel. |
 | `reference/` | The dated measurement log, its photos, and the curve rebuilt from the tracing. |
 | `tools/` | `plot_curve.py` redraws `reference/curve-rebuilt.png`; `overhang.py` lists faces that need support. |
 | `publish.yaml` | The Cults listing. |
