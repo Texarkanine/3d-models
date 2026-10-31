@@ -2,6 +2,8 @@
 
 The operator took these on their own tool on 2026-10-31, with calipers, a ruler and a pencil tracing. All sizes are in millimetres. The letters are defined in `../memory-bank/systemPatterns.md`.
 
+This file is a dated log: add new readings as new dated entries rather than editing old ones. The values the model uses live in `../steel.py`. Distances "from A" were measured straight from A; `steel.py` converts them to distances along the curve.
+
 Material: TPU 95A. The old rubber grips were fairly firm.
 
 ## Curved handle, bare steel

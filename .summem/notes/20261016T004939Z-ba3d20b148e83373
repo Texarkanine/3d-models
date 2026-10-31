@@ -1,1 +1,0 @@
-Cults creationsBatch ids matches the slug, not the stored global id. A global id decodes to Creation/<slug>. The returned row id stays the global id.

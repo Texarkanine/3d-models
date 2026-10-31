@@ -61,3 +61,19 @@ Design and publish-ready a slide-on TPU 95A grip for the curved handle of a Comm
     - The bore cannot slide along the steel as a rigid copy, because the curve is not uniform (radius about 175 mm in the middle, nearly straight at both ends). With the grip settled in its best pose, the W ribs rub over about the last 27 mm of travel, never harder than when seated, and the bore walls never touch the steel.
     - The ribs bite along the whole grip, so the full grip needs about 83/FIT_LEN times the fit test's force to seat and hold. A fit test that feels tight predicts a grip that will not go on by hand.
     - At D2 the rib tip clears the hole by only about 0.08 mm on the mock, which is less than the uncertainty in W there. The creative doc's claim that the ribs clear the hole "even at W 6.3" is wrong.
+
+## 2026-10-31 - BUILD - COMPLETE
+
+* Work completed
+    - `steel.py` (the measured steel as a `Handle`), `grips.py` (bore, gable roof, glue-key ribs, flared and domed outside, print transform, fit test), `README.md`, and `tools/overhang.py`. `plot_curve.py` now draws from `steel.py`; `reduce_curve.py` is gone.
+    - Outputs: `curved_grip` and `curved_grip_fit_test`, as STEP and STL, standing on the open end. Grip: 92.6 tall, 19.3 × 21.3 at the open end, 14.9 cm³.
+    - Ad hoc verification in `.scratch/wirestripper-grip/` (`verify.py`, `render.py`): every check passes; details in `activeContext.md`.
+* Decisions made
+    - Operator direction at build: no `publish.yaml` changes, the ribs are glue keys, and no committed tests while the shape is prototyped. Plan step 5 and `check_fit.py` were dropped.
+    - Readings from A are chords, converted to arc length. The open end is at s = 83.58.
+    - One light rib bite (0.1). `CORNER_R` is 4.8, keeping 2 mm over each bore corner. `END_CLEAR` is 1.0, `FIT_LEN` 15.
+    - The bore's gable roof is computed in print orientation. The dome starts at the ridge's height.
+* Insights
+    - CadQuery's smooth loft overshoots where a section changes quickly: a rib fading out over 1 mm bit 0.18 instead of 0.10. Ruled lofts follow the sections exactly, and with sections 4 mm apart on a 175 mm radius they stray only about 0.01.
+    - If the dome starts at the bore's end, the T wall at the roof's ridge thins to about 1.3. Starting it at the ridge's height keeps the body's 2.2.
+    - W at B is the biggest unknown: 9.7 from the calipers against 10.25 from the tracing. The fit test will show which is right.

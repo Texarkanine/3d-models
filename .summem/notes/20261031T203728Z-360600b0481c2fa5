@@ -1,0 +1,1 @@
+CadQuery smooth makeLoft overshoots where sections change fast (a rib fading out over 1 mm bit 0.18 for 0.10); loft such features ruled=True. Wire.fillet2D needs r under half the shorter side, so shrinking sections need capped radii.

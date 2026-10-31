@@ -263,8 +263,8 @@ The operator's direction at `/niko-build` overrides the plan where they differ:
 - [x] 4. Outputs `curved_grip.{step,stl}` and `curved_grip_fit_test.{step,stl}`. `tools/overhang.py` is copied from h11.
 - [x] Ad hoc verification (`.scratch/wirestripper-grip/verify.py`, `render.py`): every check passes. Overhang: only the 0.2 mm roof ridge (2.9 mm²).
 - [~] 5. `publish.yaml`: dropped by the operator.
-- [ ] 6. Docs: README, systemPatterns, techContext, measurements.
-- [ ] 7. Final verification: catalog suite, rebuild, STEP header churn, commit.
+- [x] 6. Docs: README (new), systemPatterns, techContext, and measurements.md (now a dated log; `steel.py` holds the values).
+- [x] 7. Final verification: catalog suite 88 OK. A rebuild reproduces the committed STLs byte for byte; the STEP changes were header-only and were restored.
 
 ## Status
 
@@ -274,6 +274,6 @@ The operator's direction at `/niko-build` overrides the plan where they differ:
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
-- [ ] Build
+- [x] Preflight
+- [x] Build
 - [ ] QA

@@ -1,0 +1,1 @@
+Cults: updateCreation has no file/image URLs; add via createBlueprint/createIllustration(creationId, url), remove via destroyBlueprint/destroyIllustration(id). creation() takes a slug; myself.creationsBatch ids match the slug (global id = Creation/<slug>); rows return global id.
