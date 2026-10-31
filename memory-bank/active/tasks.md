@@ -266,6 +266,44 @@ The operator's direction at `/niko-build` overrides the plan where they differ:
 - [x] 6. Docs: README (new), systemPatterns, techContext, and measurements.md (now a dated log; `steel.py` holds the values).
 - [x] 7. Final verification: catalog suite 88 OK. A rebuild reproduces the committed STLs byte for byte; the STEP changes were header-only and were restored.
 
+## QA (2026-10-31): FAIL (fixable), documentation only
+
+What QA checked independently:
+- It rebuilt both parts into a scratch directory. Both STLs are byte-identical to the committed files, and the STEP files differ only in the `FILE_NAME` header line.
+- It redrew `reference/curve-rebuilt.png` from a copy of `steel.py`. The result is byte-identical.
+- Catalog suite: 88 OK.
+- `tools/overhang.py`:
+  - grip: watertight; the only flagged area is the 2.9 mm² ridge strip;
+  - fit test: watertight, with no overhangs.
+- `.scratch/wirestripper-grip/verify.py` reproduces every number in `activeContext.md`. Its documented run line lacks `networkx`, `rtree`, `scipy` and `mapbox-earcut`. The script is scratch, so this does not block.
+- The fit-test STL matches the grip STL cut at 15 mm: 0.07 % volume difference, same bounding box.
+
+The geometry, the `steel.py` maths (polyfit, arc length, chord conversion, roof intersection, `check_design` formulas) and the print transform are correct and match the plan. The operator's build-time direction explains every deviation from the plan.
+
+### Blocking: Build must rerun to fix
+
+- [ ] Q1. `M/README.md` repeats `FIT_LEN`: "The fit test is the grip's first 15 mm". Say what the fit test is without the number, as the h11 README does ("the open end alone"). Source of the norm: the root SumMem note of 2026-10-16 ("A model README only orients source readers … Copies drift, and the operator will not maintain them"), and the h7/h11 rule that the README "never needs updating when a parameter changes".
+- [ ] Q2. `M/memory-bank/systemPatterns.md` copies the tunable `grips.py` values in parentheses and in prose:
+  - `BORE_CLEAR` (0.3), corner radius 0.5, "clears it by 0.2", `RIB_BITE` (0.1), "0.3 valleys";
+  - `RIB_INSET` (1.5), `END_CLEAR` (1.0), `WALL_SIDE` (3.8), `WALL_FACE` (2.5), `CORNER_R` (4.8);
+  - `FLARE` (1.0), `FLARE_LEN` (5), "wall at B is therefore 4.8", `DOME_LEN` (5), `ROOF_ANGLE` (50 degrees), "0.2 mm ridge", `FIT_LEN` 15 mm.
+
+  This breaks three things:
+  - the plan's invariant "One home per number: readings in `steel.py`, design values in `grips.py`";
+  - the h7/h11 rule "Each fact has one home. Sizes … live in the script";
+  - the file's own line 5.
+
+  The operator will tune exactly these values (`BORE_CLEAR`, `RIB_BITE`, `FIT_LEN` first) after each test print, so the notes would be wrong after the first retune. Refer to parameters by name and keep the reasoning. Keep the measured constraints (the 9 mm gap, the 5 mm convex limit) and assertion thresholds (≥ 2 mm over the bore corners, ≥ 0.15 corner clearance). Optionally extend line 5 to say that `grips.py` is the home of design values and prints the main sizes on each run, as h7 and h11 do.
+
+### Non-blocking advisories
+
+- A-1 (integrity). `grips.sizes()` prints "footprint 29.7 x 21.6". That is the bounding box of the leaning part. The real footprint on the bed is about 19.3 × 21.3, which the "open end (B)" row already shows. It also uses OpenCascade's loose `BoundingBox()`: it reports 92.6 tall where the mesh is 92.32, and `progress.md` repeats the 92.6. Suggest labelling it as the overall size, or using `BoundingBox(tolerance=…)` or the open-end section.
+- A-2 (naming). `grips.stations()` returns the s values of the loft sections. `steel.STATIONS` and `Handle.stations` are the caliper stations S1 to S3, the meaning `systemPatterns.md` defines. A name like `loft_positions` would avoid the overload.
+- A-3 (YAGNI, accepted). No committed code calls `grips.steel_solid()`; only the scratch `verify.py` does. `techContext.md` names it as the basis for ad hoc checks, so keep it.
+- A-4 (record keeping). Neither `activeContext.md` nor `progress.md` lists, as a build decision, that ribs may cross a hole's edge. The creative doc said they stay clear of the holes. The plan's step 3 asserted "ribs clear of the holes"; preflight A3 offered dropping that. On the mock steel, at D2, the rib's contact edge sits 1.497 from the face centre line, against the hole's radius of 1.5. `systemPatterns.md` documents the choice. Carry it into the reflection.
+- A-5 (scope). The operator's direction defers acceptance criterion 4 of the project brief, "the publish record names its printable files": `files: []`. Reflect and archive should record it as open, not met. A `feat` commit for this model will propose release 1.0.0. Deploy refuses a blank `license_code` or `category_id` (preflight A12).
+- A-6 (nit). The `grips.py` module docstring says "The 0.3 mm valleys". That repeats `BORE_CLEAR` in prose in the same file.
+
 ## Status
 
 - [x] Component analysis complete
@@ -276,4 +314,4 @@ The operator's direction at `/niko-build` overrides the plan where they differ:
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [ ] QA: run 1 FAIL (fixable). Rerun Build for Q1 and Q2 (docs only), then QA again.

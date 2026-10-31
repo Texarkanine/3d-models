@@ -1,0 +1,9 @@
+FAIL (fixable)
+
+QA of commercial-electric-wire-stripper-curved-grip, 2026-10-31. Build must rerun: documentation only, no geometry change.
+
+Blocking:
+- Q1. The model README copies FIT_LEN ("the grip's first 15 mm"). The root SumMem norm (2026-10-16) and the h7/h11 README pattern say a model README holds no sizes, because copies drift and the operator will not maintain them.
+- Q2. The model's memory-bank/systemPatterns.md copies about 17 tunable grips.py values in parentheses (BORE_CLEAR 0.3, RIB_BITE 0.1, FIT_LEN 15, CORNER_R 4.8, ROOF_ANGLE 50, ...) and results derived from them. This breaks the plan invariant "one home per number", the h7/h11 rule "each fact has one home", and the file's own line 5. The operator will retune these numbers after each test print, so the design notes go stale at the first retune.
+
+Non-blocking advisories are recorded in tasks.md (QA section).

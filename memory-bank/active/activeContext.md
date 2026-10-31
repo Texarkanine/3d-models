@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: commercial-electric-wire-stripper-curved-grip
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (FAIL)
 
 ## What Was Done
 - Earlier phases: intent approved (matched TPU 95A grips; curved first). Creative: a clearance bore with lengthwise ribs, and a steel-offset rounded-rectangle outside. Plan in `tasks.md`. Preflight: PASS WITH ADVISORY.

@@ -77,3 +77,22 @@ Design and publish-ready a slide-on TPU 95A grip for the curved handle of a Comm
     - CadQuery's smooth loft overshoots where a section changes quickly: a rib fading out over 1 mm bit 0.18 instead of 0.10. Ruled lofts follow the sections exactly, and with sections 4 mm apart on a 175 mm radius they stray only about 0.01.
     - If the dome starts at the bore's end, the T wall at the roof's ridge thins to about 1.3. Starting it at the ridge's height keeps the body's 2.2.
     - W at B is the biggest unknown: 9.7 from the calipers against 10.25 from the tracing. The fit test will show which is right.
+
+## 2026-10-31 - QA - COMPLETE (FAIL, fixable)
+
+* Work completed
+    - Semantic review of the build against the plan, the creative docs and the operator's build-time direction.
+    - Independent checks:
+        - both STLs rebuild byte for byte, and the STEP files differ only in their header;
+        - the curve PNG is reproducible;
+        - catalog suite 88 OK;
+        - overhang: only the ridge strip on the grip, nothing on the fit test;
+        - `verify.py` reproduces every number in `activeContext.md`;
+        - the fit-test STL matches the grip STL cut at 15 mm to within 0.07 %.
+* Decisions made
+    - FAIL (fixable), documentation only. Build must rerun:
+        - Q1: the README copies `FIT_LEN`;
+        - Q2: the model's `systemPatterns.md` copies about 17 tunable `grips.py` values, against the plan's one-home invariant and the h7/h11 rule.
+    - Geometry, maths and print orientation are accepted as they are. Six non-blocking advisories are in `tasks.md`, among them the misleading "footprint" in `sizes()` and the `stations` naming overload.
+* Insights
+    - The operator has said these values will be tuned after each test print. Copies of them in prose go stale at the first retune, which is why the one-home rule exists.
