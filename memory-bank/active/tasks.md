@@ -250,6 +250,22 @@ No new technology. CadQuery, shapely and trimesh are already used by h7 and h11.
 - **Imagined failure: the straight grip cannot reuse `grips.py`.** Plan response: `Handle` holds everything specific to the steel, and the builder takes a straight handle with no special case. A straight two-point handle is not built now (non-goal), but the interface must not assume curvature. For example, `convex_sign` has to handle zero sagitta.
 - **Imagined failure: plan built on a misread tracing (mirror, or which side faces the straight handle).** Plan response: the grip is symmetric in both W and T (same `WALL_SIDE` on both in-plane sides, same ribs), so mirroring cannot matter, and C1 holds on either side. Note in `systemPatterns.md` that the symmetry is load-bearing for an unmirrored-tracing assumption.
 
+## Build: operator direction and progress (2026-10-31)
+
+The operator's direction at `/niko-build` overrides the plan where they differ:
+- No `publish.yaml` changes. Step 5 is dropped, and A8 and A12 are moot for now.
+- The ribs are glue keys, not crush ribs. One light `RIB_BITE` (0.1) replaces `RIB_BITE_W` and `RIB_BITE_T`, and the bite tuning in A1, A2 and A3 is set aside.
+- No committed tests against the generated files: `tools/check_fit.py` is dropped. Sections A to E run ad hoc in `.scratch/wirestripper-grip/verify.py`, and the test print decides.
+
+- [x] 1. `steel.py`: the readings, a `Handle` class and `CURVED`. Every reading from A is a chord, converted to arc length (A4). B is at `Handle.length` (83.58). `python steel.py` prints the cross-checks.
+- [x] 2. `tools/plot_curve.py` draws from `steel.py`. `reduce_curve.py` is deleted, and `reference/curve-rebuilt.png` is regenerated.
+- [x] 3. `grips.py`: bore, gable roof, ribs, outside with flare and dome, print transform, fit test, design assertions and a size report.
+- [x] 4. Outputs `curved_grip.{step,stl}` and `curved_grip_fit_test.{step,stl}`. `tools/overhang.py` is copied from h11.
+- [x] Ad hoc verification (`.scratch/wirestripper-grip/verify.py`, `render.py`): every check passes. Overhang: only the 0.2 mm roof ridge (2.9 mm²).
+- [~] 5. `publish.yaml`: dropped by the operator.
+- [ ] 6. Docs: README, systemPatterns, techContext, measurements.
+- [ ] 7. Final verification: catalog suite, rebuild, STEP header churn, commit.
+
 ## Status
 
 - [x] Component analysis complete
