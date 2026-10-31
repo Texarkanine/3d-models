@@ -25,3 +25,13 @@ Design and publish-ready a slide-on TPU 95A grip for the curved handle of a Comm
     - Longitudinal crush ribs on a clearance bore with relieved corners. Two ribs per face sit near the corners, clear of the holes and the insert. The valleys carry glue and let air out. W bites harder than T. The fit test tunes `BORE_CLEAR` and the bites.
 * Insights
     - The steel's W taper keeps the W ribs from biting until the last few millimetres. T barely tapers, so T contact rubs the whole way and must stay light.
+
+## 2026-10-31 - CREATIVE (outside shape) - COMPLETE
+
+* Work completed
+    - Compared a steel-offset rounded rectangle, an oval, and a sculpted outside.
+* Decisions made
+    - Steel-offset rounded rectangle. Walls are set from the steel face (3.8 in the plane of the handles, 2.5 across it, corner radius 5), with a 1.0 flare at the open end and a lofted dome at the closed end. The same definition will wrap the straight steel.
+* Insights
+    - An ellipse around a rectangular steel needs too much wall to clear the corners, and breaks the 5 mm convex limit at B.
+    - The closing gap was measured only at B. Constant walls keep the closest approach at B, so no shape rests on a gap nobody measured.
