@@ -130,3 +130,13 @@ Design and publish-ready a slide-on TPU 95A grip for the curved handle of a Comm
         - A-9: one docstring line is longer than the others.
 * Insights
     - The split now matches h7 and h11. Readings live in `steel.py`, design values in `grips.py`, and the reasoning in `systemPatterns.md`. A retune after a test print changes one file.
+
+## 2026-10-31 - REFLECT - COMPLETE
+
+* Work completed
+    - Reflection written. QA run 2's wording advisories (A-7 to A-9) fixed. Root persistent files reconciled: no change needed.
+* Decisions made
+    - Acceptance criterion 4 (`publish.yaml` names its files) stays open at the operator's direction. Criteria 1 to 3 wait on test prints.
+* Insights
+    - The creative phase turned "texture for glue" into a friction fit, and preflight analysed that fit in depth; the operator reframed the ribs as glue keys at build. Confirm with the operator any requirement a creative decision adds.
+    - In this catalog, first-print prototypes get ad hoc checks in `.scratch/` and a fit test. Committed checks wait until a shape survives a print.

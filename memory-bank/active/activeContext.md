@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: commercial-electric-wire-stripper-curved-grip
-**Phase:** QA - COMPLETE (PASS)
+**Phase:** REFLECT - COMPLETE
 
 ## What Was Done
 - Earlier phases: intent approved (matched TPU 95A grips; curved first). Creative: a clearance bore with lengthwise ribs, and a steel-offset rounded-rectangle outside. Plan in `tasks.md`. Preflight: PASS WITH ADVISORY.
@@ -32,5 +32,9 @@
   - The fit-test STL matches the grip STL cut at 15 mm to within 0.1 %.
   - Catalog suite: 88 OK. A rebuild reproduces the committed STLs exactly.
 
+- QA run 2: PASS. Its advisories A-7 to A-9 (wording) were fixed before reflect.
+- Reflection: `memory-bank/active/reflection/reflection-commercial-electric-wire-stripper-curved-grip.md`. Persistent root files were not changed: the catalog contracts are unchanged.
+
 ## Next Step
-- QA (subagent), then reflect. After that, the operator prints the fit test and then the full grip, and reports back.
+- The operator prints the fit test, then the full grip, and reports back. That feedback is either rework (`/niko`) or, once the grip proves out, `/niko-archive`.
+- Still open: acceptance criterion 4 (`publish.yaml` `files`) waits until the operator decides to publish.
