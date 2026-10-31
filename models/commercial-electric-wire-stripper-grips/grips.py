@@ -9,8 +9,8 @@ corners, flared a little at the open end and domed at the closed end.
 Inside: the bore is the steel plus BORE_CLEAR on every side, with tight
 corners so even a sharp steel corner clears it. Eight lengthwise ribs, two
 on each face near the corners, reach RIB_BITE past the steel's face. They
-locate the grip on the steel. The valleys between them, BORE_CLEAR deep, give glue
-something to fill and key into, and they stay there if the outside is
+locate the grip on the steel. The valleys between them, BORE_CLEAR deep, give
+glue something to fill and key into, and they stay there if the outside is
 vapor-smoothed. Glue and air escape along the valleys when you push the grip
 on. The ribs are glue keys, not crush ribs: test prints decide whether the grip
 also holds dry.
@@ -21,8 +21,8 @@ way the tip leans. The outside's dome starts at the ridge's height, so the wall
 over the roof is never thinner than the body's.
 
 Print: standing on the open end, closed end up. Its lean follows the steel's
-curve (about 15 degrees at the tip). The flare is widest on the bed, and the dome
-and roof face up, so no supports are needed.
+curve (about 15 degrees at the tip). The flare is widest on the bed, and the
+dome and roof face up, so no supports are needed.
 
 Coordinates are those of `steel.py` (use position: the handle flat in XY, T
 along Z, s along the centre line from A). Each cross-section is in the plane

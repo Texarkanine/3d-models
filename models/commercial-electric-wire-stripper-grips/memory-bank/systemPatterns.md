@@ -41,7 +41,7 @@ Each fact has one home:
 
 ## Print orientation is designed in
 
-Each grip prints standing up, open end down on the bed, closed end at the top. The grip leans with the steel's curve, most at the tip. The flare is widest on the bed. The bore's closed end is a gable roof whose two slopes are `ROOF_ANGLE` above horizontal in print, computed from the actual lean. The only face `tools/overhang.py` flags is the ridge strip at the roof's top (`RIDGE_W`), which is narrower than one extrusion line. No supports are needed.
+Each grip prints standing up, open end down on the bed, closed end at the top. The grip leans with the steel's curve, most at the tip. The flare is widest on the bed. The bore's closed end is a gable roof whose two slopes are `ROOF_ANGLE` above horizontal in print, computed from the actual lean. The only face `tools/overhang.py` flags is the ridge strip at the roof's top. `RIDGE_W` must stay narrower than one extrusion line, so the perimeters close it. No supports are needed.
 
 ## Test prints
 

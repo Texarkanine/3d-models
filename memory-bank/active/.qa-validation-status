@@ -1,0 +1,7 @@
+PASS
+
+QA run 2 of commercial-electric-wire-stripper-curved-grip, 2026-10-31. Reviewed the build rework (93f8407) and rechecked the model.
+
+- Q1 and Q2 from run 1 are resolved. The README and the model's systemPatterns.md no longer copy tunable grips.py values. The numbers left are measured limits or assertion thresholds, and they match check_design.
+- A rebuild gives byte-identical STLs. The STEP files differ only in the header timestamp. Catalog suite: 88 OK. overhang.py flags only the 2.9 mm2 ridge strip on the grip and nothing on the fit test. The scratch verify.py reproduces every number in activeContext.md.
+- Non-blocking advisories A-7 to A-9 (wording and a docstring nit) are in tasks.md. A-4 (ribs may cross a hole's edge) and A-5 (publish.yaml files: [], acceptance criterion 4 open) go to reflect and archive.

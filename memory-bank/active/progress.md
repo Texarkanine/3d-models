@@ -109,3 +109,24 @@ Design and publish-ready a slide-on TPU 95A grip for the curved handle of a Comm
     - A-3 (keep `steel_solid`) and A-5 (`publish.yaml` files stay open) unchanged, per QA and the operator. A-4 (ribs may cross a hole's edge) goes to the reflection.
 * Insights
     - CadQuery's `BoundingBox()` on lofted B-spline faces is loose by about 0.3 mm. Measure sizes from a tessellation.
+
+## 2026-10-31 - QA (run 2) - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed the build rework against the run 1 findings, then rechecked the whole model.
+    - Independent checks:
+        - a scratch rebuild gives byte-identical STLs, and the STEP files differ only in their header;
+        - `sizes()` reports 92.3 tall, which matches the mesh;
+        - catalog suite 88 OK;
+        - overhang: only the ridge strip on the grip, nothing on the fit test;
+        - `verify.py` runs with its new run line and reproduces every number in `activeContext.md`;
+        - no tunable value is copied into the README or the model's memory bank;
+        - the reference images carry no metadata.
+* Decisions made
+    - PASS. Q1, Q2, A-1, A-2 and A-6 are resolved, and A-3 is accepted. A-4 and A-5 go to reflect and archive.
+    - Three new non-blocking advisories are in `tasks.md`:
+        - A-7: the `steel.py` docstring says it holds all "the numbers the model uses";
+        - A-8: `systemPatterns.md` says `RIDGE_W` "is narrower than one extrusion line", which is true only for its current value;
+        - A-9: one docstring line is longer than the others.
+* Insights
+    - The split now matches h7 and h11. Readings live in `steel.py`, design values in `grips.py`, and the reasoning in `systemPatterns.md`. A retune after a test print changes one file.

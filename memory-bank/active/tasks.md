@@ -304,6 +304,30 @@ The geometry, the `steel.py` maths (polyfit, arc length, chord conversion, roof 
 - A-5 (scope). The operator's direction defers acceptance criterion 4 of the project brief, "the publish record names its printable files": `files: []`. Reflect and archive should record it as open, not met. A `feat` commit for this model will propose release 1.0.0. Deploy refuses a blank `license_code` or `category_id` (preflight A12).
 - A-6 (nit). The `grips.py` module docstring says "The 0.3 mm valleys". That repeats `BORE_CLEAR` in prose in the same file.
 
+## QA run 2 (2026-10-31): PASS
+
+Reviewed the build rework (commit `93f8407`) against the run 1 findings, then rechecked the whole model.
+
+What QA checked independently:
+- Rebuilt both parts into a scratch directory, outside the model directory. Both STLs are byte-identical to the committed files. The STEP files differ only in the `FILE_NAME` timestamp. The build took 15.6 s.
+- `sizes()` now reports "stands 92.3 tall on its open end; leaning, it spans 29.5 x 21.3". 92.3 matches the mesh height (92.323).
+- Catalog suite: 88 OK. `python steel.py` prints the same cross-checks (B at s 83.58; W at B 9.69 from the calipers against 10.25 from the tracing).
+- `tools/overhang.py`: the grip is watertight, and the only flagged area is the 2.9 mm² ridge strip. The fit test is watertight, with no overhangs. `overhang.py` is still byte-identical to the h8-h9-h11-h16 copy.
+- `.scratch/wirestripper-grip/verify.py` runs with its new run line and reproduces every number in `activeContext.md`. No scratch script called the old `stations()`.
+- No copied design value is left in `README.md`, `AGENTS.md` or the model's `memory-bank/`. The numbers that remain are measured (the 9 mm gap, the 5 mm convex limit, the old grip's 5 mm wall, the bend of about 15 degrees) or assertion thresholds (0.15, 2 mm). Each one in `systemPatterns.md` matches `check_design`.
+- The reference photos and `curve-rebuilt.png` carry no EXIF, XMP or text metadata.
+
+Results:
+- Q1 is resolved: the README calls the fit test "the open end alone".
+- Q2 is resolved: `systemPatterns.md` names parameters, keeps the reasoning, and states where each kind of fact lives.
+- A-1, A-2 and A-6 are resolved as suggested. A-3 is accepted. A-4 and A-5 stay open for reflect and archive, as `progress.md` records.
+
+### Non-blocking advisories (run 2)
+
+- A-7 (wording). The `steel.py` docstring calls itself "the one home of the numbers the model uses". Since Q2, `systemPatterns.md` says the design values live in `grips.py`. "The one home of the readings" would agree with it. `reference/measurements.md` ("The values the model uses live in `../steel.py`") reads correctly in context, because it is about readings.
+- A-8 (wording). `systemPatterns.md` says the ridge strip (`RIDGE_W`) "is narrower than one extrusion line". That is true only for the current value. Saying `RIDGE_W` must stay narrower than one extrusion line would keep it true after a retune.
+- A-9 (nit). The A-6 fix left one line of the `grips.py` docstring at 82 characters, where the rest wrap at 79 or less. No linter is configured.
+
 ## Status
 
 - [x] Component analysis complete
@@ -314,4 +338,4 @@ The geometry, the `steel.py` maths (polyfit, arc length, chord conversion, roof 
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA: run 1 FAIL (fixable). Build rework fixed Q1, Q2, A-1, A-2, A-6 and the scratch run line; QA run 2 pending.
+- [x] QA: run 1 FAIL (fixable). Build rework fixed Q1, Q2, A-1, A-2, A-6 and the scratch run line. Run 2 PASS, with advisories A-7 to A-9.

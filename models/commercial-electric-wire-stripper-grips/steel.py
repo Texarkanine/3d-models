@@ -1,7 +1,8 @@
 """The bare steel handles of the Commercial Electric wire stripper, as measured.
 
-This file is the one home of the numbers the model uses. `reference/measurements.md`
-is the dated log of how and when each reading was taken, with the photos.
+This file is the one home of the steel readings the model uses; design values
+live in `grips.py`. `reference/measurements.md` is the dated log of how and when
+each reading was taken, with the photos.
 
 Coordinates (use position): the handle lies flat in the XY plane, the plane the
 handles swing in. Z is T, straight up off the table. For the curved handle, X and
