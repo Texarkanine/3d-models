@@ -16,3 +16,12 @@ Design and publish-ready a slide-on TPU 95A grip for the curved handle of a Comm
 * Insights
     - The tracing's widths match the calipers to within 0.5 mm, and its length from A to B is within 0.7 mm of the measured 83.15. Take the shape from the tracing and the sizes from the calipers.
     - The old grip reached past hole D1. The end of the residue on the steel was not B.
+
+## 2026-10-31 - CREATIVE (bore fit and glue key) - COMPLETE
+
+* Work completed
+    - Compared a plain interference bore, longitudinal crush ribs, circumferential rings, and a clearance bore with glue.
+* Decisions made
+    - Longitudinal crush ribs on a clearance bore with relieved corners. Two ribs per face sit near the corners, clear of the holes and the insert. The valleys carry glue and let air out. W bites harder than T. The fit test tunes `BORE_CLEAR` and the bites.
+* Insights
+    - The steel's W taper keeps the W ribs from biting until the last few millimetres. T barely tapers, so T contact rubs the whole way and must stay light.
