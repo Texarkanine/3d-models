@@ -49,3 +49,15 @@ Design and publish-ready a slide-on TPU 95A grip for the curved handle of a Comm
 * Insights
     - The grip is symmetric in both W and T, so a mirrored tracing cannot matter.
     - The fit test proves only the open end. The full grip is the test of the curve.
+
+## 2026-10-31 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Checked the plan against the codebase: TDD encoding, conventions, dependencies, conflicts and completeness. Ran two numeric probes outside the repository: a slide-on sweep and arc against chord placement.
+    - First line of `.preflight-status`: `PASS WITH ADVISORY`. No plan edits.
+* Decisions made
+    - The plan is acceptable as it stands. The 12 advisories and the radical idea are listed in `.preflight-status` for the operator to weigh before `/niko-build`.
+* Insights
+    - The bore cannot slide along the steel as a rigid copy, because the curve is not uniform (radius about 175 mm in the middle, nearly straight at both ends). With the grip settled in its best pose, the W ribs rub over about the last 27 mm of travel, never harder than when seated, and the bore walls never touch the steel.
+    - The ribs bite along the whole grip, so the full grip needs about 83/FIT_LEN times the fit test's force to seat and hold. A fit test that feels tight predicts a grip that will not go on by hand.
+    - At D2 the rib tip clears the hole by only about 0.08 mm on the mock, which is less than the uncertainty in W there. The creative doc's claim that the ribs clear the hole "even at W 6.3" is wrong.

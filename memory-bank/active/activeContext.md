@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: commercial-electric-wire-stripper-curved-grip
-**Phase:** PLAN - COMPLETE
+**Phase:** BUILD - READY
 
 ## What Was Done
 - Operator approved the intent: matched TPU grips for both handles. Curved grip first; straight later, once its glued grip is off and the steel is measured.
@@ -10,9 +10,11 @@
 - Creative decisions:
   - Bore: longitudinal crush ribs on a clearance bore, two per face, whose valleys take glue.
   - Outside: a steel-offset rounded rectangle with a mouth flare and a domed end.
-- Plan written to `tasks.md`:
-  - 7 implementation steps; check_fit sections A to E pin requirements, not shapes.
-  - The CadQuery loft along the curve was proven in `.scratch/wirestripper-grip/poc_loft.py`.
+- Plan written to `tasks.md`. Preflight: PASS WITH ADVISORY (A1 to A12 in `.preflight-status`).
+- Operator direction at `/niko-build` (2026-10-31), which overrides parts of the plan:
+  - `publish.yaml` stays as it is (`files: []`). We are on a branch and will print and fit-test long before anything publishes. Plan step 5 is dropped; A8 and A12 are moot for now.
+  - The inner ribs exist for adhesive to key into, not for a friction fit. Don't fret over them; get close enough for a first test print and learn from each print. So the crush-rib bite tuning (A1, A2, A3, the grip-zone idea) is set aside.
+  - No committed tests against the generated files yet: the shape is still being iterated in meat space. Design it, verify ad hoc that it is what was meant, then the operator prints and reports. `tools/check_fit.py` is dropped; its checks run ad hoc from `.scratch/`.
 
 ## Next Step
-- Preflight (subagent), then the operator runs `/niko-build`.
+- Build the curved grip and its fit test, verify ad hoc, hand off for a test print.
