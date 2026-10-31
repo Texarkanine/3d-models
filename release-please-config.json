@@ -40,6 +40,12 @@
       "component": "jerry-can-buffer",
       "include-component-in-tag": true,
       "pull-request-header": ":service_dog: I have created a release \\*bark\\* \\*woof\\*"
+    },
+    "models/commercial-electric-wire-stripper-grips": {
+      "release-type": "simple",
+      "component": "commercial-electric-wire-stripper-grips",
+      "include-component-in-tag": true,
+      "pull-request-header": ":service_dog: I have created a release \\*bark\\* \\*woof\\*"
     }
   }
 }

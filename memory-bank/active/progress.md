@@ -1,0 +1,18 @@
+# Progress
+
+Design and publish-ready a slide-on TPU 95A grip for the curved handle of a Commercial Electric wire stripper. It lives in a new catalog model, `models/commercial-electric-wire-stripper-grips/`, whose outside design the straight grip will share later.
+
+**Complexity:** Level 3
+
+## 2026-10-31 - COMPLEXITY-ANALYSIS - COMPLETE
+
+* Work completed
+    - Guided the operator's measurements (annotated photo guide), then reduced the curve offsets and cross-checked them against the calipers.
+    - Set up the model directory: release-please config and manifest at 0.0.0, catalog test entry, `AGENTS.md`, memory bank, draft `publish.yaml`, SumMem store, `reference/` and `tools/`.
+* Decisions made
+    - Level 3.
+    - Curved grip first. The straight grip is a later task.
+    - Model directory `commercial-electric-wire-stripper-grips`: brand plus tool, as the bulb models name what they fit. It can be renamed cheaply before the first release.
+* Insights
+    - The tracing's widths match the calipers to within 0.5 mm, and its length from A to B is within 0.7 mm of the measured 83.15. Take the shape from the tracing and the sizes from the calipers.
+    - The old grip reached past hole D1. The end of the residue on the steel was not B.
