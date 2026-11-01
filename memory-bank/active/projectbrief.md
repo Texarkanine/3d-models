@@ -41,3 +41,14 @@ Once the curved grip works, the same design approach makes a straight grip with 
 2. The tool closes fully with the new curved grip and the old straight grip on.
 3. The part prints open end down without supports.
 4. The catalog tests pass, and the model's publish record names its printable files.
+
+## Rework (2026-11-01): round the open end
+
+The first TPU 95A print fits the steel "like a glove" and stays on without adhesive. The flare widens all the way to the bed, so the open end's outer edge is acute and feels sharp.
+
+1. Give the open end a rounded lip. From the bed, the outside bulges out and then comes back in, so the edge the hand meets is rounded.
+2. It still prints open end down with no supports.
+3. The wall at B on the side facing the other handle stays within `CONVEX_LIMIT`.
+4. The bore, the ribs, the rest of the outside, and the fit test's length stay as they are.
+
+The straight grip is still a later task. It needs its steel measured once the old glued grip is off.

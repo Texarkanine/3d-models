@@ -140,3 +140,13 @@ Design and publish-ready a slide-on TPU 95A grip for the curved handle of a Comm
 * Insights
     - The creative phase turned "texture for glue" into a friction fit, and preflight analysed that fit in depth; the operator reframed the ribs as glue keys at build. Confirm with the operator any requirement a creative decision adds.
     - In this catalog, first-print prototypes get ad hoc checks in `.scratch/` and a fit test. Committed checks wait until a shape survives a print.
+
+## 2026-11-01 - REWORK - INITIATED
+
+* Work completed
+    - Rework opened on the operator's first test print. The completed cycle was Level 3.
+* Decisions made
+    - The operator's feedback: "it's basically perfect. Except, the part that prints on the bed, since it just angles up with no bevel, makes a pretty 'sharp' edge. Can we get a little 'bulge' out from the contact with the bed, then back in, so there's a rounded edge at the top? And also, if you want to make the straight one, it oughta work. Fits like a glove, doesn't even need adhesive!"
+    - The straight grip stays a later task: its steel is still unmeasured (`reference/measurements.md`).
+* Insights
+    - First print: the bore fits the steel from A to B and the grip holds dry, with no glue. Acceptance criterion 1 is met. The flare made the open end's outer edge acute where it met the bed.
