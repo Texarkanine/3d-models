@@ -296,4 +296,67 @@ No new technology - validation not required. The scratch checks use packages alr
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
+
+## QA (2026-11-01, rework 4): PASS
+
+Reviewed commits `db5cbfd` (straight readings), `e1b3528` (curved iteration 5) and `3046d4e` (straight iteration 1) against the "Rework 4" section of `projectbrief.md` and the plan above.
+
+### How each rework 4 requirement stands
+
+1. **Flare, on both grips, 1.0 further out.** Met.
+    - The widest point is 1.464 (curved) and 1.463 (straight), at z 1.50. Iteration 4's was 0.474, so this is 0.99 further out, as the plan said the report would state.
+    - The bevel on the bed is kept: 130 degrees at the bed edge, which is 0.96 in from the widest point.
+    - The flare is still a flute. Above the widest point it falls at most 0.42 per mm.
+    - With the tool shut, the shipped pair leaves 1.08, and `check_design` asserts at least 0.8. Two curved grips would leave 1.32, which matches the brief's "about 1.3". The smaller 1.08 comes from the straight steel being 0.47 wider at B (preflight run 1, A1).
+2. **Straight readings recorded.** Met.
+    - The dated log entry has the tracing table, T at A and J to M, A to B, the holes (the sheet's own words and the operator's reading of them), the old grip's opening, and the gap with the tool shut.
+    - Both photos are under Git LFS, re-encoded as JPEG, and have no EXIF or JFIF segments. They show only paper and pencil.
+    - `steel.STRAIGHT` matches the photo: QA re-read every row's offsets and the J, K, L and M labels from it.
+    - The gap with the tool shut is in `grips.py` (`SHUT_GAP`), not `steel.py`, as the plan chose. It describes the tool with grips on, not the bare steel.
+3. **Straight grip, with the curved grip's design.** Met.
+    - Its open end and walls are the curved grip's.
+    - Its bore is steel plus the shared clearance.
+    - It stands upright, with a symmetric roof.
+    - `tools/overhang.py` flags only the 0.2 ridge strip, which bridges.
+4. **One commit per iteration.** Met: readings, then curved iteration 5, then straight iteration 1. Each commit describes itself: `db5cbfd` still has `CONVEX_LIMIT` and its prose, and `e1b3528` replaces both together.
+5. **`publish.yaml` unchanged.** Met.
+
+### What QA checked independently
+
+- **Rebuild:** `grips.py` was copied to the scratchpad and run there. It took 43 s.
+    - All four STLs are byte-identical to the committed files.
+    - The four STEP files are identical past their headers.
+    - The printed sizes match the build's.
+- **Steel report:** the curved part of `python steel.py` is identical to the iteration 4 baseline. `tools/plot_curve.py`, run in the scratchpad, redraws `curve-rebuilt.png` pixel for pixel.
+- **Scratch checks on the committed outputs:** all pass, with the build's figures.
+    - `straight_check.py`.
+    - `shut_gap.py`: 1.080, 3.063 and 0.080. The last one raises.
+    - `slice_compare.py`: bore 0.00029 mm², outside 0.075.
+    - `lip.py` on both grips.
+    - `corner_bevel.py` on all four STLs: at least 49.9 degrees.
+    - `tools/overhang.py` on all four STLs: only the ridge strip on the full grips, nothing on the fit tests.
+    - `verify.py` on both grips: 0 mm³ of steel in the bore wall; ribs 39.4 and 38.7 mm³; thinnest wall 2.051; cap 5.0; watertight; each fit test matches its grip cut at `FIT_LEN`.
+- **`shut_gap()` maths:** QA worked through the worst-case term by hand. On the straight steel, the curved grip's bore cleared the steel. Only its ribs bit harder, so its wall moved out by between 0 and half the W difference. Subtracting the full half-difference is therefore the worst case, as the docstring says.
+- **Catalog suite:** 88 OK. The working tree is clean.
+- **Code quality:**
+    - `Handle(widths=…)` is a small, documented addition.
+    - The straight fits reuse `steel.polyfit`.
+    - `widest()` replaces the duplicated `max(rim, …)`, and `sizes()` no longer shadows it.
+    - `SHUT_WALL` is a literal, with its derivation in a comment.
+    - No `CONVEX_LIMIT` or stale "curved only" wording is left in the model.
+
+### Advisories (none blocks)
+
+- **A-25 (low, docs):** `systemPatterns.md` has two wrong sentences in "The tool must still close".
+    - It says the measured curved grip was "stretched over steel wider at B than its bore". That is wrong: the straight steel at B (10.16) is narrower than that grip's bore (10.29). The steel is wider only than the curved steel the bore was built for (9.69), and than the rib tips (9.49).
+    - The next sentence compares the straight grip with "that grip's bore". It should compare it with that grip's wall.
+    - The docstring of `grips.shut_gap()` already says this correctly. Fix the prose at wrap-up. Nothing in the model's behaviour changes.
+- **A-26 (low, report):** preflight run 2's A6 asked for a note beside the 1.08 in the report to the operator. During the 3.3 reading, the curved grip sat about 0.4 short of the straight B. The effect is likely under 0.1, which fits inside the 0.28 margin to `MIN_SHUT_GAP`. So far this is only in `progress.md`'s preflight insights. Put it in the report to the operator.
+- **A-27 (information, no action):** `check_design(h)` checks the pair's `shut_gap()` once for each handle, and `sizes()` prints the same gap under both grips. This is harmless, and it keeps each build checking itself.
+
+### Advisories resolved after QA (rework 4)
+
+- **A-25:** fixed. "The tool must still close" in the model's `systemPatterns.md` no longer says the measured curved grip was stretched over steel wider than its bore. Its bore still cleared the straight steel (10.29 against 10.16); only its ribs bit harder. The `shut_gap()` docstring says the same. This is docstring-only: a rebuild gave byte-identical STLs, and the STEP files, whose only changes were header timestamps, were restored.
+- **A-26:** goes in the report to the operator. During the 3.3 reading, the curved grip sat about 0.4 short of the straight handle's B; the likely effect is under 0.1, within the 0.28 margin.
+- **A-27:** no action.

@@ -399,3 +399,19 @@ The first cycle (2026-10-31) was Level 3. Reworks 1 to 3 (2026-11-01) were Level
 * Insights
     - Raw `mesh_plane` segments do not share exact endpoints, so `shapely.polygonize` finds no rings. trimesh's `section().to_2D(to_2D=identity)` welds them and keeps the mesh's own x and y.
     - A loft samples its sections every `SECTION_STEP`, so a kink in a readings profile between samples is cut across. Here the straight T rises steeply from A to J, which adds a 9 µm rib bite at J. That is harmless, but worth knowing before readings get denser.
+
+## 2026-11-01 - QA - COMPLETE (PASS) (fourth rework)
+
+* Work completed
+    - Semantic review of `db5cbfd`, `e1b3528` and `3046d4e` against the rework 4 brief and plan.
+    - Independent checks:
+        - a scratch rebuild gives byte-identical STLs for both grips and both fit tests, and STEP files identical past their headers;
+        - the curved steel report and `curve-rebuilt.png` are unchanged from iteration 4;
+        - every scratch check passes on the committed outputs: `straight_check.py`, `shut_gap.py`, `slice_compare.py`, `lip.py` and `verify.py` on both grips, `corner_bevel.py` and `tools/overhang.py` on all four STLs;
+        - the straight readings in `steel.py` match the tracing photo;
+        - catalog suite 88 OK.
+* Decisions made
+    - PASS. All five rework 4 requirements are met.
+    - Advisories A-25 to A-27 are in `tasks.md`. None blocks. A-25 fixes a sentence in `systemPatterns.md`: the curved grip's bore was not narrower than the straight steel, only its ribs were. A-26 carries preflight's "sat 0.4 short of B" note into the operator's report.
+* Insights
+    - On the straight steel, the curved grip's bore (10.29 at B) still cleared the steel (10.16). Only the ribs bit harder. So the 3.3 reading was taken with that grip's wall moved out by less than half the W difference, and `shut_gap()`'s full half-difference is a true worst case.

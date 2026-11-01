@@ -250,10 +250,10 @@ def shut_gap():
     From the measured SHUT_GAP, each grip's wall at the widest point moves out by
     its change from SHUT_WALL. One more term: the measured grip on the straight
     handle was a curved grip, whose bore was built for the curved steel, which is
-    narrower at B. Stretched over the wider straight steel, its wall moved out by
-    at most half the difference. The straight grip, built for its own steel, sits
-    a full half-difference out. Counting that half-difference in full is the worst
-    case.
+    narrower at B. On the straight steel its bore still cleared but its ribs bit
+    harder, so its wall moved out by at most half the difference. The straight
+    grip, built for its own steel, sits a full half-difference out. Counting that
+    half-difference in full is the worst case.
     """
     _, most = widest()
     c, st = steel.CURVED, steel.STRAIGHT

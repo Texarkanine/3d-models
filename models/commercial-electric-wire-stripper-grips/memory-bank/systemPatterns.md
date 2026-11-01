@@ -60,7 +60,7 @@ Each fact has one home:
 ## The tool must still close
 
 - The first limit was inferred: with the old straight grip on, the gap at B was 9, and the old curved grip's wall there was 5 (measurement F). The operator has since measured the real thing. With an iteration-4 grip on each handle and the tool shut, the two open ends were `SHUT_GAP` apart, with a wall of `SHUT_WALL` at the widest point on each.
-- `grips.shut_gap()` works out the gap for the grips built now. Each grip's wall at the widest point moves out by its change from `SHUT_WALL`, which is why `SHUT_WALL` stays what was measured even if `WALL_SIDE` or the open end changes. One more term: the grip measured on the straight handle was a curved grip, stretched over steel wider at B than its bore. The straight grip sits a full half-difference further out than that grip's bore would, and the worst case counts it in full.
+- `grips.shut_gap()` works out the gap for the grips built now. Each grip's wall at the widest point moves out by its change from `SHUT_WALL`, which is why `SHUT_WALL` stays what was measured even if `WALL_SIDE` or the open end changes. One more term: the grip measured on the straight handle was a curved grip, built for the curved steel, which is narrower at B. On the straight steel its bore still cleared, but its ribs bit harder, so its wall may have moved out by up to half the difference in W. The straight grip, built for its own steel, sits a full half-difference further out than that grip's wall would have without the ribs pushing. The worst case counts it in full.
 - `check_design` asserts at least `MIN_SHUT_GAP` left. The operator called 0.3 "pushing it" and chose about a millimetre each side. `grips.py` prints the gap on each build.
 
 ## Print orientation is designed in
