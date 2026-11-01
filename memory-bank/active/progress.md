@@ -324,3 +324,12 @@ The first cycle (2026-10-31) was Level 3. The 2026-11-01 rework is Level 1.
     - Root persistent files: skip. Only this model's outside changed, and no catalog contract changed.
 * Decisions made
     - Iteration 4 (`87e777c`) is ready to print. Next: the operator prints it, cuts off the old straight grip, and measures the straight steel. Then `/niko-archive`, or another rework.
+
+## 2026-11-01 - REWORK - INITIATED (fourth rework)
+
+* Work completed
+    - A fourth rework was opened on the operator's print of iteration 4 and their readings of the bare straight steel. The previous cycle was Level 1.
+    - The straight readings were typed back in chat and confirmed by the operator against the paper.
+* Decisions made
+    - The operator's feedback: iteration 4 fits. "The hand feel of the most recent iteration, I would like a bit more of a flare out." With the tool shut and a curved grip on each handle, the open ends are about 3.3 apart. "Each one could do 1.5, but that'd be pushing it, so let's actually go one millimeter out flare on each side, not just one half."
+    - The straight grip: "we technically don't need to make the straight one, but we're going to make it anyway for completeness' sake." It "should match inner and outer dimensions the same as the other side." A curved grip already slides onto the straight handle and works.

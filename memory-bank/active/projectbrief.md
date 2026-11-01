@@ -71,3 +71,13 @@ Iteration 3 (flare, with a rounded and bevelled edge on the bed) reached its wid
 2. Keep print 1's flare above it, the round between bevel and flare, no supports, and `CONVEX_LIMIT`.
 3. Keep enough wall on the first layers that the edge prints solidly.
 4. The bore, ribs and dome stay as they are. Commit the iteration on its own.
+
+## Rework 4 (2026-11-01): a stronger flare, and the straight grip
+
+Iteration 4 (`87e777c`) printed and fits. A curved grip also slides onto the straight handle and works. With the tool squeezed shut and a curved grip on each handle, the two open ends are about 3.3 apart. The operator wants more flare, to stop the fingers sliding, and the straight grip for completeness.
+
+1. **Flare:** on both grips, the open end's widest point stands 1.0 further out than iteration 4's. The tool must still close with a gap left between the two grips (about 1.3 at this flare). Keep the bevel on the bed, the round, a flute rather than a bead, and no supports.
+2. **Straight readings:** record the operator's readings of 2026-11-01 in the dated log, with the two photos, and in `steel.py`: the tracing, T at A, J, K, L and M, A to B 85.14, the two holes, the old straight grip's opening, and the gap with the tool shut.
+3. **Straight grip:** build it, and its fit test, from the straight readings with the curved grip's design (bore, ribs, walls, open end, roof, dome), standing on its open end, without supports. Its inside and outside should match the curved grip's.
+4. **One commit per iteration:** the curved grip's new flare first, then the straight grip.
+5. `publish.yaml` stays as it is (`files: []`).
