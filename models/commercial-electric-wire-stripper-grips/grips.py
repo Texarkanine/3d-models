@@ -231,17 +231,21 @@ def outside(h):
     _, rise = roof(h)
     s_dome = -END_CLEAR - rise
 
-    def sec(s, grow):
+    def sec(s, grow, corner_r):
         w = h.width(s) + 2 * (WALL_SIDE + grow)
         t = h.thickness(s) + 2 * (WALL_FACE + grow)
-        return rrect(section_plane(h, s), w, t, CORNER_R + max(grow, 0.0))
+        return rrect(section_plane(h, s), w, t, corner_r)
 
-    # ruled: a smooth loft would ring through the rounded rim
-    rim = cq.Solid.makeLoft([sec(h.length - d, g) for d, g in rim_profile()], ruled=True)
-    secs = [sec(s, 0.0) for s in loft_positions(h.length - FLARE_LEN, s_dome)]
-    for deg in (20, 38, 54, 67, 78, 90):       # dome: quarter circle of radius DOME_LEN
-        phi = math.radians(deg)
-        secs.append(sec(s_dome - DOME_LEN * math.sin(phi), -DOME_LEN * (1 - math.cos(phi))))
+    # The open end is a true offset of the body: its corners grow and shrink
+    # with it, so the bevel keeps BEVEL_ANGLE at the corners as on the flats.
+    # Ruled: a smooth loft would ring through the round.
+    rim = cq.Solid.makeLoft([sec(h.length - d, g, CORNER_R + g) for d, g in rim_profile()],
+                            ruled=True)
+    secs = [sec(s, 0.0, CORNER_R) for s in loft_positions(h.length - FLARE_LEN, s_dome)]
+    for deg in (20, 38, 54, 67, 78, 90):       # dome: quarter circle of radius DOME_LEN;
+        phi = math.radians(deg)                 # rrect caps CORNER_R as it shrinks
+        secs.append(sec(s_dome - DOME_LEN * math.sin(phi), -DOME_LEN * (1 - math.cos(phi)),
+                        CORNER_R))
     return rim.fuse(cq.Solid.makeLoft(secs)).clean()
 
 
@@ -281,9 +285,10 @@ def export(shape, stem, out):
 
 
 def corner_wall(grow=0.0):
-    """Material over each bore corner where the outside stands grow past the body wall."""
+    """Material over each bore corner where the outside is offset grow past the body
+    wall, its corner radius with it (as at the open end)."""
     c, r = BORE_CLEAR, BORE_CORNER_R
-    rc = CORNER_R + max(grow, 0.0)
+    rc = CORNER_R + grow
     gap_u = WALL_SIDE + grow - rc - (c - r)
     gap_v = WALL_FACE + grow - rc - (c - r)
     return rc - math.hypot(gap_u, gap_v) - r

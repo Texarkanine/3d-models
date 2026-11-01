@@ -289,3 +289,11 @@ The first cycle (2026-10-31) was Level 3. The 2026-11-01 rework is Level 1.
     - Advisories A-19 to A-21 are in `tasks.md`; none blocks.
 * Insights
     - `outside()`'s corner rule `CORNER_R + max(grow, 0)` was written for the dome. Once the rim goes inside the body wall, the corners move in about 1.41 times as far as the flats, so the bevel there is flatter than its profile. A check of the T extent alone, or of the W and T sides, cannot see it; scan face normals around the whole part.
+
+## 2026-11-01 - BUILD - COMPLETE (third rework, Q3 fix)
+
+* Work completed
+    - Fixed QA's Q3. The open end's sections are now a true offset (corner radius `CORNER_R + grow`), so the bevel keeps `BEVEL_ANGLE` at the corners as well. `corner_wall` matches.
+    - The all-round normal scan failed on `efac921` (43.4 degrees) and passes now (49.9 degrees at the least). The other checks are unchanged; catalog suite 88 OK.
+* Insights
+    - The corner rule was written for the dome, where grow is only negative. It became wrong as soon as another feature took grow below zero. A shape rule that sits in a shared helper (`sec`) needs to state what it is for.

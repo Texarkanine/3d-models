@@ -113,3 +113,22 @@ Reviewed commit `efac921` against the "Rework 3" section of `projectbrief.md`.
     - If the flute feels weaker, `FLARE` has 0.2 of headroom under `CONVEX_LIMIT` (3.8 + 1.2 = 5.0).
 - **A-20 (print).** The footprint is down to 128 mm² (prints 1, 2 and 3: 231, 164 and 180). A brim may be needed on the 92 mm part. Add it to `publish.yaml`'s manufacturing notes only if the print shows it is needed.
 - **A-21 (print record, as A-18).** Add a model SumMem note "Iteration 4 = <commit>" once the fix for Q3 is committed. `efac921` will no longer be the printable iteration.
+
+## Build (rework 3, after QA FAIL): Q3 fixed
+
+- **Cause:** `outside()` gave every section the corner radius `CORNER_R + max(grow, 0)`. Below the body wall that holds the radius while the flats come in, so the corners move in about 1.41 times as far. The bevel at the corners was 43.4 degrees.
+- **Fix:** the open end's sections are a true offset, with corner radius `CORNER_R + grow`. The body and the dome keep `CORNER_R`; the dome's radius is still capped by `rrect` as it shrinks. `corner_wall(grow)` uses the same true offset, so the first-layer wall over the bore corners is 1.55 (it was 1.39).
+- **Failing check first:** `.scratch/wirestripper-grip/corner_bevel.py` (QA's `corner_bevel.py`, now with a pass/fail line) scans the face normals all round near the bed. On `efac921`'s STL it fails: 43.4 degrees at a corner, 116 faces under 45. After the fix it passes, at 49.9 to 52.3 degrees in every 15-degree direction.
+- **Re-verified:**
+    - `lip.py` passes: unchanged on the T side.
+    - `verify.py`:
+        - steel 0 mm³ in the wall;
+        - rib bites 38.7 mm³;
+        - thinnest wall 1.553, on the first layer;
+        - cap 5.0;
+        - watertight STLs;
+        - footprint 132 mm²;
+        - the fit test matches.
+    - `tools/overhang.py`: only the ridge strip.
+    - Catalog suite: 88 OK.
+- **Docs:** `systemPatterns.md` states the true-offset rule and why the dome differs. `techContext.md` adds the all-round normal scan to the useful ad hoc checks.
