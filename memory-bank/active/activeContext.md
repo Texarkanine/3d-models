@@ -1,11 +1,10 @@
 # Active Context
 
 ## Current Task: commercial-electric-wire-stripper-curved-grip (rework 3: a bigger bevel)
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Third rework opened: a taller bevel on the bed edge, with the edge brought further in.
-- Level 1: `grips.rim_profile` only.
+- `BEVEL` sets how far the bed edge comes in. The straight bevel rises to 0.94 and rounds to the widest point about 7 layers up, with the edge 0.5 inside the body wall. Details are in `tasks.md`.
 
 ## Next Step
-- Load the Level 1 workflow and build.
+- QA (subagent). Then the operator prints iteration 4, cuts off the old straight grip, and measures the straight steel.

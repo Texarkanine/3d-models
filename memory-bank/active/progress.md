@@ -260,3 +260,15 @@ The first cycle (2026-10-31) was Level 3. The 2026-11-01 rework is Level 1.
 
 * Decisions made
     - Level 1. One element changes: the bevel in `grips.rim_profile`. It becomes its own parameter, how far the bed edge comes in, rather than a by-product of the round's radius.
+
+## 2026-11-01 - BUILD - COMPLETE (third rework)
+
+* Work completed
+    - `BEVEL` (how far the bed edge comes in), `BEVEL_ANGLE` and a round `RIM_R` touching the bevel and the flare. Outputs regenerated, model docs updated.
+    - `lip.py` now requires 6 layers to the widest point and an edge 0.8 in from it. Iteration 3 fails both; the new STL passes. `verify.py`, `tools/overhang.py` and the catalog suite (88 OK) show no regressions beyond the intended thinner first layer.
+* Decisions made
+    - `BEVEL` 1.5 with `RIM_R` 0.8. That gives about twice iteration 3's layers, which is what the operator asked for: "a little bit more... bring it in a little bit more". The edge sits 0.5 inside the body wall.
+    - The first layer keeps three extrusion lines over the bore's corners; this is asserted.
+* Insights
+    - The footprint is down to 128 mm². The operator should consider a brim.
+    - Iteration 3 is this construction with a smaller `BEVEL`, so the bevel can be tuned with one number from here on.

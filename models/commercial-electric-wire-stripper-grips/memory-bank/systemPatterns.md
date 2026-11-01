@@ -36,18 +36,19 @@ Each fact has one home:
 
 - Walls are measured from the steel face, not from the bore, so retuning the bore never moves the outside. `WALL_SIDE` is in the plane of the handles, and `WALL_FACE` is across it. `CORNER_R` rounds the corners and must leave at least 2 mm over each bore corner; `check_design` asserts it.
 - It flares by `FLARE` toward the open end, fading out over `FLARE_LEN`. That gradual flare is what the hand meets, and the operator prefers it, as on the stock grip.
-- The flare's edge on the bed is rounded with radius `RIM_R`. Below the point where that round slopes at `RIM_ANGLE`, a straight bevel runs down to the bed instead, so the edge is neither sharp nor overhanging. History (2026-11-01):
+- On the bed, the open end's edge sits `BEVEL` in from the flare's full width. A straight bevel rises from there at `BEVEL_ANGLE`, and a round of radius `RIM_R` blends it into the flare. The edge is neither sharp nor overhanging, and the bevel is tall enough to see and feel. `BEVEL` may bring the edge inside the body wall. `check_design` keeps at least three extrusion lines over the bore's corners on the first layer, and `grips.py` prints the figure. History (2026-11-01):
     - Print 1's flare ran out to the bed and left an acute, sharp edge there.
     - Print 2 swapped the flare for a bead that bulged out and back in. The edge was good, but the flare was lost.
-    - The design now keeps the flare and rounds only its edge on the bed.
+    - Iteration 3 (`c585867`, not printed) kept the flare and rounded its bed edge with a circle that also touched the bed. That left only a few layers of bevel; the operator asked for more, brought further in.
+    - The design now sets the bevel directly with `BEVEL`. Iteration 3's shape is the same construction with a smaller `BEVEL`.
 - `grips.rim_profile` gives the open end's outline, from the bed to `FLARE_LEN`. It is a ruled loft of closely spaced sections; a smooth loft would ring through the round.
-- On the side facing the other handle, the wall at the open end is at most `WALL_SIDE + FLARE`. It must stay within the 5 mm the closed tool allows (`CONVEX_LIMIT`, asserted). The round trims the widest point below that, and `grips.py` prints the actual figure. Constant walls keep the closest approach to the other handle at the open end, where the gap was measured.
+- On the side facing the other handle, the wall at the open end is at most `WALL_SIDE + FLARE`. It must stay within the 5 mm the closed tool allows (`CONVEX_LIMIT`, asserted). The bevel and round trim the widest point below that, and `grips.py` prints the actual figure. Constant walls keep the closest approach to the other handle at the open end, where the gap was measured.
 - The grip is the same on both sides in W and in T. That is load-bearing: it makes a mirrored tracing harmless.
 - The dome starts at the height of the bore's roof ridge and shrinks along a quarter circle of radius `DOME_LEN`. Starting it any lower thins the T wall at the ridge's ends below the body's. The cap over the ridge is then `DOME_LEN`, at least `END`.
 
 ## Print orientation is designed in
 
-Each grip prints standing up, open end down on the bed, closed end at the top. The grip leans with the steel's curve, most at the tip. The rim's bevel rises at `RIM_ANGLE` above horizontal. Below 45 degrees it would need support, and `tools/overhang.py` would flag it; `check_design` asserts it. The bore's closed end is a gable roof whose two slopes are `ROOF_ANGLE` above horizontal in print, computed from the actual lean. The only face `tools/overhang.py` flags is the ridge strip at the roof's top. `RIDGE_W` must stay narrower than one extrusion line, so the perimeters close it. No supports are needed.
+Each grip prints standing up, open end down on the bed, closed end at the top. The grip leans with the steel's curve, most at the tip. The open end's bevel rises at `BEVEL_ANGLE` above horizontal. Below 45 degrees it would need support, and `tools/overhang.py` would flag it; `check_design` asserts it. The bore's closed end is a gable roof whose two slopes are `ROOF_ANGLE` above horizontal in print, computed from the actual lean. The only face `tools/overhang.py` flags is the ridge strip at the roof's top. `RIDGE_W` must stay narrower than one extrusion line, so the perimeters close it. No supports are needed.
 
 ## Test prints
 

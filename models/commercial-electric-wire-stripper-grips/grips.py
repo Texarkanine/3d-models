@@ -22,10 +22,10 @@ way the tip leans. The outside's dome starts at the ridge's height, so the wall
 over the roof is never thinner than the body's.
 
 Print: standing on the open end, closed end up. Its lean follows the steel's
-curve (about 15 degrees at the tip). The flare is widest just above the bed.
-Its edge on the bed is rounded, with a bevel at RIM_ANGLE under the round, so it
-is neither sharp nor overhanging. The dome and roof face up, so no supports are
-needed.
+curve (about 15 degrees at the tip). The flare is widest a little above the
+bed. Below that, a bevel at BEVEL_ANGLE brings its edge in toward the bed, and a
+round blends the bevel into the flare, so the edge is neither sharp nor
+overhanging. The dome and roof face up, so no supports are needed.
 
 Coordinates are those of `steel.py` (use position: the handle flat in XY, T
 along Z, s along the centre line from A). Each cross-section is in the plane
@@ -61,8 +61,9 @@ WALL_FACE = 2.5      # steel face to outside, across that plane
 CORNER_R = 4.8       # outside corner radius (>= 2 mm over each bore corner)
 FLARE = 1.0          # extra wall each side at the open end ...
 FLARE_LEN = 5.0      # ... fading out over this length
-RIM_R = 0.8          # radius rounding the flare's edge at the open end
-RIM_ANGLE = 50.0     # the bevel under that round, degrees above horizontal in print
+BEVEL = 1.5          # the open end's edge on the bed comes in this far from the flare's full width
+BEVEL_ANGLE = 50.0   # the bevel up from the bed, degrees above horizontal in print
+RIM_R = 0.8          # radius of the round between the bevel and the flare
 DOME_LEN = 5.0       # the dome's length, and how far it shrinks each side
 END = 3.0            # thinnest cap over the roof's ridge
 
@@ -183,13 +184,15 @@ def rim_profile():
     """The open end's outline: (d, grow) points from B (d = 0) to FLARE_LEN, d along
     the centre line toward A, grow past the body wall.
 
-    The flare widens toward B. Its edge on the bed is rounded by a circle of
-    radius RIM_R that touches both the bed's plane and the flare. Below the
-    point where that circle slopes at RIM_ANGLE above horizontal (in print), it
-    would overhang, so a straight bevel runs from there down to the bed. Past
-    the circle, the flare runs on unchanged into the body.
+    The flare widens toward B. On the bed its edge sits BEVEL in from the
+    flare's full width, and a straight bevel rises from there at BEVEL_ANGLE
+    above horizontal (in print). A round of radius RIM_R, touching both the
+    bevel and the flare, blends one into the other. Past the round, the flare
+    runs on unchanged into the body.
     """
-    r, a = RIM_R, math.radians(RIM_ANGLE)
+    r = RIM_R
+    c = 1 / math.tan(math.radians(BEVEL_ANGLE))         # the bevel's grow per unit d
+    foot = FLARE - BEVEL                                # the bevel's foot on the bed
 
     def centre(t):
         """Centre of the circle of radius r that touches the flare at d = t, inside it."""
@@ -197,22 +200,25 @@ def rim_profile():
         q = math.hypot(1.0, m)
         return t + r * m / q, g - r / q
 
-    lo, hi = 0.0, FLARE_LEN        # the touch point whose circle also touches the bed
+    def gap(t):
+        """centre(t)'s depth inside the bevel's line, less r: 0 where its circle touches it."""
+        cd, cg = centre(t)
+        return (foot + c * cd - cg) / math.hypot(1.0, c) - r
+
+    lo, hi = 0.0, FLARE_LEN        # the touch point whose circle also touches the bevel
     for _ in range(60):
         mid = (lo + hi) / 2
-        lo, hi = (mid, hi) if centre(mid)[0] < r else (lo, mid)
+        lo, hi = (mid, hi) if gap(mid) < 0 else (lo, mid)
     t = (lo + hi) / 2
-    gc = centre(t)[1]
-    start = 180.0 - RIM_ANGLE                           # the circle slopes at RIM_ANGLE here
+    cd, cg = centre(t)
     m = flare(t)[1]
+    start = 180.0 - BEVEL_ANGLE                         # the round leaves the bevel here
     stop = math.degrees(math.atan2(1.0, -m))            # and touches the flare here
-    bd = r + r * math.cos(math.radians(start))
-    bg = gc + r * math.sin(math.radians(start))
-    pts = [(0.0, bg - bd / math.tan(a))]                # the bevel's foot on the bed
+    pts = [(0.0, foot)]
     n = max(1, math.ceil((start - stop) / RIM_STEP))
     for k in range(n + 1):
         phi = math.radians(start + (stop - start) * k / n)
-        pts.append((r + r * math.cos(phi), gc + r * math.sin(phi)))
+        pts.append((cd + r * math.cos(phi), cg + r * math.sin(phi)))
     n = max(1, math.ceil(math.degrees(math.atan(-m)) / RIM_STEP))
     for k in range(1, n + 1):                           # the rest of the flare
         d = t + (FLARE_LEN - t) * k / n
@@ -274,22 +280,33 @@ def export(shape, stem, out):
     cq.exporters.export(shape, str(out / f"{stem}.stl"), tolerance=0.01, angularTolerance=0.1)
 
 
+def corner_wall(grow=0.0):
+    """Material over each bore corner where the outside stands grow past the body wall."""
+    c, r = BORE_CLEAR, BORE_CORNER_R
+    rc = CORNER_R + max(grow, 0.0)
+    gap_u = WALL_SIDE + grow - rc - (c - r)
+    gap_v = WALL_FACE + grow - rc - (c - r)
+    return rc - math.hypot(gap_u, gap_v) - r
+
+
 def check_design(h):
     """Script assertions on the parameters; geometry checks belong to the test prints."""
     c, r = BORE_CLEAR, BORE_CORNER_R
     corner_gap = c if r <= c else r - math.sqrt(2) * (r - c)
     assert corner_gap >= 0.15, f"a sharp steel corner clears the bore by only {corner_gap:.2f}"
-    gap_u, gap_v = WALL_SIDE - CORNER_R - (c - r), WALL_FACE - CORNER_R - (c - r)
-    corner_wall = CORNER_R - math.hypot(gap_u, gap_v) - r
-    assert corner_wall >= 2.0, f"only {corner_wall:.2f} over the bore's corners"
+    wall = corner_wall()
+    assert wall >= 2.0, f"only {wall:.2f} over the bore's corners"
     assert WALL_SIDE + FLARE <= CONVEX_LIMIT, "too thick at B for the tool to close"
-    assert RIM_R < FLARE_LEN, "the rim's round is longer than the flare"
-    assert rim_profile()[0][1] >= 0, "the rim's bevel would cut into the body wall"
-    assert RIM_ANGLE >= 45, "the rim's bevel would need support"
+    rim = rim_profile()
+    assert all(q[0] > p[0] for p, q in zip(rim, rim[1:])), \
+        "the bevel and its round do not fit between the bed and FLARE_LEN"
+    assert corner_wall(rim[0][1]) >= 1.2, \
+        "the bevel leaves under three extrusion lines over the bore's corners on the bed"
+    assert BEVEL_ANGLE >= 45, "the bevel would need support"
     assert h.width(0) / 2 + WALL_SIDE - DOME_LEN > 0.4, "the dome would shrink to nothing"
     assert DOME_LEN >= END, "the dome is too short to cap the roof"
     assert RIB_INSET - RIB_BASE / 2 > r - c, "ribs would sit in the bore's corners"
-    return corner_gap, corner_wall
+    return corner_gap, wall
 
 
 def sizes(h, printed):
@@ -308,7 +325,9 @@ def sizes(h, printed):
               f"{t + 2 * BORE_CLEAR:5.2f}  ribs {w - 2 * RIB_BITE:5.2f} x {t - 2 * RIB_BITE:5.2f}  "
               f"outside {w + 2 * (WALL_SIDE + grow):5.2f} x {t + 2 * (WALL_FACE + grow):5.2f}")
     _, rise = roof(h)
-    print(f"  rim: {rim[0][1]:.2f} out on the bed, widest {most:.2f} out at {widest:.2f} from B; "
+    print(f"  open end: edge on the bed {rim[0][1]:+.2f} from the body wall "
+          f"({corner_wall(rim[0][1]):.2f} over the bore corners); bevel up to {rim[1][0]:.2f}, "
+          f"then rounding to the widest, {most:.2f} out at {widest:.2f} from B; "
           f"the flare meets the body {FLARE_LEN} from B")
     print(f"  wall at the widest, on the side facing the other handle: {WALL_SIDE + most:.2f} "
           f"(limit {CONVEX_LIMIT})")
