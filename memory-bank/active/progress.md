@@ -248,3 +248,10 @@ The first cycle (2026-10-31) was Level 3. The 2026-11-01 rework is Level 1.
     - Root persistent files: skip. Only this model's outside changed, and no catalog contract changed.
 * Decisions made
     - Iteration 3 closes unprinted. The operator, looking at the model, asked for more bevel ("only three or four layers... bring it in a little bit more"). That is rework 3.
+
+## 2026-11-01 - REWORK - INITIATED (third rework)
+
+* Work completed
+    - A third rework was opened, on the operator's review of iteration 3 in CAD, before it was printed. The previous cycle was Level 1.
+* Decisions made
+    - The operator's feedback: "a little bit more of a bevel on the top. We basically only have three or four layers of bevel. I think we can do a little bit more... bring it in a little bit more maybe."

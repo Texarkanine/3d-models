@@ -62,3 +62,12 @@ Print 2's lip fixed the sharp edge, but the operator prefers print 1's gradual f
 3. It still prints open end down with no supports, and the wall facing the other handle stays within `CONVEX_LIMIT`.
 4. The bore, ribs and dome stay as they are.
 5. Commit each printable iteration on its own, so that earlier ones can be checked out.
+
+## Rework 3 (2026-11-01): a bigger bevel
+
+Iteration 3 (flare, with a rounded and bevelled edge on the bed) reached its widest point about 4 layers up. The operator wants more bevel, with the edge on the bed brought further in.
+
+1. Make the bevel on the open end's bed edge taller, bringing the edge on the bed further in.
+2. Keep print 1's flare above it, the round between bevel and flare, no supports, and `CONVEX_LIMIT`.
+3. Keep enough wall on the first layers that the edge prints solidly.
+4. The bore, ribs and dome stay as they are. Commit the iteration on its own.
