@@ -17,6 +17,6 @@ Parametric CAD in Python with CadQuery (OpenCascade kernel), as in the bulb stor
 ## Testing Process
 
 - The final test is a TPU print slid onto the operator's tool. The fit test comes first, then the full grip.
-- `grips.py`'s assertions catch impossible parameters: corner clearance, material over the bore corners, the wall at B, the dome, rib placement. `grip()` asserts one valid solid.
+- `grips.py`'s assertions catch impossible parameters: corner clearance, material over the bore corners, the wall at the lip's crown, the lip's underside (starting no lower than the body wall, and steep enough to print), the dome, rib placement. `grip()` asserts one valid solid.
 - `tools/overhang.py <file.stl>` lists faces that need support in print orientation (copied from the H11 model). Exported STLs should be watertight.
 - Do not add committed tests for shapes still being prototyped. Verify ad hoc in `.scratch/` and let the test print decide; add checks once a shape settles. Useful ad hoc checks: the mock steel (`grips.steel_solid`) never inside the bore wall; each rib bites `RIB_BITE` in cross-sections; the thinnest wall between the bore's and the outside's faces; the steel's tip below the roof in print orientation; horizontal slices of the STL just above the bed, for the angle where the outside meets the bed and the lip's profile.

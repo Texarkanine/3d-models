@@ -171,3 +171,29 @@ The first cycle (2026-10-31) was Level 3. The 2026-11-01 rework is Level 1.
 * Insights
     - The old flare had also left the smooth body loft 0.02 to 0.03 over its wall for several millimetres past the flare. Taking the lip out of the smooth loft brought that back to 0.000.
     - The footprint on the bed drops from 231 to 164 mm². The operator should watch bed adhesion on the 92 mm tall print.
+
+## 2026-11-01 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantic review of the rework against the rework brief and the operator's direction.
+    - Independent checks:
+        - a scratch rebuild gives byte-identical STLs, and the STEP files differ only in their header;
+        - `lip.py` fails on the pre-fix STL and passes on both new STLs;
+        - a separate slice check matches `lip_profile()` to within 0.01 on all four sides and both diagonals;
+        - `verify.py` reproduces the build's numbers;
+        - the body walls are within 0.012 of design;
+        - overhangs are unchanged;
+        - catalog suite 88 OK.
+* Decisions made
+    - PASS. All four rework requirements are met. Advisories A-10 to A-14 are in `tasks.md`; none blocks.
+* Insights
+    - On a leaning part, horizontal STL slices exaggerate small differences. Old and new differ by up to 0.1 locally above the lip, while cross-sections square to the centre line put both builds within 0.015 of design. Check walls square to the centre line.
+
+## 2026-11-01 - WRAP-UP - COMPLETE
+
+* Work completed
+    - Fixed QA advisories A-10 to A-13: doc wording, the comment on `d1`, `LIP_STEP` moved, and a new `LIP_ANGLE >= 45` assertion. A-14 (the footprint) is passed to the operator.
+    - The rebuild is byte-identical in both STLs.
+    - Root persistent files: skip. The rework changed only this model's outside; no catalog contract changed.
+* Decisions made
+    - Level 1 rework complete. Next is the operator's print of the lipped grip, then `/niko-archive` for the whole task.

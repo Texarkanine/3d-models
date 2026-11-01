@@ -38,3 +38,47 @@
 - `tools/overhang.py`: only the roof's ridge strip (2.9 mm²), as before. The lip's underside is not flagged.
 - Close-up render, `.scratch/wirestripper-grip/render-lip.png`: the bevel, crown and blend, matching on the W and T sides.
 - Catalog suite: 88 OK.
+
+## QA (2026-11-01): PASS
+
+Reviewed commit `36508f1` against the rework section of `projectbrief.md`.
+
+What QA checked independently:
+- **Rebuild:** QA rebuilt both parts in a scratch directory outside the repository, in 22 s. Both STLs are byte-identical to the committed files. The STEP files differ only in the `FILE_NAME` timestamp.
+- **Red, then green:** `lip.py` fails on the pre-fix grip STL from `95e5f61`: 71 degrees, widest on the bed. It passes on both committed STLs, with the numbers listed above.
+- **All sides, not just T:** `lip.py` reads only the T extent. A separate QA slice check also measured W and both diagonals, which cross the rounded corners. At every height from the bed to 6 mm, the STL matches `grips.lip_profile()` to within 0.01.
+- **The rest unchanged (rework requirement 4):** the diff leaves `bore()`, `ribs()`, `roof()`, `steel.py` and `FIT_LEN` untouched. `verify.py` reproduces every number listed above. QA cut cross-sections square to the centre line every 0.5 mm. The body walls are within 0.012 of `WALL_SIDE` and `WALL_FACE`; the old build was within 0.015.
+- **Overhangs:** `tools/overhang.py` flags only the 2.9 mm² ridge strip on the grip, and nothing on the fit test. Both are watertight.
+- **Catalog suite:** 88 OK.
+- **No leftovers:** no `FLARE` or `FLARE_LEN` is left in committed code or in the model's docs. The SumMem note for test print 1 is committed.
+
+The `lip_profile()` maths is correct, checked by hand:
+- The underside from (0, 0) is tangent to the crown at 180° − `LIP_ANGLE`.
+- The blend circle touches the crown from outside, at angle `m`.
+- The blend ends tangent to the body wall.
+- The new `check_design` assertion is exactly the condition that the tangent point sits on or outside the body wall.
+
+Building the lip as a separate ruled loft is justified. It also removed the 0.02 to 0.03 overshoot that the old flare left in the smooth body loft.
+
+### Non-blocking advisories
+
+- **A-10 (wording, same class as A-8).** The model's `systemPatterns.md`, under "Print orientation", says the lip's underside "overhangs at `LIP_ANGLE` above horizontal, less steeply than the 45 degrees `tools/overhang.py` flags". This has two problems:
+    - The claim holds only while `LIP_ANGLE` is above 45, and nothing asserts that.
+    - The sentence counts its angle from horizontal, so "less steeply" reads backward.
+
+  Suggested fix: state it as a rule ("`LIP_ANGLE` must stay above 45 degrees, or `tools/overhang.py` flags the underside"), or add that rule as a `check_design` assertion. "The crown sits a couple of millimetres from B" also depends on the current values, and `sizes()` already prints that distance.
+- **A-11 (docs).** In the model's `techContext.md`, "Testing Process" lists what the assertions in `grips.py` catch. It still says "the wall at B" and leaves out the new check that the lip's underside starts on or outside the body wall.
+- **A-12 (comment).** In `lip_profile()`, the comment on `d1` says it is "the distance at which the underside from (0, 0) meets it". In fact `d1` is the crown centre's distance. The underside touches the crown lower down, at `d1 − LIP_R·cos(LIP_ANGLE)`, which is 0.77 now. Suggested wording: "placed so the underside from (0, 0) is tangent to the crown".
+- **A-13 (nit).** `LIP_STEP` sets loft resolution, like `SECTION_STEP`, but it sits under "Outside" instead of "Build".
+- **A-14 (operator, print risk).** The footprint on the bed drops from 231 to 164 mm² (−29 %) on a 92 mm part that leans. That follows from what the operator asked for: contact with the bed narrower than the bulge. Build already flagged it. Watch adhesion on the next print; a brim is the usual remedy.
+
+### Advisories resolved after QA
+
+- **A-10:** `systemPatterns.md` now states the rule:
+    - below 45 degrees the lip's underside needs support, and `check_design` asserts `LIP_ANGLE >= 45`;
+    - the crown's distance from B is left to `sizes()`.
+- **A-11:** `techContext.md` lists the assertions on the lip's crown and underside.
+- **A-12:** the `d1` comment now says the crown centre is placed so that the underside is tangent to the crown.
+- **A-13:** `LIP_STEP` has moved to the Build parameters.
+- **A-14:** the operator is told about the smaller footprint and the brim.
+- **After the rebuild:** the STLs are byte-identical, and the STEP files changed only in their header timestamp, so they were restored.

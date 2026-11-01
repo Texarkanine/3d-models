@@ -60,12 +60,12 @@ CORNER_R = 4.8       # outside corner radius (>= 2 mm over each bore corner)
 LIP = 1.0            # the open end's lip stands this far out from the body wall
 LIP_R = 1.5          # radius of the lip's crown, and of its blend back into the body
 LIP_ANGLE = 50.0     # the lip's underside, degrees above horizontal in print
-LIP_STEP = 6.0       # degrees of arc between the lip's lofted sections
 DOME_LEN = 5.0       # the dome's length, and how far it shrinks each side
 END = 3.0            # thinnest cap over the roof's ridge
 
 # ---- Build -----------------------------------------------------------------
 SECTION_STEP = 4.0   # longest gap between lofted cross-sections
+LIP_STEP = 6.0       # degrees of arc between the lip's lofted sections
 FIT_LEN = 15.0       # the fit test is the grip's first FIT_LEN mm from the open end
 CONVEX_LIMIT = 5.0   # tool shut: wall allowed at B on the side facing the other handle
 
@@ -177,8 +177,8 @@ def lip_profile():
     back into the body wall. The outline is smooth from the bed to the body.
     """
     r, a = LIP_R, math.radians(LIP_ANGLE)
-    g1 = LIP - r                                # crown centre: grow, and the distance
-    d1 = g1 * math.tan(a) + r / math.cos(a)     # at which the underside from (0, 0) meets it
+    g1 = LIP - r                                # crown centre (d1, g1), placed so the
+    d1 = g1 * math.tan(a) + r / math.cos(a)     # underside from (0, 0) is tangent to it
     d2 = d1 + math.sqrt((2 * r) ** 2 - (r - g1) ** 2)   # blend circle's centre: (d2, r)
     m = math.degrees(math.atan2(r - g1, d2 - d1))       # where the two circles touch
     pts = [(0.0, 0.0)]
@@ -262,6 +262,7 @@ def check_design(h):
     assert WALL_SIDE + LIP <= CONVEX_LIMIT, "too thick near B for the tool to close"
     assert LIP >= LIP_R * (1 - math.sin(math.radians(LIP_ANGLE))), \
         "the lip's underside would start inside the body wall"
+    assert LIP_ANGLE >= 45, "the lip's underside would need support"
     assert h.width(0) / 2 + WALL_SIDE - DOME_LEN > 0.4, "the dome would shrink to nothing"
     assert DOME_LEN >= END, "the dome is too short to cap the roof"
     assert RIB_INSET - RIB_BASE / 2 > r - c, "ribs would sit in the bore's corners"
