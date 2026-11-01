@@ -52,3 +52,13 @@ The first TPU 95A print fits the steel "like a glove" and stays on without adhes
 4. The bore, the ribs, the rest of the outside, and the fit test's length stay as they are.
 
 The straight grip is still a later task. It needs its steel measured once the old glued grip is off.
+
+## Rework 2 (2026-11-01): flare plus a rounded bevel
+
+Print 2's lip fixed the sharp edge, but the operator prefers print 1's gradual flare ("flute") where the hand meets the grip. The stock grip has both: a flare, and a rounded edge at the open end.
+
+1. Bring back print 1's flare along the grip.
+2. Round off only the open end's outer edge, the one on the bed, with a small printable bevel so it isn't sharp.
+3. It still prints open end down with no supports, and the wall facing the other handle stays within `CONVEX_LIMIT`.
+4. The bore, ribs and dome stay as they are.
+5. Commit each printable iteration on its own, so that earlier ones can be checked out.

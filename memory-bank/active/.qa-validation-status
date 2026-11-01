@@ -1,8 +1,0 @@
-PASS
-
-QA of the 2026-11-01 rework of commercial-electric-wire-stripper-curved-grip (round the open end), Level 1. Reviewed commit 36508f1 against the rework brief.
-
-- All four rework requirements are met. The lip bulges out from the bed contact and comes back in. The grip needs no supports. The wall facing the other handle peaks at WALL_SIDE + LIP, which is within CONVEX_LIMIT and asserted. The bore, ribs, roof, steel.py and FIT_LEN are unchanged.
-- A rebuild gives byte-identical STLs. The STEP files differ only in the header timestamp. Catalog suite: 88 OK. overhang.py flags only the 2.9 mm2 ridge strip on the grip and nothing on the fit test.
-- lip.py fails on the pre-fix STL (71 degrees, widest on the bed) and passes on both new STLs (130 degrees). A separate QA slice check matches grips.lip_profile() to within 0.01 on all four sides and both diagonals. verify.py reproduces the build's numbers.
-- Non-blocking advisories A-10 to A-14 are in tasks.md: wording that depends on current values, one docs line that drifted, one comment, one parameter placement, and the smaller bed footprint to watch on the next print.

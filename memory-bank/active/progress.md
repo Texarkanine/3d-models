@@ -197,3 +197,13 @@ The first cycle (2026-10-31) was Level 3. The 2026-11-01 rework is Level 1.
     - Root persistent files: skip. The rework changed only this model's outside; no catalog contract changed.
 * Decisions made
     - Level 1 rework complete. Next is the operator's print of the lipped grip, then `/niko-archive` for the whole task.
+
+## 2026-11-01 - REWORK - INITIATED (second rework)
+
+* Work completed
+    - A second rework was opened on the operator's second test print. The previous cycle was Level 1, and the first was Level 3.
+* Decisions made
+    - The operator's feedback, with a photo of print 1, print 2 and the stock grip: "I actually really liked the kind of flute that you had going on. We only want to bevel the side that's down towards the bed. We want to keep the more gradual fluting that was on the top side where your hands would connect... if we can combine those so we can print one that's going to look more like the stock one with a flute on the actual grip but then the little bevel on the top so it's not sharp, that would be ideal." Also: commit each iteration, so that old ones can be looked at again.
+    - The operator will cut the old straight grip off and measure the steel once this print is done.
+* Insights
+    - Print 2's lip fixed the sharp edge, but it gave up print 1's gradual flare. The flare is what the hand meets, and the operator prefers it. Print 1 is commit `95e5f61`, print 2 is `da750d8`.
