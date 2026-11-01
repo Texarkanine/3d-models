@@ -72,3 +72,53 @@ A slide-on TPU 95A grip for the bare curved steel handle, with a fit test, is bu
 - For a first-print prototype in this catalog, plan ad hoc verification in `.scratch/` plus a fit test from the start. Plan committed checks only after the shape survives a print. The rule already existed in h7 and h11; arguing past it cost planning and preflight effort.
 - When a creative decision adds a functional requirement the operator did not state (here, holding without glue), confirm it with the operator before building the design around it.
 - Model docs name parameters and give the reasoning; they never copy values. This catalog norm was already in SumMem and was still missed. Check the model's `README.md` and `memory-bank/` for copied numbers before QA.
+
+---
+
+# Reflection: Rework 4 (2026-11-01, Level 2): a stronger flare, and the straight grip
+
+## Summary
+
+Curved grip iteration 5 (`e1b3528`) stands the open end's widest point 0.99 further out, at the same height, with its flare no steeper than print 1's. Its tool-closing guard now uses the operator's measured gap. Straight grip iteration 1 (`3046d4e`) is built from the operator's straight readings (`db5cbfd`) with the same design. QA passed. Whether both print and fit waits on the operator.
+
+## Requirements vs Outcome
+
+- **Flare:** met. The widest point is 0.99 further out (asked: 1.0), at z 1.50. The flare falls at most 0.42 per mm, the bevel is at least 49.9 degrees all round, and 1.08 is left with the tool shut, against at least 0.8.
+    - Reinterpreted: "one millimeter out flare" was taken at the widest point, since the operator reasoned in terms of the gap.
+    - Added: `FLARE_LEN` grew from 5 to 8, to keep print 1's slope. The operator did not ask for this and should judge it in hand.
+- **Readings:** met. The log, both photos and `steel.py`. The one assumption, row 7 at 10 from B, is recorded.
+- **Straight grip:** met as designed. Its walls and open end are identical to the curved grip's, and its bore follows its own readings: 0.34 to 0.47 wider in W than the curved grip's, 0.22 taller at B. "Match inner and outer dimensions" was read as the same design on its own steel.
+- **One commit per iteration:** met, with three commits.
+- **`publish.yaml`:** unchanged.
+
+## Plan Accuracy
+
+- **Preflight run 1** found two real flaws:
+    - B3 could not pass, because `FLARE_LEN` moves every section of the body loft;
+    - the gap guard modelled the wrong pair of grips.
+
+  Fixing the second reordered the plan (straight steel first) and split the work into three commits. After that the plan held.
+- **Surprises:**
+    - `shapely.polygonize` cannot close rings from raw mesh-plane segments;
+    - a 9 µm extra rib bite where the straight T profile kinks between loft sections;
+    - "leaning" in the size report.
+
+## Build & QA Observations
+
+- The regression guards made the `Handle` change safe to do quickly: the curved report diff, a pixel diff of the plot, and byte-identical STLs across every rebuild.
+- QA found one wrong sentence (A-25), fixed. Its checks reproduced every figure.
+- One process slip: `tail` on a red run's output. The green runs were read whole.
+
+## Insights
+
+### Technical
+- **A measurement taken on a stand-in must be translated to the part that ships.** The 3.3 gap was measured with a curved grip on the straight steel. Walls measured from the steel do not carry across when the two steels differ, so the guard needed the W difference at B. Preflight caught it, not the plan.
+- **Moving one end of a smooth loft's section range moves every section,** so "unchanged elsewhere" checks need a geometric tolerance, not equality.
+- **trimesh's welded `section().to_2D(to_2D=identity)` is the reliable way to get slice polygons for comparison.** Raw `mesh_plane` segments do not share exact endpoints.
+
+### Process
+- **Typing hand-written readings back in chat before building** settled three questions in one round trip: the paper edge is B, the holes' datum, and where J to L sit. Do it for every measurement sheet.
+
+### Million-Dollar Question
+
+The open end would be set in the operator's own terms: the widest point's reach and height, plus the flare's slope. `FLARE` and `BEVEL` would be derived from those by a solver, which today lives in the scratch `flare_solve.py`. The tool-closing guard would then be a direct limit on that reach. "A bit more flare" becomes one number, and the next print's change is exactly what the operator asked for. Preflight run 2 proposed this. It was not taken here, because the operator had already named the change and the current parameters deliver it, but it is the natural next refactor if the open end is retuned again.

@@ -415,3 +415,14 @@ The first cycle (2026-10-31) was Level 3. Reworks 1 to 3 (2026-11-01) were Level
     - Advisories A-25 to A-27 are in `tasks.md`. None blocks. A-25 fixes a sentence in `systemPatterns.md`: the curved grip's bore was not narrower than the straight steel, only its ribs were. A-26 carries preflight's "sat 0.4 short of B" note into the operator's report.
 * Insights
     - On the straight steel, the curved grip's bore (10.29 at B) still cleared the steel (10.16). Only the ribs bit harder. So the 3.3 reading was taken with that grip's wall moved out by less than half the W difference, and `shut_gap()`'s full half-difference is a true worst case.
+
+## 2026-11-01 - REFLECT - COMPLETE (fourth rework)
+
+* Work completed
+    - Reflection appended to `reflection/reflection-commercial-electric-wire-stripper-curved-grip.md`.
+    - QA's A-25 is fixed; it is docstring and doc only, and the STLs are byte-identical.
+    - Root persistent files reconciled: all skip.
+* Decisions made
+    - Next: the operator prints, and then archives or reworks.
+* Insights
+    - A measurement taken on a stand-in part needs translating to the part that ships before it can serve as a limit.
