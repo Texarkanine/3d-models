@@ -212,3 +212,14 @@ The first cycle (2026-10-31) was Level 3. The 2026-11-01 rework is Level 1.
 
 * Decisions made
     - Level 1. One element changes: the outline of the open end in `grips.py`. Print 1's flare comes back, and its edge on the bed is rounded with a printable bevel.
+
+## 2026-11-01 - BUILD - COMPLETE (second rework)
+
+* Work completed
+    - The flare is restored. Its bed edge is rounded by `RIM_R` over a bevel at `RIM_ANGLE` (`grips.rim_profile`). The outputs were regenerated, and the model's `systemPatterns.md` and `techContext.md` updated.
+    - The slice check now also requires a flute (a gradual fall above the widest point). Both earlier prints' STLs fail it, each on the flaw the operator named; the new STL passes. `verify.py`, `tools/overhang.py` and the catalog suite (88 OK) show no regressions.
+* Decisions made
+    - The round touches both the bed's plane and the flare, so above it the flare is exactly print 1's. `RIM_R` is small, so the widest point drops from print 1's `FLARE` only by what the round trims.
+    - `RIM_STEP` was halved after the first build, because the flare's ruled steps left creases on the surface the hand meets.
+* Insights
+    - The operator's word "flute" means the flare, not the bead.
