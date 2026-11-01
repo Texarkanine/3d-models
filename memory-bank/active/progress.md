@@ -382,3 +382,20 @@ The first cycle (2026-10-31) was Level 3. Reworks 1 to 3 (2026-11-01) were Level
 * Insights
     - The restated B3 has real margin: 0.075 against 0.1 on the outside, and 0.0003 against 0.001 on the bore.
     - During the 3.3 reading, the curved grip on the straight handle sat about 0.4 short of the straight B, because its bore is shorter than the straight A to B. The shipped straight grip sits at B. The effect on the gap was not measured, and is likely under 0.1.
+
+## 2026-11-01 - BUILD - COMPLETE (fourth rework)
+
+* Work completed
+    - Six steps, in three commits:
+        - `db5cbfd`: the straight readings in `steel.py`, the log and the photos;
+        - `e1b3528`: curved grip iteration 5;
+        - `3046d4e`: straight grip iteration 1, with the docs.
+    - Each check ran red before its code: `straight_check.py`, `lip.py`, `shut_gap.py` and `verify.py straight`. The regression guards were shown able to fail: `slice_compare.py` fails on a 0.2 shift.
+    - All green on the committed outputs. Catalog suite 88 OK.
+* Decisions made
+    - Curved iteration 5: widest 1.464, against iteration 4's 0.473, at z 1.50; the flare falls at most 0.42 per mm; the bevel is at least 49.9 degrees all round; the footprint is 197 mm² (it was 132).
+    - The gap with the tool shut is modelled for the shipped pair: 1.08, with at least 0.8 asserted. The operator's "pushing it" case gives 0.08 and is refused.
+    - Straight grip: its open end and walls are identical to the curved grip's. Its bore is 0.34 wider at A and 0.47 wider at B, from the traced W, and 0.22 taller at B, from the calipers.
+* Insights
+    - Raw `mesh_plane` segments do not share exact endpoints, so `shapely.polygonize` finds no rings. trimesh's `section().to_2D(to_2D=identity)` welds them and keeps the mesh's own x and y.
+    - A loft samples its sections every `SECTION_STEP`, so a kink in a readings profile between samples is cut across. Here the straight T rises steeply from A to J, which adds a 9 µm rib bite at J. That is harmless, but worth knowing before readings get denser.

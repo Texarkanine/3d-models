@@ -285,7 +285,7 @@ No new technology - validation not required. The scratch checks use packages alr
 
   The curved STLs stayed byte-identical to iteration 5's; the STEP files changed only in their headers and were restored. `verify.py` and `render.py` take `curved|straight`. The size report no longer says "leaning" for the straight grip.
 - [x] 5. Model docs: the README, productContext (the straight success criterion), techContext (the build of both grips; run every check for both), systemPatterns (print orientation and the fit test for both grips), and the `grips.py` docstring. `publish.yaml` is unchanged.
-- [ ] 6. Final verification
+- [x] 6. Final verification: catalog suite 88 OK. Rerun on the committed outputs, all pass: `straight_check.py`, `shut_gap.py`, `slice_compare.py`, `verify.py straight`, `lip.py` (both grips), `corner_bevel.py` (all four files) and `tools/overhang.py`. Commits: readings `db5cbfd`, curved iteration 5 `e1b3528`, straight iteration 1 `3046d4e`.
 
 ## Status
 
@@ -294,6 +294,6 @@ No new technology - validation not required. The scratch checks use packages alr
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
-- [ ] Build
+- [x] Preflight
+- [x] Build
 - [ ] QA
