@@ -10,7 +10,7 @@
 - Pull off a ruined grip, print a new one in TPU, and slide it onto the bare steel.
 - Print another whenever a grip wears out or gets contaminated again.
 - Glue a grip on if wanted. The inside has texture for the glue to key into. That texture is still there if someone vapor-smooths the outside, which removes the print lines.
-- Fit both handles: the curved grip first, then a straight grip with the same outside design.
+- Fit both handles: a curved grip and a straight grip with the same outside design.
 
 ## Key Benefits
 
@@ -20,6 +20,7 @@
 ## Success Criteria
 
 - The curved grip slides onto the bare curved steel as far as the original went (83 mm from the tip) and stays on in use.
+- The straight grip slides onto the bare straight steel as far as the original went (85 mm from the tip) and stays on in use.
 - The tool still closes fully with the grips on.
 - Each grip prints open end down with no supports.
 - Files open in a slicer (STL) and in CAD (STEP).

@@ -21,8 +21,9 @@ are ROOF_ANGLE above horizontal when the grip stands on its open end, whichever
 way the tip leans. The outside's dome starts at the ridge's height, so the wall
 over the roof is never thinner than the body's.
 
-Print: standing on the open end, closed end up. Its lean follows the steel's
-curve (about 15 degrees at the tip). The flare is widest a little above the
+Print: standing on the open end, closed end up. The curved grip leans with the
+steel's curve (about 15 degrees at the tip); the straight grip stands upright,
+its roof a symmetric gable. The flare is widest a little above the
 bed. Below that, a bevel at BEVEL_ANGLE brings its edge in toward the bed, and a
 round blends the bevel into the flare, so the edge is neither sharp nor
 overhanging. The dome and roof face up, so no supports are needed.
@@ -32,8 +33,9 @@ along Z, s along the centre line from A). Each cross-section is in the plane
 square to the centre line: u along the W direction, v along T.
 
 Run:  python grips.py   (needs cadquery)
-Writes STEP (opens in CAD) and STL (for the slicer) for the curved grip and its
-fit test, already standing on the open end, and prints the main sizes.
+Writes STEP (opens in CAD) and STL (for the slicer) for each grip and its fit
+test (curved_grip, straight_grip), already standing on the open end, and
+prints each grip's main sizes.
 """
 
 import math
@@ -353,8 +355,8 @@ def sizes(h, printed):
     verts, _ = printed.tessellate(0.01, 0.1)   # BoundingBox() is loose on lofted faces
     span = [max(getattr(v, a) for v in verts) - min(getattr(v, a) for v in verts) for a in "xyz"]
     L = h.length
-    print(f"{h.name} grip: stands {span[2]:.1f} tall on its open end; leaning, it spans "
-          f"{span[0]:.1f} x {span[1]:.1f}; volume {printed.Volume() / 1000:.1f} cm3")
+    print(f"{h.name} grip: stands {span[2]:.1f} tall on its open end and spans "
+          f"{span[0]:.1f} x {span[1]:.1f} across (with any lean); volume {printed.Volume() / 1000:.1f} cm3")
     rim = rim_profile()
     d_most, most = widest()
     for name, s, grow in (("open end (B)", L, rim[0][1]), ("widest", L - d_most, most),
@@ -374,11 +376,17 @@ def sizes(h, printed):
     print(f"  bore ends {END_CLEAR} past A, its roof rises {rise:.2f} more; dome {DOME_LEN} beyond that")
 
 
-if __name__ == "__main__":
-    out = Path(__file__).resolve().parent
-    h = steel.CURVED
+def build(h, stem, out):
+    """Check the design for handle h, build its grip standing on the open end,
+    write <stem> and <stem>_fit_test (STEP and STL) into out, and print the sizes."""
     check_design(h)
     printed = to_print(grip(h), h)
-    export(printed, "curved_grip", out)
-    export(fit_test(printed), "curved_grip_fit_test", out)
+    export(printed, stem, out)
+    export(fit_test(printed), f"{stem}_fit_test", out)
     sizes(h, printed)
+
+
+if __name__ == "__main__":
+    out = Path(__file__).resolve().parent
+    for h, stem in ((steel.CURVED, "curved_grip"), (steel.STRAIGHT, "straight_grip")):
+        build(h, stem, out)

@@ -276,8 +276,15 @@ No new technology - validation not required. The scratch checks use packages alr
     - `tools/overhang.py`: the ridge strip only.
 
   The `CONVEX_LIMIT` prose is replaced in `systemPatterns.md` and `techContext.md` (preflight run 2, A1). A SumMem correction to "0.5" is recorded (run 1, A5).
-- [ ] 4. Straight grip, iteration 1
-- [ ] 5. Model docs
+- [x] 4. Straight grip, iteration 1: `grips.build(h, stem, out)`; the main block builds both grips in about 40 s. `verify.py straight` was red first (no STL), then green:
+    - steel 0 mm³ in the wall; ribs 39.4 mm³ against 39.4. One T-face rib bites 0.109 at J, because the loft's sections miss that station's kink in T; that is 9 µm;
+    - thinnest wall 2.05; cap 5.0; watertight; the fit test matches; footprint 202 mm²;
+    - `lip.py straight`: widest 1.463 at z 1.50;
+    - `corner_bevel.py`: at least 50.2 degrees;
+    - `tools/overhang.py`: only the 0.2 ridge, which bridges.
+
+  The curved STLs stayed byte-identical to iteration 5's; the STEP files changed only in their headers and were restored. `verify.py` and `render.py` take `curved|straight`. The size report no longer says "leaning" for the straight grip.
+- [x] 5. Model docs: the README, productContext (the straight success criterion), techContext (the build of both grips; run every check for both), systemPatterns (print orientation and the fit test for both grips), and the `grips.py` docstring. `publish.yaml` is unchanged.
 - [ ] 6. Final verification
 
 ## Status
