@@ -132,3 +132,78 @@ Reviewed commit `efac921` against the "Rework 3" section of `projectbrief.md`.
     - `tools/overhang.py`: only the ridge strip.
     - Catalog suite: 88 OK.
 - **Docs:** `systemPatterns.md` states the true-offset rule and why the dome differs. `techContext.md` adds the all-round normal scan to the useful ad hoc checks.
+
+## QA (2026-11-01, rework 3, run 2): PASS
+
+Reviewed commit `87e777c` (the fix for Q3) against QA run 1's findings and the "Rework 3" section of `projectbrief.md`.
+
+### Q3: resolved
+
+- `outside()` now builds the open end's sections as a true offset (corner radius `CORNER_R + grow`). The body and the dome keep `CORNER_R`, as before. `corner_wall(grow)` uses the same offset.
+- **All-round normal scan** (`corner_bevel.py`):
+    - the new grip and the fit test are 49.9 degrees at the least, in every 15 degree direction;
+    - `efac921` fails at 43.4, and iteration 3 (`c585867`) passes at 49.9.
+- **A separate check by QA** (`offset_check.py` in the QA scratchpad): each slice in the bevel is compared with the slice below it, at 720 points round the outline.
+    - The step outward is the same all round: within 3.5 %, and that 3.5 % comes from the part's lean. That gives a slope of 49.9 to 50.9 degrees.
+    - On `efac921` the step at the corners was 1.30 times the step on the flats, a slope of 43.4 degrees.
+- **The change stays in the bevel:** slices of the new STL and of `efac921` are identical from z 0.95 up to the dome, bore included (symmetric difference 0.0002 mm² or less). Only the first ruled segment changed, from the bed to the bevel's top at 0.94.
+- **The fix holds for any accepted parameters:** a sweep over 4,846 parameter sets that `check_design` accepts found none where:
+    - a rim corner radius reaches zero;
+    - `rrect`'s cap shortens a rim corner (which would break the true offset).
+
+    So `BEVEL_ANGLE >= 45` now also guards the corners.
+- **Docs:** `systemPatterns.md` states the true-offset rule and why the dome is different. `techContext.md` adds the all-round scan to the useful checks. The README and `publish.yaml` need no change.
+
+### How each rework 3 requirement stands
+
+1. **A taller bevel, with the edge on the bed further in.** Met. `lip.py`: 130 degrees at the bed edge; the edge is −0.496 from the body wall and 0.968 in from the widest point; widest 0.473 at z 1.50.
+2. **Print 1's flare above it, the round between, no supports, `CONVEX_LIMIT`.** Met, now all round:
+    - the bevel is at least 49.9 degrees in every direction;
+    - `tools/overhang.py` flags only the roof's ridge strip (2.9 mm²), and nothing on the fit test;
+    - the wall facing the other handle is 4.27, against the 5.0 limit.
+3. **Enough first-layer wall.** Met:
+    - 1.553 over the bore corners, measured by `verify.py`, against 1.55 from `corner_wall`;
+    - asserted at least 1.2.
+4. **Bore, ribs and dome unchanged; its own commit.** Met:
+    - `bore()`, `ribs()`, `roof()`, the dome, `steel.py` and `FIT_LEN` are untouched;
+    - slices above the bevel are identical to `efac921`;
+    - iteration 4 is commit `87e777c`.
+
+### What QA checked independently
+
+- **Rebuild** in the scratchpad (24 s): both STLs are byte-identical to the committed files, and the STEP files differ only in the `FILE_NAME` timestamp. `sizes()` prints the build's figures.
+- **`verify.py`:**
+    - steel inside the bore wall 0 mm³;
+    - rib bites 38.7 mm³ against 38.6;
+    - corner gap at least 0.213;
+    - thinnest wall 1.553;
+    - cap 5.0;
+    - both STLs watertight, standing on z = 0;
+    - footprint 132 mm²;
+    - the fit test matches the grip cut at `FIT_LEN` (2479 against 2480 mm³).
+- **`corner_wall()`:** where its corner-arc assumption holds (the outside corner's centre lies inside the bore corner's centre in both directions), a shapely distance check matches it to 0.00003. Otherwise it reports less material than there is, so it is a safe lower bound. That is true of the body check too, and it predates this fix.
+- **Catalog suite:** 88 OK.
+
+### Non-blocking advisories
+
+- **A-19, A-20, A-21 still stand.**
+    - A-19: tell the operator that the flute's widest point is 0.47, against iteration 3's 0.66.
+    - A-20: the footprint is now 132 mm² (it was 128); a brim may be needed.
+    - A-21: add the model SumMem note "Iteration 4 = `87e777c`" at wrap-up.
+- **A-22 (docs wording).** The new bullet in the model's `systemPatterns.md` ends with process history: "That happened in iteration 4's first build (`efac921`), and QA caught it."
+    - "Iteration 4" is not defined in the History list just above it, which stops at iteration 3.
+    - The rule and the reason for it are the lasting part.
+    - Either drop the sentence, or add iteration 4 to the History list and point to it.
+- **A-23 (docs, older than this fix).** The "Print orientation" paragraph of the model's `systemPatterns.md` says a bevel under 45 degrees would be flagged by `tools/overhang.py`.
+    - Its `LIMIT` (cos 45° + 0.03) flags only faces flatter than about 42.6 degrees, which is why `efac921`'s 43.4 went unflagged.
+    - The guard that holds is `check_design` plus the true offset.
+    - Reword: `tools/overhang.py` flags under about 43 degrees, and the all-round normal scan checks the bevel itself.
+- **A-24 (code, optional).** In `corner_wall`, `grow` cancels out of `gap_u` and `gap_v`, so the result is `corner_wall(0) + grow`. That is correct, and the current form follows the geometry, so no change is needed. A docstring line could say that it is a lower bound when the corner-arc assumption fails.
+
+### Advisories resolved after QA (rework 3, run 2)
+
+- **A-19, A-20:** told the operator: the widest point is 0.47 (iteration 3: 0.66), and the 132 mm² footprint may need a brim.
+- **A-21:** the model's SumMem records "Iteration 4 = `87e777c`". `efac921` is its flawed first build and is not to be printed.
+- **A-22:** the `efac921` history moved into the History list as part of iteration 4. The true-offset point now states only the rule and the reason.
+- **A-23:** `systemPatterns.md` now says that `check_design` guards the 45-degree rule, and that `tools/overhang.py` flags only faces flatter than about 43 degrees.
+- **A-24 (optional):** not taken. The `corner_wall` docstring is unchanged, so no rebuild was needed.

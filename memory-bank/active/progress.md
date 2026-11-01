@@ -297,3 +297,30 @@ The first cycle (2026-10-31) was Level 3. The 2026-11-01 rework is Level 1.
     - The all-round normal scan failed on `efac921` (43.4 degrees) and passes now (49.9 degrees at the least). The other checks are unchanged; catalog suite 88 OK.
 * Insights
     - The corner rule was written for the dome, where grow is only negative. It became wrong as soon as another feature took grow below zero. A shape rule that sits in a shared helper (`sec`) needs to state what it is for.
+
+## 2026-11-01 - QA - COMPLETE (PASS) (third rework, run 2)
+
+* Work completed
+    - Semantic review of commit `87e777c` (the fix for Q3) against QA run 1's findings and the rework 3 brief.
+    - Independent checks:
+        - a scratch rebuild gives byte-identical STLs, and the STEP files differ only in their header;
+        - the all-round normal scan passes at 49.9 degrees at the least (`efac921` failed at 43.4);
+        - a separate slice-offset check shows the bevel steps out evenly all round;
+        - slices above z 0.95 are identical to `efac921`;
+        - a sweep of 4,846 accepted parameter sets keeps the rim a true offset;
+        - `lip.py`, `verify.py` and `tools/overhang.py` reproduce the build's numbers;
+        - catalog suite 88 OK.
+* Decisions made
+    - PASS. Q3 is resolved, and all four rework 3 requirements are met.
+    - A-19 to A-21 still stand. New advisories A-22 to A-24 (two doc wordings and an optional docstring note) are in `tasks.md`; none blocks.
+    - Iteration 4 is commit `87e777c`.
+* Insights
+    - A true offset of a rounded rectangle needs no separate assertion at the corners: as long as the corner radius stays positive and `rrect`'s cap does not apply, the corners follow the flats' profile exactly. Then `BEVEL_ANGLE >= 45` guards the whole outline.
+
+## 2026-11-01 - WRAP-UP - COMPLETE (third rework)
+
+* Work completed
+    - QA run 2 passed on `87e777c`. Advisories A-19 to A-23 are handled; A-24 (optional) is not taken. Iteration 4's commit is recorded in the model's SumMem.
+    - Root persistent files: skip. Only this model's outside changed, and no catalog contract changed.
+* Decisions made
+    - Iteration 4 (`87e777c`) is ready to print. Next: the operator prints it, cuts off the old straight grip, and measures the straight steel. Then `/niko-archive`, or another rework.
