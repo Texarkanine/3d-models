@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: commercial-electric-wire-stripper-curved-grip (rework 4: a stronger flare, and the straight grip)
-**Phase:** BUILD - IN-PROGRESS (steps 1 and 2 done)
+**Phase:** BUILD - IN-PROGRESS (steps 1 to 3 done)
 
 ## What Was Done
 - Preflight run 2: PASS WITH ADVISORY. The advisories are folded into the build as they come up.

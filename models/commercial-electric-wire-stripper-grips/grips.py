@@ -59,9 +59,9 @@ RIDGE_W = 0.2        # the roof's ridge is a strip this wide
 WALL_SIDE = 3.8      # steel face to outside, in the plane of the handles
 WALL_FACE = 2.5      # steel face to outside, across that plane
 CORNER_R = 4.8       # outside corner radius (>= 2 mm over each bore corner)
-FLARE = 1.0          # extra wall each side at the open end ...
-FLARE_LEN = 5.0      # ... fading out over this length
-BEVEL = 1.5          # the open end's edge on the bed comes in this far from the flare's full width
+FLARE = 2.3          # extra wall each side at the open end ...
+FLARE_LEN = 8.0      # ... fading out over this length
+BEVEL = 1.8          # the open end's edge on the bed comes in this far from the flare's full width
 BEVEL_ANGLE = 50.0   # the bevel up from the bed, degrees above horizontal in print
 RIM_R = 0.8          # radius of the round between the bevel and the flare
 DOME_LEN = 5.0       # the dome's length, and how far it shrinks each side
@@ -71,7 +71,16 @@ END = 3.0            # thinnest cap over the roof's ridge
 SECTION_STEP = 4.0   # longest gap between lofted cross-sections
 RIM_STEP = 3.0       # degrees the outline turns between the open end's lofted sections
 FIT_LEN = 15.0       # the fit test is the grip's first FIT_LEN mm from the open end
-CONVEX_LIMIT = 5.0   # tool shut: wall allowed at B on the side facing the other handle
+
+# ---- Tool shut -------------------------------------------------------------
+# The operator's reading of 2026-11-01: with the tool squeezed shut and an
+# iteration-4 curved grip (87e777c) on each handle, the two open ends were
+# SHUT_GAP apart. Those grips' wall at the widest point, on the side facing the
+# other handle, was SHUT_WALL from the steel face. Both describe the grips that
+# were measured, so they stay as they are when WALL_SIDE or the open end changes.
+SHUT_GAP = 3.3
+SHUT_WALL = 4.274    # iteration 4: WALL_SIDE 3.8 + its widest point's 0.474
+MIN_SHUT_GAP = 0.8   # least gap to leave; the operator called 0.3 "pushing it"
 
 
 def V(p):
@@ -226,6 +235,30 @@ def rim_profile():
     return pts
 
 
+def widest():
+    """The open end's widest point: (d from B, grow past the body wall)."""
+    return max(rim_profile(), key=lambda p: p[1])
+
+
+def shut_gap():
+    """Gap left between the two grips' open ends with the tool shut, for the pair
+    built here: the curved grip on the curved handle, the straight grip on the
+    straight handle.
+
+    From the measured SHUT_GAP, each grip's wall at the widest point moves out by
+    its change from SHUT_WALL. One more term: the measured grip on the straight
+    handle was a curved grip, whose bore was built for the curved steel, which is
+    narrower at B. Stretched over the wider straight steel, its wall moved out by
+    at most half the difference. The straight grip, built for its own steel, sits
+    a full half-difference out. Counting that half-difference in full is the worst
+    case.
+    """
+    _, most = widest()
+    c, st = steel.CURVED, steel.STRAIGHT
+    extra = max(0.0, (st.width(st.length) - c.width(c.length)) / 2)
+    return SHUT_GAP - 2 * (WALL_SIDE + most - SHUT_WALL) - extra
+
+
 def outside(h):
     """Outside: steel + walls, flared at B, straight past A to the ridge, then a dome."""
     _, rise = roof(h)
@@ -301,10 +334,11 @@ def check_design(h):
     assert corner_gap >= 0.15, f"a sharp steel corner clears the bore by only {corner_gap:.2f}"
     wall = corner_wall()
     assert wall >= 2.0, f"only {wall:.2f} over the bore's corners"
-    assert WALL_SIDE + FLARE <= CONVEX_LIMIT, "too thick at B for the tool to close"
     rim = rim_profile()
     assert all(q[0] > p[0] for p, q in zip(rim, rim[1:])), \
         "the bevel and its round do not fit between the bed and FLARE_LEN"
+    shut = shut_gap()
+    assert shut >= MIN_SHUT_GAP, f"tool shut, the two grips' open ends would come within {shut:.2f}"
     assert corner_wall(rim[0][1]) >= 1.2, \
         "the bevel leaves under three extrusion lines over the bore's corners on the bed"
     assert BEVEL_ANGLE >= 45, "the bevel would need support"
@@ -322,8 +356,8 @@ def sizes(h, printed):
     print(f"{h.name} grip: stands {span[2]:.1f} tall on its open end; leaning, it spans "
           f"{span[0]:.1f} x {span[1]:.1f}; volume {printed.Volume() / 1000:.1f} cm3")
     rim = rim_profile()
-    widest, most = max(rim, key=lambda p: p[1])
-    for name, s, grow in (("open end (B)", L, rim[0][1]), ("widest", L - widest, most),
+    d_most, most = widest()
+    for name, s, grow in (("open end (B)", L, rim[0][1]), ("widest", L - d_most, most),
                           ("body near B", L - FLARE_LEN, 0.0), ("at A", 0.0, 0.0)):
         w, t = h.width(s), h.thickness(s)
         print(f"  {name:13s} steel {w:5.2f} x {t:5.2f}  bore {w + 2 * BORE_CLEAR:5.2f} x "
@@ -332,10 +366,10 @@ def sizes(h, printed):
     _, rise = roof(h)
     print(f"  open end: edge on the bed {rim[0][1]:+.2f} from the body wall "
           f"({corner_wall(rim[0][1]):.2f} over the bore corners); bevel up to {rim[1][0]:.2f}, "
-          f"then rounding to the widest, {most:.2f} out at {widest:.2f} from B; "
+          f"then rounding to the widest, {most:.2f} out at {d_most:.2f} from B; "
           f"the flare meets the body {FLARE_LEN} from B")
-    print(f"  wall at the widest, on the side facing the other handle: {WALL_SIDE + most:.2f} "
-          f"(limit {CONVEX_LIMIT})")
+    print(f"  wall at the widest, on the side facing the other handle: {WALL_SIDE + most:.2f}; "
+          f"tool shut, the two grips' open ends come within {shut_gap():.2f} (at least {MIN_SHUT_GAP})")
     print(f"  steel corner clears the bore by {gap:.2f}; {wall:.2f} over each bore corner")
     print(f"  bore ends {END_CLEAR} past A, its roof rises {rise:.2f} more; dome {DOME_LEN} beyond that")
 

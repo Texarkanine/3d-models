@@ -267,7 +267,15 @@ No new technology - validation not required. The scratch checks use packages alr
 
 - [x] 1. Straight handle in `steel.py`. B5 passes. B6: the curved report is identical to the baseline, the plot is pixel-identical, and the curved STLs rebuild byte-identical to `87e777c`'s (the STEP files changed only in their headers and were restored).
 - [x] 2. Straight readings in the log, with the two photos; the straight handle in `systemPatterns.md`. `steel.py`'s docstring and techContext's steel report line updated (preflight run 2, A2).
-- [ ] 3. Curved grip, iteration 5
+- [x] 3. Curved grip, iteration 5: `FLARE` 2.3, `FLARE_LEN` 8, `BEVEL` 1.8. The widest point is 1.464 at z 1.50, which is 0.99 further out than iteration 4's. The shut gap is 1.08 against `MIN_SHUT_GAP` 0.8, and `SHUT_WALL` is 4.274. Green:
+    - `lip.py` (red first on iteration 4);
+    - `shut_gap.py` (red first while `shut_gap()` was a stub);
+    - `slice_compare.py`: bore 0.00029 mm², outside 0.075. It passes on iteration 4 against itself and fails when shifted 0.2;
+    - `corner_bevel.py`, at least 49.9 degrees;
+    - `verify.py curved`: 0 mm³ of steel in the wall, ribs 38.7 mm³, thinnest wall 2.05, footprint 197 mm², the fit test matches;
+    - `tools/overhang.py`: the ridge strip only.
+
+  The `CONVEX_LIMIT` prose is replaced in `systemPatterns.md` and `techContext.md` (preflight run 2, A1). A SumMem correction to "0.5" is recorded (run 1, A5).
 - [ ] 4. Straight grip, iteration 1
 - [ ] 5. Model docs
 - [ ] 6. Final verification

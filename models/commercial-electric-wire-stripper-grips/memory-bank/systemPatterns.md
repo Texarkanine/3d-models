@@ -23,7 +23,7 @@ Each fact has one home:
 - It bends about 15 degrees between A and B, in the plane the handles swing in. Most of the bend is in the middle; both ends are nearly straight.
 - The curve comes from offsets the operator measured on a pencil tracing. `steel.py` fits a quartic centre line to the traced centre points and takes W and T from the calipers, linear between the stations and extended past them. Take the shape from the tracing and the sizes from the calipers.
 - The biggest unknown is W at B. It lies beyond the last caliper station, and the tracing there reads wider than the calipers' trend. `python steel.py` prints both.
-- With the tool squeezed shut and the old straight grip on, the gap at B is 9 mm. That is the room for the curved grip's wall on the side facing the straight handle. The old grip's wall there was 5 mm.
+- Squeezed shut, the two handles come closest at B. How much room the grips have there is set by a measured gap; see "The tool must still close" below.
 
 ## The straight handle
 
@@ -49,12 +49,19 @@ Each fact has one home:
     - Print 1's flare ran out to the bed and left an acute, sharp edge there.
     - Print 2 swapped the flare for a bead that bulged out and back in. The edge was good, but the flare was lost.
     - Iteration 3 (`c585867`, not printed) kept the flare and rounded its bed edge with a circle that also touched the bed. That left only a few layers of bevel; the operator asked for more, brought further in.
-    - Iteration 4 sets the bevel directly with `BEVEL`. Iteration 3's shape is the same construction with a smaller `BEVEL`. Its first build (`efac921`) held the corner radius as the edge came in, so the bevel flattened at the corners; see the next point. The fix is `87e777c`.
+    - Iteration 4 sets the bevel directly with `BEVEL`. Iteration 3's shape is the same construction with a smaller `BEVEL`. Its first build (`efac921`) held the corner radius as the edge came in, so the bevel flattened at the corners; see the next point. The fix is `87e777c`. Printed: it fits, and a curved grip also works on the straight handle. The operator asked for the flare to stand a millimetre further out, to stop the fingers sliding.
+    - Iteration 5 (2026-11-01) stands the widest point about a millimetre further out at the same height, so the bevel keeps iteration 4's look. `FLARE_LEN` grew with `FLARE`, so the flare above it is no steeper than print 1's, which the operator liked; at the old length it would have been twice as steep, nearer a ridge than a flute.
 - `grips.rim_profile` gives the open end's outline, from the bed to `FLARE_LEN`. It is a ruled loft of closely spaced sections; a smooth loft would ring through the round.
 - The open end is a true offset of the body: its corner radius grows and shrinks with the walls (`CORNER_R` plus the outline's grow). The bevel then keeps `BEVEL_ANGLE` at the corners as well as on the flats. Holding the corner radius while the walls come in moves the corners in about 1.4 times as far, and flattens the bevel there below 45 degrees. The dome is different: it keeps `CORNER_R`, capped by `grips.rrect` as it shrinks.
-- On the side facing the other handle, the wall at the open end is at most `WALL_SIDE + FLARE`. It must stay within the 5 mm the closed tool allows (`CONVEX_LIMIT`, asserted). The bevel and round trim the widest point below that, and `grips.py` prints the actual figure. Constant walls keep the closest approach to the other handle at the open end, where the gap was measured.
+- Constant walls keep the closest approach to the other handle at the open end's widest point, where the gap was measured.
 - The grip is the same on both sides in W and in T. That is load-bearing: it makes a mirrored tracing harmless.
 - The dome starts at the height of the bore's roof ridge and shrinks along a quarter circle of radius `DOME_LEN`. Starting it any lower thins the T wall at the ridge's ends below the body's. The cap over the ridge is then `DOME_LEN`, at least `END`.
+
+## The tool must still close
+
+- The first limit was inferred: with the old straight grip on, the gap at B was 9, and the old curved grip's wall there was 5 (measurement F). The operator has since measured the real thing. With an iteration-4 grip on each handle and the tool shut, the two open ends were `SHUT_GAP` apart, with a wall of `SHUT_WALL` at the widest point on each.
+- `grips.shut_gap()` works out the gap for the grips built now. Each grip's wall at the widest point moves out by its change from `SHUT_WALL`, which is why `SHUT_WALL` stays what was measured even if `WALL_SIDE` or the open end changes. One more term: the grip measured on the straight handle was a curved grip, stretched over steel wider at B than its bore. The straight grip sits a full half-difference further out than that grip's bore would, and the worst case counts it in full.
+- `check_design` asserts at least `MIN_SHUT_GAP` left. The operator called 0.3 "pushing it" and chose about a millimetre each side. `grips.py` prints the gap on each build.
 
 ## Print orientation is designed in
 
