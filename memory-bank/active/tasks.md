@@ -263,6 +263,15 @@ No new technology - validation not required. The scratch checks use packages alr
 - **A8:** the report gives 0.99.
 - **The flare sampler** (three fit tests on a plate at +0.5, +1.0 and +1.5) is not taken. The operator chose 1.0 explicitly. The report can offer it if the feel is off.
 
+## Build Progress
+
+- [x] 1. Straight handle in `steel.py`. B5 passes. B6: the curved report is identical to the baseline, the plot is pixel-identical, and the curved STLs rebuild byte-identical to `87e777c`'s (the STEP files changed only in their headers and were restored).
+- [x] 2. Straight readings in the log, with the two photos; the straight handle in `systemPatterns.md`. `steel.py`'s docstring and techContext's steel report line updated (preflight run 2, A2).
+- [ ] 3. Curved grip, iteration 5
+- [ ] 4. Straight grip, iteration 1
+- [ ] 5. Model docs
+- [ ] 6. Final verification
+
 ## Status
 
 - [x] Initialization complete

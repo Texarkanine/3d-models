@@ -45,6 +45,41 @@ Material: TPU 95A. The old rubber grips were fairly firm.
 
 ## Straight handle
 
-Not measured yet. The old straight grip is still glued on.
+Not measured yet. The old straight grip is still glued on. (Superseded by the 2026-11-01 entry below.)
 
 - **G:** its outside measures 12 to 15.1, then flares to 19.7. The new grips will not copy the old outsides.
+
+## Straight handle, bare steel (2026-11-01)
+
+The operator cut the old straight grip off and measured the bare steel with calipers and a pencil tracing. The readings were typed back in chat, and the operator checked them against the sheets.
+
+`straight-tracing.jpg` shows the tracing, tip up, between two straight lines 30 apart. The rows are 10 apart (the "10mm" mark on the sheet). The paper edge is B, where the old grip stopped on the steel (M on the sheet). Row 7 is taken to be 10 above the paper edge, as row 8 would be; the photo shows 10.2. A is 85.14 above B.
+
+| Row | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+|---|---|---|---|---|---|---|---|---|
+| Left line to the left traced edge | 11.5 | 11.5 | 11 | 11 | 10.5 | 10.5 | 10.5 | 10 |
+| Right line to the right traced edge | 11.5 | 11.5 | 11 | 11 | 11 | 10.5 | 10.5 | 10 |
+| W (30 less both) | 7 | 7 | 8 | 8 | 8.5 | 9 | 9 | 10 |
+
+- The widths come from the tracing alone, to the nearest 0.5. This handle has no caliper widths.
+- The traced centre is 15 from the left line on every row except row 4 (14.75). The handle is straight.
+
+| Item | Where | Reading |
+|---|---|---|
+| A | The rounded tip | T 13.9 |
+| J | Row 0 | T 14.02 |
+| K | Row 3 | T 14.09 |
+| L | Row 5 | T 14.25 |
+| M | B, the paper edge | T 14.53 |
+| B | 85.14 from A | Where the old grip stopped |
+
+**Holes** (`straight-holes.jpg`):
+- The sheet reads "Hole bottom from bd. edge: 76.75, 6.32".
+- The operator's reading of it: measured from the rounded tip to the near edge (the "bottom") of each hole.
+- Both are 3 mm holes, like the curved handle's, so their centres are 7.82 and 78.25 from A.
+- `steel.py` names them D2 and D1, after the matching holes on the curved handle.
+
+**Other readings:**
+- **Old straight grip, inside at the open end:** 10.12 wide × 14.6 high. The operator: the new straight grip "should match inner and outer dimensions the same as the other side".
+- **A curved grip on the straight handle:** an iteration-4 curved grip also slides onto the straight handle and works.
+- **Tool shut:** with an iteration-4 curved grip on each handle and the tool squeezed shut, the two open ends are about 3.3 apart. For the design, this replaces F.

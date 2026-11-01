@@ -14,7 +14,7 @@ Each fact has one home:
 - **A** is the tip of the bare steel. Every length along a handle is measured from A.
 - **B** is where the old grip's open end sat. The new grip covers the steel from A to B.
 - **W** is the steel's width in the plane the handles swing in, which is across the handle when the tool lies flat. **T** is its thickness at right angles to that plane, straight up off the table.
-- **D1, D2** are holes through the steel. **S1 to S3** are the stations where W and T were measured.
+- **D1, D2** are holes through the steel; D2 is the one near A on both handles. **S1 to S3** are the stations where W and T were measured on the curved handle. **J to M** are the stations where T was measured on the straight handle; M is at B.
 - **s** is distance along the centre line from A. The calipers and ruler measure straight lines, so `steel.py` stores each reading as a chord and converts it to s. On a curved handle, B is at s = `Handle.length`, which is longer than the straight distance measured from A. Anything placed "at B" must use `Handle.length`.
 
 ## The curved handle
@@ -24,6 +24,15 @@ Each fact has one home:
 - The curve comes from offsets the operator measured on a pencil tracing. `steel.py` fits a quartic centre line to the traced centre points and takes W and T from the calipers, linear between the stations and extended past them. Take the shape from the tracing and the sizes from the calipers.
 - The biggest unknown is W at B. It lies beyond the last caliper station, and the tracing there reads wider than the calipers' trend. `python steel.py` prints both.
 - With the tool squeezed shut and the old straight grip on, the gap at B is 9 mm. That is the room for the curved grip's wall on the side facing the straight handle. The old grip's wall there was 5 mm.
+
+## The straight handle
+
+- The tracing shows it straight, so its centre line is a constant.
+- It has no caliper widths. The tracing reads W to the nearest 0.5, so `steel.py` takes W as one straight line through every traced row. A piecewise fit would kink at each half-millimetre step and run off past the last row.
+- T comes from the calipers at A, J, K, L and M. A and M are its ends, so T is never extrapolated.
+- B is the paper edge of the tracing, where the old grip stopped. The rows are placed from B, one row apart, as on the curved tracing.
+- Its readings are within half a millimetre of the curved handle's, and a curved grip slides onto it and works. The straight grip is built from its own readings, with the same clearances and walls, so the two grips match inside and out as closely as the two steels allow. `python steel.py` prints the differences.
+- The weakest reading is W near B. If the straight fit test is loose there, caliper widths at J, K, L, M and B replace the traced line.
 
 ## How a grip fits
 

@@ -4,18 +4,25 @@ This file is the one home of the steel readings the model uses; design values
 live in `grips.py`. `reference/measurements.md` is the dated log of how and when
 each reading was taken, with the photos.
 
+Two handles: `CURVED` and `STRAIGHT`. Both were traced in pencil, tip up,
+between two straight reference lines, with rows 10 apart.
+
 Coordinates (use position): the handle lies flat in the XY plane, the plane the
-handles swing in. Z is T, straight up off the table. For the curved handle, X and
-Y are the tracing's: y runs from tracing row 0 (near the tip) toward B, x from
-the PA reference line. A distance along a handle, s, is arc length along its
-centre line from A, the tip. Calipers and rulers measure straight lines, so
-every reading "from A" is a chord; `Handle.s_at_chord` turns it into s. In
-particular B, where the grip's open end sits, is at s = `Handle.length`, which
-is longer than the 83.15 measured straight from A.
+handles swing in. Z is T, straight up off the table. X and Y are each handle's
+own tracing: y runs from tracing row 0 (near the tip) toward B, x from the left
+reference line. A distance along a handle, s, is arc length along its centre
+line from A, the tip. Calipers and rulers measure straight lines, so every
+reading "from A" is a chord; `Handle.s_at_chord` turns it into s. In particular
+B, where the grip's open end sits, is at s = `Handle.length`. On the curved
+handle that is longer than the 83.15 measured straight from A; on the straight
+handle the two are the same.
+
+The curved handle takes W and T from calipers. The straight handle has T from
+calipers and W from the tracing alone, as a straight line through its rows.
 
 Run:  python steel.py   (pure Python)
-Prints the curved handle's centre line and the cross-checks of the tracing
-against the calipers.
+Prints, for each handle, the centre line and W against the tracing, then the
+caliper stations, the holes, and W and T at A and B.
 """
 
 import bisect
@@ -73,12 +80,16 @@ class Handle:
     """One bare steel handle: centre line x(y) in the XY plane, W and T along it.
 
     The centre line is a polynomial x(y) (a constant for a straight handle).
-    W and T are linear between the stations and extended linearly past them;
-    past the tip (s < 0) they stay at their values at A. Before A and after B
-    the centre line continues straight along its end tangents.
+    `stations` are the named readings, (name, chord from A, W, T); W or T is
+    None where only the other was read. W and T are linear between the stations
+    that have them and extended linearly past them; past the tip (s < 0) they
+    stay at their values at A. `widths`, if given, is a list of (chord from A, W)
+    that sets W instead of the stations, for a handle whose W comes from a
+    tracing rather than calipers. Before A and after B the centre line continues
+    straight along its end tangents.
     """
 
-    def __init__(self, name, coeffs, y_a, y_b, stations, holes, step=0.01):
+    def __init__(self, name, coeffs, y_a, y_b, stations, holes, widths=None, step=0.01):
         self.name, self.co, self.y_a, self.y_b = name, coeffs, y_a, y_b
         n = int(math.ceil((y_b - y_a) / step))
         self._ys = [y_a + (y_b - y_a) * k / n for k in range(n + 1)]
@@ -89,8 +100,11 @@ class Handle:
         self.length = self._ss[-1]
         self.stations = [(nm, self.s_at_chord(c), w, t) for nm, c, w, t in stations]
         self.holes = {nm: (self.s_at_chord(c), d) for nm, (c, d) in holes.items()}
-        self._w = [(s, w) for _, s, w, _ in self.stations]
-        self._t = [(s, t) for _, s, _, t in self.stations]
+        if widths is not None:
+            self._w = [(self.s_at_chord(c), w) for c, w in widths]
+        else:
+            self._w = [(s, w) for _, s, w, _ in self.stations if w is not None]
+        self._t = [(s, t) for _, s, _, t in self.stations if t is not None]
 
     def y_at(self, s):
         """Tracing y of the centre-line point at arc length s (0 <= s <= length)."""
@@ -164,8 +178,82 @@ def _tip_y():
 CURVED = Handle("curved", CENTRE, _tip_y(), Y_B, STATIONS, HOLES)
 
 
-def report(h=CURVED):
+# ---- Straight handle: readings of 2026-11-01 --------------------------------
+# Pencil tracing of the bare steel, tip up (reference/straight-tracing.jpg). Two
+# straight lines STRAIGHT_PW apart; rows STRAIGHT_PU apart, rows 0 to 7. The paper
+# edge is B, where the old grip stopped. It is taken to be one row below row 7
+# (row 8, as on the curved tracing; the photo shows 10.2), so A sits
+# STRAIGHT_B_CHORD above it. The tracing reads to 0.5; there are no caliper widths.
+STRAIGHT_PW, STRAIGHT_PU = 30.0, 10.0
+STRAIGHT_LEFT = [11.5, 11.5, 11, 11, 10.5, 10.5, 10.5, 10]    # left line -> left traced edge
+STRAIGHT_RIGHT = [11.5, 11.5, 11, 11, 11, 10.5, 10.5, 10]     # right line -> right traced edge
+STRAIGHT_B_CHORD = 85.14   # A to B
+
+# Calipers: (name, tracing row, T). A is the tip; J, K and L were taken at rows
+# 0, 3 and 5; M at the paper edge, B (row 8).
+STRAIGHT_T = [("A", None, 13.9), ("J", 0, 14.02), ("K", 3, 14.09), ("L", 5, 14.25), ("M", 8, 14.53)]
+# Holes, through the T faces: measured from the rounded tip to each hole's near
+# edge ("Hole bottom from bd. edge"). Named as the matching holes on the curved handle.
+STRAIGHT_HOLE_EDGES = {"D2": 6.32, "D1": 76.75}
+STRAIGHT_HOLE_D = 3.0
+
+# Not steel, kept for cross-checks: the old straight grip's opening, inside (W, T).
+OLD_STRAIGHT_OPENING = (10.12, 14.6)
+
+# ---- Build the straight handle from the tracing and the calipers -------------
+# Same frame as the curved tracing: row 0 at y = 0, B one row below the last.
+S_ROW_Y = [i * STRAIGHT_PU for i in range(len(STRAIGHT_LEFT))]
+S_Y_B = len(STRAIGHT_LEFT) * STRAIGHT_PU
+S_Y_A = S_Y_B - STRAIGHT_B_CHORD
+S_TRACED_LEFT = list(STRAIGHT_LEFT)
+S_TRACED_RIGHT = [STRAIGHT_PW - r for r in STRAIGHT_RIGHT]
+S_TRACED_W = [r - a for a, r in zip(S_TRACED_LEFT, S_TRACED_RIGHT)]
+S_TRACED_CENTRE = [(a + r) / 2 for a, r in zip(S_TRACED_LEFT, S_TRACED_RIGHT)]
+S_CENTRE = polyfit(S_ROW_Y, S_TRACED_CENTRE, 0)   # straight: one x, the traced centres' mean
+# The tracing reads to 0.5, so W is the least-squares line through every row, not
+# a piecewise fit, which would kink at each step and run wild past row 7.
+S_W_LINE = polyfit(S_ROW_Y, S_TRACED_W, 1)
+
+
+def _straight_chord(row):
+    """Chord from A of a tracing row (None is A itself)."""
+    return 0.0 if row is None else row * STRAIGHT_PU - S_Y_A
+
+
+STRAIGHT = Handle(
+    "straight", S_CENTRE, S_Y_A, S_Y_B,
+    [(nm, _straight_chord(row), None, t) for nm, row, t in STRAIGHT_T],
+    {nm: (e + STRAIGHT_HOLE_D / 2, STRAIGHT_HOLE_D) for nm, e in STRAIGHT_HOLE_EDGES.items()},
+    widths=[(0.0, poly(S_W_LINE, S_Y_A)), (STRAIGHT_B_CHORD, poly(S_W_LINE, S_Y_B))])
+
+
+def report_straight():
+    """Print the straight handle's fits to the tracing and its caliper readings."""
+    h = STRAIGHT
+    print(f"{h.name} handle: A at tracing y {h.y_a:.2f}; A to B {STRAIGHT_B_CHORD}; "
+          f"bend {h.bend_deg():.1f} deg; centre line x {S_CENTRE[0]:.3f}")
+    print(f"\n{'row':>3} {'y':>5} {'s':>6} {'centre line-traced':>18} {'traced W':>8} {'line W':>6} {'diff':>5}")
+    for i, y in enumerate(S_ROW_Y):
+        s = y - h.y_a
+        print(f"{i:>3} {y:5.0f} {s:6.2f} {S_CENTRE[0] - S_TRACED_CENTRE[i]:+18.3f} {S_TRACED_W[i]:8.2f} "
+              f"{h.width(s):6.2f} {S_TRACED_W[i] - h.width(s):+5.2f}")
+    print(f"\n{'':4} {'s':>6} {'W':>5} {'T':>6}")
+    for nm, s, _, t in h.stations:
+        print(f"{nm:4} {s:6.2f} {h.width(s):5.2f} {t:6.2f}")
+    for nm, (s, d) in h.holes.items():
+        print(f"{nm:4} {s:6.2f} {h.width(s):5.2f} {h.thickness(s):6.2f}  hole {d} "
+              f"(near edge {STRAIGHT_HOLE_EDGES[nm]})")
+    ow, ot = OLD_STRAIGHT_OPENING
+    print(f"\nW is the tracing's line: {h.width(0):.2f} at A, {h.width(h.length):.2f} at B. "
+          f"The old grip's opening was {ow} x {ot}.")
+    c = CURVED
+    print(f"Against the curved handle: at A W {h.width(0) - c.width(0):+.2f}, T {h.thickness(0) - c.thickness(0):+.2f}; "
+          f"at B W {h.width(h.length) - c.width(c.length):+.2f}, T {h.thickness(h.length) - c.thickness(c.length):+.2f}")
+
+
+def report_curved():
     """Print the centre line and the cross-checks of the tracing against the calipers."""
+    h = CURVED
     print(f"{h.name} handle: A at tracing y {h.y_a:.2f} (photo: {-TIP_ABOVE_ROW0:.2f}); "
           f"A to B {B_CHORD} straight, {h.length:.2f} along the centre line; bend {h.bend_deg():.1f} deg")
     print(f"\n{'row':>3} {'y':>5} {'s':>6} {'centre fit-traced':>17} {'traced W':>8} {'mock W':>6} {'diff':>5}")
@@ -190,4 +278,6 @@ def report(h=CURVED):
 
 
 if __name__ == "__main__":
-    report()
+    report_curved()
+    print()
+    report_straight()
