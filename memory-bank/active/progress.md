@@ -207,3 +207,8 @@ The first cycle (2026-10-31) was Level 3. The 2026-11-01 rework is Level 1.
     - The operator will cut the old straight grip off and measure the steel once this print is done.
 * Insights
     - Print 2's lip fixed the sharp edge, but it gave up print 1's gradual flare. The flare is what the hand meets, and the operator prefers it. Print 1 is commit `95e5f61`, print 2 is `da750d8`.
+
+## 2026-11-01 - COMPLEXITY-ANALYSIS - COMPLETE (second rework)
+
+* Decisions made
+    - Level 1. One element changes: the outline of the open end in `grips.py`. Print 1's flare comes back, and its edge on the bed is rounded with a printable bevel.
