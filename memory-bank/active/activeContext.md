@@ -12,4 +12,5 @@
 - The reflection is appended to `reflection/reflection-commercial-electric-wire-stripper-curved-grip.md`. Root persistent files: skip; only the model changed.
 
 ## Next Step
-- The operator prints the two fit tests, then the grips. Then `/niko-archive`, or another rework.
+- The operator started a print of about 5 hours on 2026-11-01. Which file it is was not said. They return in a new session with print feedback.
+- Then `/niko-archive`, or another rework (Level 1 or 2, by the feedback). If the straight grip is loose near B, ask for caliper W at J, K, L, M and B to replace the traced line.
