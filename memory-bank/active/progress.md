@@ -371,3 +371,14 @@ The first cycle (2026-10-31) was Level 3. Reworks 1 to 3 (2026-11-01) were Level
     - The gap guard models the pair that ships, about 1.1 left. `MIN_SHUT_GAP` is 0.8.
     - A3: build the straight bore from the traced W now. Recommend the fit test first, and offer caliper widths if it is loose.
     - The flare sampler is not taken; it can be offered later.
+
+## 2026-11-01 - PREFLIGHT - COMPLETE (fourth rework, run 2)
+
+* Work completed
+    - Checked the revised plan against the codebase: the TDD encoding, conventions, dependencies, conflicts and completeness. A probe built iteration 5 and applied the restated B3: the bore's symmetric difference is at most 0.00029 mm², and the outside above the flare moves at most 0.075. `lip.py` and `corner_bevel.py` pass. B2's figures are 1.080, 3.063 and 0.063. Catalog suite 88 OK.
+    - First line of `.preflight-status`: `PASS WITH ADVISORY`. No plan edits.
+* Decisions made
+    - Run 1's F1 is resolved. Advisories A1 to A6 and the radical idea are in `.preflight-status`. The most useful: iteration 5's commit should also update the `CONVEX_LIMIT` bullet in `systemPatterns.md` and the "wall at the open end" assertion in `techContext.md` (A1), and `SHUT_WALL` is 4.274 (A4).
+* Insights
+    - The restated B3 has real margin: 0.075 against 0.1 on the outside, and 0.0003 against 0.001 on the bore.
+    - During the 3.3 reading, the curved grip on the straight handle sat about 0.4 short of the straight B, because its bore is shorter than the straight A to B. The shipped straight grip sits at B. The effect on the gap was not measured, and is likely under 0.1.
