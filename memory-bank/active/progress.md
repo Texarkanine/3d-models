@@ -2,9 +2,9 @@
 
 Design and publish-ready a slide-on TPU 95A grip for the curved handle of a Commercial Electric wire stripper. It lives in a new catalog model, `models/commercial-electric-wire-stripper-grips/`, whose outside design the straight grip will share later.
 
-**Complexity:** Level 1
+**Complexity:** Level 2
 
-The first cycle (2026-10-31) was Level 3. The 2026-11-01 rework is Level 1.
+The first cycle (2026-10-31) was Level 3. Reworks 1 to 3 (2026-11-01) were Level 1. Rework 4 (2026-11-01) is Level 2.
 
 ## 2026-10-31 - COMPLEXITY-ANALYSIS - COMPLETE
 
@@ -333,3 +333,8 @@ The first cycle (2026-10-31) was Level 3. The 2026-11-01 rework is Level 1.
 * Decisions made
     - The operator's feedback: iteration 4 fits. "The hand feel of the most recent iteration, I would like a bit more of a flare out." With the tool shut and a curved grip on each handle, the open ends are about 3.3 apart. "Each one could do 1.5, but that'd be pushing it, so let's actually go one millimeter out flare on each side, not just one half."
     - The straight grip: "we technically don't need to make the straight one, but we're going to make it anyway for completeness' sake." It "should match inner and outer dimensions the same as the other side." A curved grip already slides onto the straight handle and works.
+
+## 2026-11-01 - COMPLEXITY-ANALYSIS - COMPLETE (fourth rework)
+
+* Decisions made
+    - Level 2: a self-contained enhancement of this one model. The straight grip reuses the builder, which was written for any `steel.Handle`; it needs a second handle in `steel.py`, a `Handle` that takes W and T at different places, and a second set of outputs. The flare change retunes three parameters and replaces the tool-closing limit with the measured gap. No design question needs a creative phase.
