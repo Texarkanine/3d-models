@@ -2,7 +2,9 @@
 
 Design and publish-ready a slide-on TPU 95A grip for the curved handle of a Commercial Electric wire stripper. It lives in a new catalog model, `models/commercial-electric-wire-stripper-grips/`, whose outside design the straight grip will share later.
 
-**Complexity:** Level 3
+**Complexity:** Level 1
+
+The first cycle (2026-10-31) was Level 3. The 2026-11-01 rework is Level 1.
 
 ## 2026-10-31 - COMPLEXITY-ANALYSIS - COMPLETE
 
@@ -150,3 +152,10 @@ Design and publish-ready a slide-on TPU 95A grip for the curved handle of a Comm
     - The straight grip stays a later task: its steel is still unmeasured (`reference/measurements.md`).
 * Insights
     - First print: the bore fits the steel from A to B and the grip holds dry, with no glue. Acceptance criterion 1 is met. The flare made the open end's outer edge acute where it met the bed.
+
+## 2026-11-01 - COMPLEXITY-ANALYSIS - COMPLETE
+
+* Work completed
+    - Classified the rework.
+* Decisions made
+    - Level 1. It fixes one defect found in a print, the sharp edge at the open end. The fix is confined to the outside's open end in `grips.py`; the bore, ribs and dome are unchanged.
