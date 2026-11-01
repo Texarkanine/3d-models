@@ -338,3 +338,12 @@ The first cycle (2026-10-31) was Level 3. Reworks 1 to 3 (2026-11-01) were Level
 
 * Decisions made
     - Level 2: a self-contained enhancement of this one model. The straight grip reuses the builder, which was written for any `steel.Handle`; it needs a second handle in `steel.py`, a `Handle` that takes W and T at different places, and a second set of outputs. The flare change retunes three parameters and replaces the tool-closing limit with the measured gap. No design question needs a creative phase.
+
+## 2026-11-01 - PLAN - COMPLETE (fourth rework)
+
+* Work completed
+    - Plan in `tasks.md`: six steps, B1 to B9 checked ad hoc.
+* Decisions made
+    - The flare is measured at the widest point, since the operator reasoned in terms of the gap. `FLARE_LEN` goes from 5 to 8, so that the flare stays as steep as print 1's (0.42 per mm against 0.4), rather than twice as steep. `FLARE` 2.3 and `BEVEL` 1.8 keep iteration 4's bevel height and its bed edge, 0.97 in from the widest point.
+    - The 5 mm limit (`CONVEX_LIMIT`) gives way to the measured 3.3 gap between two iteration-4 grips, with at least `MIN_SHUT_GAP` left.
+    - The straight W is a least-squares line through the tracing, which reads to 0.5. T comes from the calipers at A, J, K, L and M.
