@@ -272,3 +272,20 @@ The first cycle (2026-10-31) was Level 3. The 2026-11-01 rework is Level 1.
 * Insights
     - The footprint is down to 128 mm². The operator should consider a brim.
     - Iteration 3 is this construction with a smaller `BEVEL`, so the bevel can be tuned with one number from here on.
+
+## 2026-11-01 - QA - COMPLETE (FAIL, fixable) (third rework)
+
+* Work completed
+    - Semantic review of commit `efac921` against the rework 3 brief.
+    - Independent checks:
+        - a scratch rebuild gives byte-identical STLs, and the STEP files differ only in their header;
+        - `lip.py` fails on iteration 3's STL and passes on the new one;
+        - `rim_profile()` is valid for every accepted parameter set, and its "d rises strictly" guard catches every round that cannot touch the bevel (9,225 sets);
+        - `verify.py` reproduces the build's numbers;
+        - overhangs are unchanged by `tools/overhang.py`;
+        - catalog suite 88 OK.
+* Decisions made
+    - FAIL (fixable). Build must rerun for Q3: at the four corners the bevel is 43.4 degrees, not `BEVEL_ANGLE`'s 50, which is under the design's 45 degree rule. `check_design` passes, and `systemPatterns.md` claims the rule holds.
+    - Advisories A-19 to A-21 are in `tasks.md`; none blocks.
+* Insights
+    - `outside()`'s corner rule `CORNER_R + max(grow, 0)` was written for the dome. Once the rim goes inside the body wall, the corners move in about 1.41 times as far as the flats, so the bevel there is flatter than its profile. A check of the T extent alone, or of the W and T sides, cannot see it; scan face normals around the whole part.

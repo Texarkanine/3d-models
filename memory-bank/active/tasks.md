@@ -43,3 +43,73 @@
 - **`tools/overhang.py`:** only the roof's ridge strip (2.9 mm²); nothing on the fit test.
 - **Close-up render** (`.scratch/wirestripper-grip/render-open-end.png`): a clear straight bevel rounding into the flare, matching on the W and T sides.
 - **Catalog suite:** 88 OK.
+
+## QA (2026-11-01, rework 3): FAIL (fixable; Build reruns)
+
+Reviewed commit `efac921` against the "Rework 3" section of `projectbrief.md`.
+
+### Blocking
+
+- **Q3: at the four corners the bevel is 43.4 degrees, not `BEVEL_ANGLE`.** That is under the design's 45 degree rule, and `check_design` still passes.
+    - **Cause:** `outside()` builds every section with corner radius `CORNER_R + max(grow, 0.0)`. That rule was written for the dome, where grow goes down to −`DOME_LEN`. This build is the first to start the rim inside the body wall (grow −0.5 on the bed). Below the body wall the corner radius stays `CORNER_R`, so the corners move in about 1.41 times as far as the flat sides. The first ruled segment, from grow −0.5 to +0.29 over 0.94 of height, is therefore 50 degrees on the flats but 43.3 on the diagonals.
+    - **Measured on the committed STL:** 116 outer faces (19 mm²) under 45 degrees, at z 0.31 to 0.63, all at the four diagonals. The flat sides are 50.0. Iteration 3 (`c585867`) is 49.9 to 50.9 all round, because its grow never went below zero.
+    - **It gets worse as `BEVEL` grows,** which the build's insight says is now the one number to tune:
+
+        | `BEVEL` | edge on the bed | corner bevel | first-layer corner wall | `check_design` |
+        | --- | --- | --- | --- | --- |
+        | 1.00 | +0.00 | 50.0 | 2.05 | passes |
+        | 1.25 | −0.25 | 45.5 | 1.73 | passes |
+        | 1.50 (built) | −0.50 | 43.3 | 1.39 | passes |
+        | 1.75 | −0.75 | 42.1 | 1.06 | fails (wall) |
+
+        A sweep of 964 sets of `BEVEL`, `BEVEL_ANGLE`, `RIM_R`, `FLARE` and `FLARE_LEN` that `check_design` accepts found 258 with a corner bevel under 45 degrees. The worst was 35.3. `tools/overhang.py` flags only faces flatter than about 42.5 degrees, so it does not catch today's 43.4.
+    - **The docs are wrong at the corners.** The model's `systemPatterns.md` says the bevel rises at `BEVEL_ANGLE`, that below 45 degrees it would need support, and that `check_design` asserts this. At the corners, neither the angle nor the guard holds.
+    - **Fix (Build chooses):**
+        - Preferred: give the rim's sections a true offset, with corner radius `CORNER_R + grow` also below zero, and make `corner_wall` match. The bevel is then `BEVEL_ANGLE` all round, and the first-layer corner wall rises from 1.39 to about 1.55. The dome keeps `max(grow, 0)`, since its grow reaches −5.
+        - Alternative: keep the rounder corners, and extend the assertion and the docs to the corner angle.
+
+      Either way, regenerate the outputs and re-run the checks, including a check of the corners.
+    - **Why the build's checks missed it:** `lip.py` measures only the T extent (the flat sides), and the render was compared on the W and T sides only.
+
+### How each rework 3 requirement stands
+
+1. **A taller bevel, with the edge on the bed further in.** Met. `lip.py`: 130 degrees at the bed edge; the edge is −0.496 from the body wall and 0.968 in from the widest point; widest 0.473 at z 1.50. Iteration 3's STL fails both new conditions (widest at z 0.75; edge 0.421 in).
+2. **Print 1's flare above it, the round between, no supports, `CONVEX_LIMIT`.** Met on the flats. Above z ≈ 1.75 the outline matches iteration 3's to 0.001. The wall facing the other handle is 4.27, against the 5.0 limit. No supports by `tools/overhang.py`. The corners, however, break the design's own 45 degree rule (Q3).
+3. **Enough first-layer wall.** Met: 1.393 over the bore corners, asserted at least 1.2. The flat T face is 1.7.
+4. **Bore, ribs and dome unchanged; its own commit.** Met. The diff leaves `bore()`, `ribs()`, `roof()`, the dome, `steel.py` and `FIT_LEN` alone. The iteration is in `efac921`, like iteration 3 in `c585867`.
+
+### What QA checked independently
+
+- **Rebuild** in the scratchpad, in 22 s:
+    - both STLs are byte-identical to the committed files;
+    - the STEP files differ only in the `FILE_NAME` timestamp;
+    - `sizes()` prints the build's figures.
+- **`lip.py`:** FAIL on iteration 3's STL, PASS on the new one. The numbers are given under requirement 1.
+- **`rim_profile()` maths:**
+    - the bevel's line, the touch condition (`gap`) and the 130 degree start angle are correct;
+    - in all 964 accepted sets of the sweep, the round leaves the bevel exactly on its line, and no outward segment of the profile is flatter than `BEVEL_ANGLE`;
+    - the new "d rises strictly" assertion catches both ways the bisection can fail to bracket a touch point.
+- **`verify.py`:** reproduces the build's numbers:
+    - 0 mm³ of steel in the bore wall;
+    - rib bites 38.7 against 38.6;
+    - thinnest wall 1.393;
+    - cap 5.0;
+    - watertight STLs;
+    - footprint 128 mm²;
+    - the fit test matches the grip cut at `FIT_LEN`.
+- **Corner angles:** a face-normal scan of the outer faces below z 2.5, in 15 degree sectors around the part. This scan found Q3.
+- **`tools/overhang.py`:** the 2.9 mm² ridge strip only; nothing on the fit test.
+- **Catalog suite:** 88 OK.
+- **Code quality:**
+    - `corner_wall()` removes the duplicated corner formula, and is used by `check_design` and `sizes()`;
+    - no `RIM_ANGLE` is left anywhere;
+    - the README and `publish.yaml` need no change.
+
+### Non-blocking advisories
+
+- **A-19 (tell the operator).** The flute's widest point drops from 0.66 (iteration 3) to 0.47. Print 1 was 1.0 on the bed. Above z ≈ 1.75 the outline is unchanged, so the hand meets the same flare, with a lower lip.
+    - The build reported 0.47, but not the comparison.
+    - "A little bit more" became about twice the layers, and the edge moved in 0.74. It is one number to retune.
+    - If the flute feels weaker, `FLARE` has 0.2 of headroom under `CONVEX_LIMIT` (3.8 + 1.2 = 5.0).
+- **A-20 (print).** The footprint is down to 128 mm² (prints 1, 2 and 3: 231, 164 and 180). A brim may be needed on the 92 mm part. Add it to `publish.yaml`'s manufacturing notes only if the print shows it is needed.
+- **A-21 (print record, as A-18).** Add a model SumMem note "Iteration 4 = <commit>" once the fix for Q3 is committed. `efac921` will no longer be the printable iteration.
