@@ -347,3 +347,27 @@ The first cycle (2026-10-31) was Level 3. Reworks 1 to 3 (2026-11-01) were Level
     - The flare is measured at the widest point, since the operator reasoned in terms of the gap. `FLARE_LEN` goes from 5 to 8, so that the flare stays as steep as print 1's (0.42 per mm against 0.4), rather than twice as steep. `FLARE` 2.3 and `BEVEL` 1.8 keep iteration 4's bevel height and its bed edge, 0.97 in from the widest point.
     - The 5 mm limit (`CONVEX_LIMIT`) gives way to the measured 3.3 gap between two iteration-4 grips, with at least `MIN_SHUT_GAP` left.
     - The straight W is a least-squares line through the tracing, which reads to 0.5. T comes from the calipers at A, J, K, L and M.
+
+## 2026-11-01 - PREFLIGHT - COMPLETE (fourth rework)
+
+* Work completed
+    - Checked the plan against the codebase: the TDD encoding, conventions, dependencies, conflicts and completeness. Probes in the session scratchpad built iteration 5 and the straight grip from the plan's values; both build, and pass `lip.py`, `corner_bevel.py` and `tools/overhang.py`. Catalog suite 88 OK.
+    - First line of `.preflight-status`: `FAIL (fixable)`. No plan edits.
+* Decisions made
+    - F1, a required fix: B3 (curved slices above the flare within 0.001 mm² of iteration 4's) cannot pass. Raising `FLARE_LEN` moves every body loft section, so the outside moves by up to 0.07 mm. The re-plan must give B3 a geometric tolerance and drop the claim that only the flare changes.
+    - Advisories A1 to A8 and the radical idea (a flare sampler plate) are in `.preflight-status`. The most important: the shut gap for the shipped pair (curved + straight) is about 1.1, not 1.3, because the straight steel is 0.47 wider at B (A1). Four caliper W readings on the straight steel would settle that steel's biggest unknown (A3).
+* Insights
+    - The body loft's section positions depend on `FLARE_LEN`, so any change to the flare's length moves the whole outside by a few hundredths. A check of "unchanged" geometry needs a tolerance, not equality.
+    - The 3.3 gap was measured with a curved grip on the straight handle. A gap model that uses walls measured from the steel must account for the steel each grip sits on.
+
+## 2026-11-01 - PLAN - COMPLETE (fourth rework, revised after preflight run 1)
+
+* Work completed
+    - Fixed F1: B3 now allows the outside 0.1 of movement above the flare; the bore stays identical.
+    - Folded in A1 to A8 (see "Preflight (run 1)" in `tasks.md`).
+    - Saved the operator's two photos to `.scratch/` (A4).
+* Decisions made
+    - Reordered: the straight handle comes first, then curved iteration 5, then the straight grip, as three commits. `shut_gap()` needs both handles' W at B.
+    - The gap guard models the pair that ships, about 1.1 left. `MIN_SHUT_GAP` is 0.8.
+    - A3: build the straight bore from the traced W now. Recommend the fit test first, and offer caliper widths if it is loose.
+    - The flare sampler is not taken; it can be offered later.

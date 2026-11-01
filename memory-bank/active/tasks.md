@@ -4,9 +4,9 @@
 * Complexity: Level 2
 * Type: simple enhancement (rework 4)
 
-Two iterations, each committed on its own (projectbrief "Rework 4"):
+Three commits, so that each iteration can be looked up on its own (projectbrief "Rework 4"): the straight readings, then curved grip iteration 5, then straight grip iteration 1.
 
-1. **Curved grip, iteration 5:** the open end's widest point stands 1.0 further out than iteration 4's (0.47 past the body wall, so about 1.47). The bevel on the bed keeps iteration 4's look: the same height to the widest point (about 7 layers) and the bed edge about 0.97 in from the widest. The flare above it stays a flute: its steepest fall stays at most 0.5 per mm, as with print 1's flare, which the operator liked. The tool-closing limit `CONVEX_LIMIT` (5 mm, inferred from the old grip) gives way to the operator's direct measurement: with the tool shut, the open ends of two iteration-4 grips are 3.3 apart. A guard keeps at least `MIN_SHUT_GAP` between the two grips. The operator called 1.5 more each "pushing it" (0.3 left); 1.0 more each leaves 1.3.
+1. **Curved grip, iteration 5:** the open end's widest point stands 1.0 further out than iteration 4's (0.47 past the body wall; the settings below give 0.99 more, which the report states). The bevel on the bed keeps iteration 4's look: the same height to the widest point (about 7 layers) and the bed edge about 0.97 in from the widest. The flare above it stays a flute: its steepest fall stays at most 0.5 per mm, as with print 1's flare, which the operator liked. The tool-closing limit `CONVEX_LIMIT` (5 mm, inferred from the old grip) gives way to the operator's direct measurement: with the tool shut, the open ends of two iteration-4 grips are 3.3 apart. A guard keeps at least `MIN_SHUT_GAP` between the two grips. The operator called 1.5 more each "pushing it" (0.3 left); 1.0 more each leaves about 1.3 between two curved grips. The pair that ships leaves about 1.1 (preflight A1): the 3.3 was measured with a curved grip stretched onto the straight steel, which models 0.47 wider at B, and the straight grip is built for that steel.
 2. **Straight grip, iteration 1:** record the straight readings, model the straight handle in `steel.py`, and build `straight_grip` and its fit test with the same design. The builder already takes any `steel.Handle`.
 
 Flare settings found in `.scratch/wirestripper-grip/flare_solve.py` (iteration 4: widest 0.474 at 1.459 above the bed, falling 0.24 per mm above it):
@@ -42,29 +42,29 @@ The operator's standing direction (build of 2026-10-31, `techContext.md`): no co
     - back on the body by the end of the profile, with no step.
 
     Iteration 4's STL (`87e777c`) fails the first condition.
-- **B2. The tool still closes.** `grips.shut_gap()` returns `SHUT_GAP − 2 × (WALL_SIDE + widest − SHUT_WALL)`, and `check_design` asserts that it is at least `MIN_SHUT_GAP`.
-    - New settings: about 1.3, passes.
-    - Settings putting the widest point 1.5 further out (the operator's "pushing it", 0.3 left): `check_design` raises.
-    - Iteration 4's settings: returns 3.3, the measurement.
+- **B2. The tool still closes.** `grips.shut_gap()` returns `SHUT_GAP − 2 × (WALL_SIDE + widest − SHUT_WALL) − max(0, (STRAIGHT W at B − CURVED W at B) / 2)`. The last term: the measured curved grip sat stretched on the straight steel with its bore built for the curved W, and its wall moves out by at most half the difference. The straight grip's wall sits a full half-difference out. `check_design` asserts the gap is at least `MIN_SHUT_GAP` = 0.8. That value lies between the operator's "pushing it" (0.3) and their choice (about 1.3, or 1.1 for the shipped pair), with room for the "about" in the 3.3 reading.
+    - New settings: about 1.08, passes.
+    - Settings putting the widest point 1.5 further out (the operator's "pushing it"): about 0.07, and `check_design` raises.
+    - Iteration 4's settings: about 3.07, the measurement less the straight term.
 
     `.scratch/wirestripper-grip/shut_gap.py` covers all three.
-- **B3. Only the flare changes on the curved grip.**
-    - The bore's outline is the same as iteration 4's at every height.
-    - The outside matches iteration 4's above the new flare: z ≥ `FLARE_LEN` + 0.5, symmetric difference ≤ 0.001 mm² per slice. Checked by `.scratch/wirestripper-grip/slice_compare.py`.
+- **B3. The curved grip changes at the open end, and barely elsewhere.** Restated after preflight F1: `FLARE_LEN` moves the body loft's first section, and with it every section of the smooth loft (preflight measured up to 0.07 of movement). `.scratch/wirestripper-grip/slice_compare.py` checks:
+    - the bore's outline at every height is iteration 4's, symmetric difference ≤ 0.001 mm² per slice;
+    - above the new flare (z ≥ `FLARE_LEN` + 0.5), the outside's outline stays within 0.1 of iteration 4's (Hausdorff distance per slice).
 - **B4. The bevel prints without supports, all round.** `corner_bevel.py` passes (≥ 47 degrees in every 15-degree direction) on each new grip and each fit test. `tools/overhang.py` flags only the roof's ridge strip.
 - **B5. The straight handle is modelled from its readings.** `.scratch/wirestripper-grip/straight_check.py` (pure Python) checks `steel.STRAIGHT`:
     - its length is 85.14;
     - its bend is 0, and its centre line stays within 0.3 of every traced centre;
     - W at each traced row is within 0.35 of the traced width (the tracing reads to 0.5);
     - T at A, J, K, L and M equals the calipers at chords 0, 5.14, 35.14, 55.14 and 85.14;
-    - the holes' centres are at 7.82 and 78.25, both 3 mm;
+    - the holes' centres are at 7.82 (`D2`, near A) and 78.25 (`D1`, near B), both 3 mm. The names follow the curved handle, so the scratch scripts that look holes up by name work on both;
     - W at B is within 0.1 of the old straight grip's inside opening (10.12), and T at B is under 14.6.
 
     It fails now: `steel` has no `STRAIGHT`.
 - **B6. The curved handle is untouched by the `Handle` change.**
     - The curved part of `python steel.py`'s output is identical to the baseline saved before the change.
     - `tools/plot_curve.py` redraws `reference/curve-rebuilt.png` pixel for pixel.
-    - The curved STL rebuilt after steps 2 and 3 is byte-identical to step 1's.
+    - The curved STL rebuilt after step 1, with iteration 4's settings, is byte-identical to `87e777c`'s. Rebuilt after step 4, it is byte-identical to iteration 5's.
 - **B7. The straight grip is what the builder means.** `verify.py straight` must show:
     - the mock steel never inside the bore wall (0 mm³);
     - the rib bites match `RIB_BITE`;
@@ -100,21 +100,72 @@ The operator's standing direction (build of 2026-10-31, `techContext.md`): no co
 
 ## Implementation Plan
 
-### 1. Curved grip, iteration 5: the stronger flare — executable
+Reordered after preflight: the straight handle comes first, because `shut_gap()` needs both handles' W at B (A1). The docs for the straight grip go in its commit (A7).
+
+### 1. Straight handle in `steel.py` — executable
+
+- Files:
+    - `models/commercial-electric-wire-stripper-grips/steel.py`;
+    - scratch `straight_check.py`.
+
+1. **Stub tests.**
+    - Empty `straight_check.py`.
+    - The baselines are already saved in `.scratch/wirestripper-grip/baseline/`: `python steel.py`'s output, `curve-rebuilt.png`, and iteration 4's STLs.
+2. **Stub interface.** In `steel.py`:
+    - `Handle(name, coeffs, y_a, y_b, stations, holes, widths=None)`. `stations` stay the named readings (name, chord, W, T), and W or T may be `None` where only one was read. `widths`, when given, is a list of (chord, W) that replaces the stations' W as the width profile. Keeping `stations` keeps `tools/plot_curve.py`, `verify.py` and `render.py` working (A6).
+    - The straight readings as `STRAIGHT_*` constants.
+    - `STRAIGHT`.
+    - `report()` split into `report_curved()` and `report_straight()`.
+3. **Write tests and run red.** The B5 assertions; they fail on `steel.STRAIGHT`.
+4. **Write code and run green.**
+    - `Handle` builds its W and T profiles from the stations that have them, or W from `widths`.
+    - The straight handle:
+        - its centre line is a constant x, the mean of the traced centres;
+        - y runs as on the curved tracing, with row 0 at y = 0 and B at y = 80;
+        - its stations are A, J, K, L and M, with T only;
+        - its `widths` are the least-squares line through the eight traced widths, given at A and at B;
+        - its holes are `D2` and `D1`, each centred at its near-edge reading plus 1.5.
+    - Green:
+        - `straight_check.py`;
+        - B6's diff of the curved report and the redrawn plot;
+        - a rebuild of the curved grip, byte-identical to `87e777c`'s STLs (restore the STEP files if only their headers change).
+
+### 2. Straight readings in the log — prose/policy
+
+- Files:
+    - `reference/measurements.md`;
+    - `reference/straight-tracing.jpg`, `reference/straight-holes.jpg`: the operator's two photos, copied to `.scratch/wirestripper-grip/straight-photos/` (A4) and re-encoded as JPEG like the others. The pre-commit hook strips their metadata.
+    - the model's `systemPatterns.md` (the straight handle).
+- No tests: prose/policy artifact.
+
+1. Add a dated entry, "Straight handle, bare steel (2026-11-01)":
+    - the tracing table, the T readings, A to B and the old straight grip's opening;
+    - the holes, quoting the sheet ("Hole bottom from bd. edge") and the operator's reading of it: from the rounded tip to each hole's near edge. Give both the near edge and the centre;
+    - the gap with the tool shut;
+    - the assumption that row 7 is 10 from B;
+    - that the widths come only from the tracing, to 0.5;
+    - that a curved grip slides onto the straight handle.
+
+   The 2026-10-31 "Not measured yet" note stays as history, marked superseded.
+2. In `systemPatterns.md`, describe how the straight handle is modelled: W as a line through the tracing, T from the calipers, and the stations named J to M.
+3. Commit the readings, with `tasks.md` updated: `chore: saving progress on commercial-electric-wire-stripper-curved-grip`, its body naming the straight readings.
+
+### 3. Curved grip, iteration 5: the stronger flare — executable
 
 - Files:
     - `models/commercial-electric-wire-stripper-grips/grips.py`;
     - `curved_grip.{step,stl}`, `curved_grip_fit_test.{step,stl}` (regenerated);
+    - the model's `systemPatterns.md`;
     - scratch `lip.py`, `shut_gap.py`, `slice_compare.py`.
 
 1. **Stub tests.**
     - `lip.py` takes `curved|straight` and an optional STL path, and gains the B1 widest-point condition (iteration 4's 0.474 + 0.95).
     - Empty `shut_gap.py`.
-    - Empty `slice_compare.py` (new STL against `git show 87e777c:…/curved_grip.stl`).
+    - Empty `slice_compare.py` (new STL against the iteration 4 baseline).
 2. **Stub interface.** In `grips.py`:
-    - `SHUT_GAP`, `SHUT_WALL` and `MIN_SHUT_GAP` replace `CONVEX_LIMIT`, with comments on where the gap was measured and on what;
+    - `SHUT_GAP`, `SHUT_WALL` and `MIN_SHUT_GAP` replace `CONVEX_LIMIT`. The comments say where the gap was measured and on what, and that `SHUT_WALL` describes the measured grips, so it stays fixed if `WALL_SIDE` changes;
     - `widest()` returns the rim profile's widest (d, grow);
-    - `shut_gap()` returns the gap with the tool shut.
+    - `shut_gap()` returns the gap with the tool shut, for the shipped pair (B2).
 3. **Write tests and run red.**
     - `lip.py curved` on iteration 4's STL: FAIL on the widest point.
     - `shut_gap.py`: the three B2 cases. It fails while `shut_gap()` is a stub.
@@ -125,62 +176,18 @@ The operator's standing direction (build of 2026-10-31, `techContext.md`): no co
     - `sizes()` prints the gap left with the tool shut, and uses `widest()`.
     - Regenerate the curved outputs.
     - Green: `lip.py`, `shut_gap.py`, `slice_compare.py`, `corner_bevel.py`, `verify.py curved` and `tools/overhang.py`.
-    - Update the model's `systemPatterns.md` flare history and the shut-gap rule, so that the commit is complete.
+    - In `systemPatterns.md`: the flare history (iteration 5), and the shut-gap rule in place of the "9 mm gap with the old straight grip" point.
+    - Add a model SumMem note correcting the earlier "0.5 wider": the operator then asked for 1.0 (A5).
     - Commit iteration 5 on its own, with `tasks.md` updated: `chore: saving progress on commercial-electric-wire-stripper-curved-grip`, its body naming curved grip iteration 5 (the stronger flare).
-
-### 2. Straight handle in `steel.py` — executable
-
-- Files:
-    - `models/commercial-electric-wire-stripper-grips/steel.py`;
-    - `tools/plot_curve.py`;
-    - scratch `straight_check.py`.
-
-1. **Stub tests.**
-    - Empty `straight_check.py`.
-    - Save the baselines: the output of `python steel.py`, and `curve-rebuilt.png`.
-2. **Stub interface.** In `steel.py`:
-    - `Handle(name, coeffs, y_a, y_b, widths, thicknesses, holes)`, where `widths` and `thicknesses` are lists of (chord from A, value), so W and T may be read at different places;
-    - the straight readings as `STRAIGHT_*` constants;
-    - `STRAIGHT`;
-    - `report()` split into `report_curved()` and `report_straight()`.
-3. **Write tests and run red.** The B5 assertions; they fail on `steel.STRAIGHT`.
-4. **Write code and run green.**
-    - `Handle` converts both lists to arc length. The curved handle passes its caliper stations as both lists.
-    - `plot_curve.py` reads the stations from `steel.STATIONS`, since `Handle.stations` goes away.
-    - The straight handle:
-        - its centre line is a constant x, the mean of the traced centres;
-        - y runs as on the curved tracing, with row 0 at y = 0 and B at y = 80;
-        - W is the least-squares line through the eight traced widths, given at A and at B;
-        - T runs through A, J, K, L and M;
-        - each hole's centre is its near-edge reading plus 1.5.
-    - Green: `straight_check.py`, plus B6's diff of the curved output and the plot.
-
-### 3. Straight readings in the log — prose/policy
-
-- Files:
-    - `reference/measurements.md`;
-    - `reference/straight-tracing.jpg`, `reference/straight-holes.jpg` (the operator's two photos, re-encoded as JPEG like the others; the pre-commit hook strips their metadata);
-    - the model's `systemPatterns.md` (the straight handle).
-- No tests: prose/policy artifact.
-
-1. Add a dated entry, "Straight handle, bare steel (2026-11-01)":
-    - the tracing table, T readings, A to B, the holes (near edge and centre) and the old straight grip's opening;
-    - the shut-tool gap;
-    - the assumption that row 7 is 10 from B;
-    - that the widths come only from the tracing, to 0.5;
-    - that a curved grip slides onto the straight handle.
-
-   The 2026-10-31 "Not measured yet" note stays as history, marked superseded.
-2. In `systemPatterns.md`, describe how the straight handle is modelled (W as a line through the tracing, T from the calipers), and replace the "9 mm gap with the old straight grip" point with the measured gap between two grips.
 
 ### 4. Straight grip, iteration 1 — executable
 
 - Files:
-    - `grips.py` (`build(h, stem, out)`; the main block builds both grips; the docstring);
+    - `grips.py`: `build(h, stem, out)`; the main block builds both grips;
     - `straight_grip.{step,stl}`, `straight_grip_fit_test.{step,stl}` (new);
-    - scratch `verify.py`, `corner_bevel.py`.
+    - scratch `verify.py`, `corner_bevel.py`, `render.py`.
 
-1. **Stub tests.** `verify.py` and `corner_bevel.py` take `curved|straight`.
+1. **Stub tests.** `verify.py`, `corner_bevel.py` and `render.py` take `curved|straight`.
 2. **Stub interface.** `grips.build(h, stem, out)`: `check_design`, the grip, both exports and `sizes`.
 3. **Write tests and run red.** `verify.py straight` fails: there is no `straight_grip.stl`.
 4. **Write code and run green.**
@@ -191,7 +198,6 @@ The operator's standing direction (build of 2026-10-31, `techContext.md`): no co
         - `corner_bevel.py` on both straight files;
         - `tools/overhang.py` on both;
         - the curved STLs byte-identical to iteration 5's (B6), with STEP header-only changes restored.
-    - Commit the straight grip on its own, with `tasks.md` updated: `chore: saving progress on commercial-electric-wire-stripper-curved-grip`, its body naming straight grip iteration 1.
 
 ### 5. Model docs — prose/policy
 
@@ -204,11 +210,9 @@ The operator's standing direction (build of 2026-10-31, `techContext.md`): no co
 1. **README:** both grips exist; the file table lists `straight_grip.*`; the build writes both.
 2. **productContext:** a success criterion for the straight grip (slides on to B, 85 from the tip).
 3. **techContext:** `grips.py` builds both grips (about a minute); `steel.py` reports both handles; the scratch checks take a handle.
-4. **systemPatterns:**
-    - names: J to M, rows;
-    - the print orientation for a straight grip (no lean, symmetric roof);
-    - no copied values (catalog norm).
+4. **systemPatterns:** the print orientation for a straight grip (no lean, symmetric roof). No copied values (catalog norm).
 5. `publish.yaml` is unchanged.
+6. Commit steps 4 and 5 together as straight grip iteration 1, with `tasks.md` updated: `chore: saving progress on commercial-electric-wire-stripper-curved-grip`, its body naming straight grip iteration 1 (A7).
 
 ### 6. Final verification — executable
 
@@ -221,7 +225,7 @@ No new technology - validation not required. The scratch checks use packages alr
 
 ## Dependencies
 
-- The operator's straight readings and photos (in this conversation; the images are copied from the session's image cache into `reference/`).
+- The operator's straight readings and photos. The photos are saved in `.scratch/wirestripper-grip/straight-photos/`, because the session's image cache does not survive a restart.
 - Iteration 4's outputs at `87e777c`, the baseline for B1 and B3.
 - The pre-commit image hook (ExifTool) for the two new photos.
 
@@ -230,7 +234,10 @@ No new technology - validation not required. The scratch checks use packages alr
 - **The tuned flare trips an existing guard** (d rising strictly, the first-layer wall, the 45-degree bevel). The exploration ran `rim_profile()` with these settings: the profile is valid and the first-layer corner wall is about 2.55. `check_design` runs on every build.
 - **`SHUT_WALL` is a fact about the measured grips, not a design value.** If `WALL_SIDE` changes later, `SHUT_WALL` must stay what was measured. Say so in its comment and in `systemPatterns.md`.
 - **The `Handle` change silently moves the curved grip.** B6 compares the steel report and the plot, and the curved STL bytes across steps 2 to 4.
-- **The W line misreads the straight steel.** The tracing reads to 0.5, and the curved calipers show a slight curve. The line's residuals are at most 0.35, and W at B lands within 0.04 of the old grip's opening. The fit test checks near B first; report W at A and B next to the curved handle's.
+- **The W line misreads the straight steel** (preflight A3). The tracing reads to 0.5, and the curved calipers show a slight curve. On the curved handle, the tracing read up to 0.56 too wide near B. If the straight tracing does the same, its bore is about 0.4 loose there, and its side ribs do not touch.
+    - **Decision:** build from the tracing now. Under the operator's standing direction, the first print should be close enough to learn from, and a curved grip, built 0.47 narrower at B, already works on this steel.
+    - **What supports the line:** its residuals are at most 0.35; W at B lands within 0.04 of the old grip's opening; in the middle rows it agrees with the curved handle's calipers.
+    - **Report:** recommend the straight fit test first. Give W at A and at B next to the curved handle's. Offer caliper W at J, K, L, M and B as the fix if the fit is loose.
 - **The row positions are assumed** (row 7 at 10 from B). A 1 mm error moves W by about 0.04. Record the assumption.
 - **The straight roof without lean.** `roof()` with equal heights gives `xr` at the midpoint and no division by zero. `verify.py`'s tip check and `tools/overhang.py` confirm it.
 - **Photo commits.** The hook rewrites images and stops the commit once; stage again and recommit.
@@ -238,10 +245,23 @@ No new technology - validation not required. The scratch checks use packages alr
 
 ## Pre-Mortem
 
-- **The operator meant 1.0 on the nominal `FLARE`, not at the widest point.** Their reasoning was in gap terms (3.3 apart, 1.5 each would be pushing it), and the gap is set by the widest point, so the widest point is the right measure. The report states the widest point and the gap left (about 1.3), so a mismatch is visible at once.
+- **The operator meant 1.0 on the nominal `FLARE`, not at the widest point.** Their reasoning was in gap terms (3.3 apart, 1.5 each would be pushing it), and the gap is set by the widest point, so the widest point is the right measure. The report states the widest point (0.99 further out) and the gap left (about 1.1 for the shipped pair), so a mismatch is visible at once.
 - **The longer flare changes the hand feel more than "a bit more of a flare out".** The report names the trade: `FLARE_LEN` 8 keeps print 1's steepness, while 5 would be twice as steep. Either is one parameter for the next print.
 - **The straight grip fits differently from the curved grip on the straight steel** (the operator's working reference). The report gives the straight bore against the curved one at A and B, and recommends the fit test first.
 - **A guard written for one handle breaks on the other.** For example, the dome check uses W at A, which differs between the handles. `check_design` runs per handle in `build()`.
+
+## Preflight (run 1, 2026-11-01): FAIL (fixable), resolved in the plan
+
+- **F1:** B3 could not pass, because `FLARE_LEN` moves the body loft's sections. B3 is restated with a 0.1 tolerance on the outside; the bore stays identical.
+- **A1:** the gap is modelled for the pair that ships. `shut_gap()` subtracts half the straight handle's extra W at B, which comes to about 1.1, not 1.3.
+- **A2:** `MIN_SHUT_GAP` is 0.8, with its reason in B2.
+- **A3:** proceed with the traced W. See Challenges.
+- **A4:** the photos are saved in `.scratch/`. The log quotes "Hole bottom from bd. edge" next to the operator's reading of it.
+- **A5:** step 3 adds a correcting SumMem note.
+- **A6:** `Handle` keeps `stations`. The straight holes are named `D2` and `D1`.
+- **A7:** the straight grip's docs go in its commit.
+- **A8:** the report gives 0.99.
+- **The flare sampler** (three fit tests on a plate at +0.5, +1.0 and +1.5) is not taken. The operator chose 1.0 explicitly. The report can offer it if the feel is off.
 
 ## Status
 

@@ -1,0 +1,56 @@
+FAIL (fixable)
+
+Preflight of the Level 2 plan for commercial-electric-wire-stripper-curved-grip, rework 4 (a stronger flare, and the straight grip), 2026-11-01.
+
+Read: `tasks.md`, `progress.md`, `projectbrief.md`, `activeContext.md`, the catalog and model memory banks, both creative docs, `grips.py`, `steel.py`, `tools/plot_curve.py`, `tools/overhang.py`, the model README, `reference/measurements.md`, `publish.yaml`, the catalog tests, the scratch checks (`lip.py`, `corner_bevel.py`, `verify.py`, `flare_solve.py`) and their baselines, both SumMem stores, and the operator's two straight photos in the session image cache.
+
+Probes, run in the session scratchpad and not in the repository:
+- Built iteration 5 with the plan's values (`FLARE` 2.3, `FLARE_LEN` 8.0, `BEVEL` 1.8). It is one valid solid and both STLs are watertight. `lip.py` PASS: 130 degrees at the bed edge; widest 1.464 at z 1.50; bed edge 0.96 in from the widest; falls at most 0.42 per mm. `corner_bevel.py` PASS (49.9 degrees at the least). `tools/overhang.py` flags only the ridge strip. Footprint 197 mm² (iteration 4: 132).
+- `rim_profile()` with the plan's values: widest 1.4653 at d 1.453; iteration 4: 0.4738 at 1.459. That is 0.99 further out. The shut gap formula gives 3.300 for iteration 4, 1.317 for iteration 5, and 0.300 for "pushing it".
+- Built the straight grip through the existing builder, using the plan's readings (W least-squares line, T through A and J to M, constant centre line). `check_design` passes, apart from the `CONVEX_LIMIT` line that the plan removes. One valid solid; `roof()` gives a symmetric gable (rise 4.33). `tools/overhang.py` flags only the ridge strip, which is anchored on both sides, so it is a bridge. Bevel 50.2 degrees at the least. W is 6.66 at A and 10.16 at B, with a worst residual of 0.339. The centre line strays at most 0.22 from a traced centre. Against the curved handle: W 0.35 wider at A and 0.47 wider at B; T 0.03 thinner at A and 0.22 thicker at B.
+- Catalog suite: 88 OK. The working tree is clean.
+
+## Checks
+
+- Wrong-reference guard: the task is Level 2, so the default reference applies.
+- Prerequisites: planning is complete (`tasks.md` status). Level 2 needs no creative phase. The first cycle's two creative docs still govern the bore and the outside, and the plan reuses them unchanged.
+- TDD plan encoding: PASS. Steps 1, 2 and 4 change executable behaviour (the printed shape, and the steel model it is built from). In each of them, stubbing the checks, writing them and running them red come before any code. Steps 3 and 5 are prose, so they owe no tests. Step 6 reruns the checks. No change-detector is scheduled: the checks are scratch scripts on the geometry, and B6's baseline comparisons catch an unintended change in the curved handle's model, not edits to a document. Nothing was struck or reordered.
+- Convention compliance: PASS, with advisories A3 and A7. The file names follow `curved_grip.*`. Readings go to `steel.py` and to the dated log, design values to `grips.py`, and reasoning to `systemPatterns.md`. Commits stay to one model and use the task's `chore` titles. The photos go to `reference/` as JPEG, which is under Git LFS and passes through the metadata hook.
+- Dependency impact: PASS, with advisory A6. The plan covers `Handle.stations` in `steel.report` and `tools/plot_curve.py`. The catalog test sees `files: []`, which does not change.
+- Conflict detection: FAIL (fixable), F1. Check B3, as specified, contradicts the plan's own implementation.
+- Completeness: PASS, with advisories A1 and A2. Every rework 4 requirement maps to a step, files and a check.
+
+## Required fix
+
+F1. B3 cannot pass on the planned code (blocks the build as written). B3 requires the curved grip's slices at z ≥ `FLARE_LEN` + 0.5 to match iteration 4's within 0.001 mm² of symmetric difference. However, `outside()` places the body's smooth loft with `loft_positions(h.length - FLARE_LEN, s_dome)`. Raising `FLARE_LEN` from 5 to 8 moves every body section: the old starts are 78.58, 74.61, 70.65 …; the new are 75.58, 71.76, 67.93 …. The smooth B-spline surface moves with them. Compared with the iteration 4 baseline STL, the probe's slices differ by 0.16 to 1.52 mm² (z 8.5 to 85). The outside outline moves by up to 0.072 mm (at z 15), and is within 0.07 everywhere above the flare. The bore is identical (0.0000). Two separate tessellations of the same surface would already exceed 0.001 mm², because the STL tolerance is 0.01. The builder would then have to loosen the check mid-build, or change the design to meet it. The re-plan should do one of these:
+- Restate B3 with a geometric tolerance. For example: the bore outline is unchanged (≤ 0.001), and the outside outline above `FLARE_LEN` + 0.5 is within 0.1 of iteration 4 (Hausdorff distance). Optionally, as QA did in rework 1, check sections square to the centre line against the design, within about 0.02.
+- Or keep the body's loft sections where they were. This is harder: a section 1 mm from its neighbour invites a smooth loft to ring.
+
+Also correct the wording "Only the flare changes on the curved grip". The body moves by a few hundredths of a millimetre, well under one extrusion line. Say so in the iteration 5 commit body and in the report.
+
+## Advisory findings
+
+A1. The gap with the tool shut is modelled for two curved grips, not for the pair that ships (medium; best fixed in the same re-plan). The 3.3 was measured with an iteration 4 curved grip on each handle. On the straight handle, that curved grip's outside is centred on steel about 0.47 wider at B than the curved steel it was built for (10.16 against 9.69). So its wall there, measured from the straight steel, was about 4.04, not `SHUT_WALL`'s 4.27. The straight grip puts 5.27 there. With curved iteration 5 on one handle and straight iteration 1 on the other, the gap is about 3.3 − 0.99 − 1.23 ≈ 1.08, not 1.32. TPU compression of the curved grip's ribs on the wider steel moves this by up to about 0.2 either way. So does the tracing's uncertainty in straight W at B (A3). `shut_gap()` as planned does not depend on the handle, so `check_design(steel.STRAIGHT)` checks the same number twice. A sketch of the fix: `shut_gap()` subtracts both grips' changes, `(WALL_SIDE + widest − SHUT_WALL)` for the curved one and that plus `(STRAIGHT W at B − CURVED W at B) / 2` for the straight one. The report then states about 1.1 for the shipped pair.
+
+A2. `MIN_SHUT_GAP` has no value in the plan (low). B2 only bounds it to more than 0.3 and at most 1.317. Given A1, a value near 1.0 leaves almost no margin for the real pair. State the value and its reason (for example, 0.5: clear of "pushing it", with margin for A1).
+
+A3. The straight W comes from the tracing alone (medium; for the operator to decide). The model's `systemPatterns.md` rule for the curved handle is "Take the shape from the tracing and the sizes from the calipers". The plan records the deviation. On the curved handle, the tracing read 0.36 and 0.56 wider than the calipers' trend at row 7 and at B, and 0.70 narrower at row 1. If the straight tracing over-reads by as much near B, the straight bore is about 0.4 loose in W there and its W ribs never touch. The steel is bare now, and the operator already took T with calipers at A, J, K, L and M. Four caliper W readings at the same places, plus one at B, would take a few minutes. They would put the straight handle on the same footing as the curved one, and settle A1's main uncertainty. The fit test is the fallback the plan already names.
+
+A4. The photos are only in `/tmp` (low). The straight readings are `images/7.png` (the tracing) and `images/8.png` (the holes) in `/tmp/claude-1000/-home-mobaxterm-worktrees-Texarkanine-3d-models-3d-models-wirestripper-handle/ed5a8bd9-f2b7-4702-9ec5-a4e6d34e7b89/`. `6.png` is the earlier print photo. `/tmp` does not survive a restart, so copy them first in step 3. `8.png` is headed "Hole bottom from bot. edge". The log should quote that wording next to the reading confirmed in chat (from the tip to each hole's near edge).
+
+A5. A model SumMem note is stale (low). The note on the iteration 4 print says the operator "wants the flare 0.5 wider". The brief, and the operator's words in `progress.md`, say 1.0 on each side ("not just one half"). Notes are append-only, so the build should add a correcting note with iteration 5's commit, as was done for iteration 4.
+
+A6. The scratch checks use `Handle.stations` and the hole names (low). `verify.py` line 56 indexes `h.stations[0..2]` and `h.holes["D1"]`/`["D2"]`, and `render.py` does the same. Both break at step 2, when `Handle.stations` goes away. Step 4's "`verify.py` takes `curved|straight`" must also replace those section positions, and the plan should name the straight holes.
+
+A7. The straight grip's commit would ship stale docs (low). Step 5 (the README, productContext, techContext and docstrings) comes after step 4's commit, and no commit of its own is scheduled. At the straight grip commit, the README would still say only the curved grip exists. After iteration 5, techContext's list of assertions would still name "the wall at the open end", which the shut gap replaces. Either fold step 5 into step 4's commit, or schedule a commit for step 5, so that each iteration's checkout describes itself.
+
+A8. Report the flare as 0.99 further out, not 1.0 (low). The chosen settings put the widest point 0.9915 past iteration 4's. That is within print resolution, but the report and the log should give the real figure.
+
+## Radical idea (advisory, not applied)
+
+A flare sampler instead of another full-length iteration. The flare, bevel and round all lie within the first 8 mm, and the fit test is the first `FIT_LEN` (15) mm, so a fit test carries the whole open end. Five full prints (each about 92 mm tall) have tuned the open end by feel. Sketch:
+- Move the open end's values (`FLARE`, `FLARE_LEN`, `BEVEL`, `RIM_R`) into a small `OpenEnd` dataclass passed to `rim_profile()`, `outside()` and `shut_gap()`. Today the scratch scripts tune by overwriting module globals (`flare_solve.py` sets `g.FLARE = …`).
+- Add `grips.sampler(h, ends)`. It builds a fit test for each of three `OpenEnd` rows from the `flare_solve` table (widest +0.5, +1.0 and +1.5 over iteration 4, so shut gaps of about 2.3, 1.3 and 0.3). Each one gets 1 to 3 notches on its top edge so it can be told apart. They are exported as one plate, `<stem>_flare_sampler.stl`.
+- The operator prints one plate per handle in a few minutes. They pick the hand feel, and measure the real shut gap with a sampler on each handle. That replaces the inferred gap model (A1) with a measurement, and the full grips are printed once, at the chosen row.
+
+The cost is a dataclass refactor of four parameters and one export. It does not block this plan.
