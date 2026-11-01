@@ -223,3 +223,28 @@ The first cycle (2026-10-31) was Level 3. The 2026-11-01 rework is Level 1.
     - `RIM_STEP` was halved after the first build, because the flare's ruled steps left creases on the surface the hand meets.
 * Insights
     - The operator's word "flute" means the flare, not the bead.
+
+## 2026-11-01 - QA - COMPLETE (PASS) (second rework)
+
+* Work completed
+    - Semantic review of commit `c585867` against the rework 2 brief.
+    - Independent checks:
+        - a scratch rebuild gives byte-identical STLs, and the STEP files differ only in their header;
+        - `lip.py` fails on print 1's and print 2's STLs, each for the flaw the operator named, and passes on both new STLs;
+        - `rim_profile()` is tangent where it should be and never flatter than `RIM_ANGLE`, at the defaults and over a parameter sweep;
+        - the rim matches its profile to 0.0000, and the body is within 0.019 of design;
+        - `verify.py` reproduces the build's numbers;
+        - overhangs are unchanged;
+        - catalog suite 88 OK.
+* Decisions made
+    - PASS. All five rework 2 requirements are met. Advisories A-15 to A-18 are in `tasks.md`; none blocks.
+* Insights
+    - Print 1's smooth loft through four sections did not follow its own quadratic flare: its STL sat up to 0.045 outside it. The new ruled loft follows `flare()` exactly, so "print 1's flare" now means print 1's design, not its STL. The two differ by far less than a line width.
+
+## 2026-11-01 - WRAP-UP - COMPLETE (second rework)
+
+* Work completed
+    - Fixed QA advisories A-15 to A-18. The STLs are byte-identical to `c585867`.
+    - Root persistent files: skip. Only this model's outside changed, and no catalog contract changed.
+* Decisions made
+    - Iteration 3 closes unprinted. The operator, looking at the model, asked for more bevel ("only three or four layers... bring it in a little bit more"). That is rework 3.

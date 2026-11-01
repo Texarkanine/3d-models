@@ -171,8 +171,12 @@ def ribs(h):
 
 
 def flare(d):
-    """Extra wall d from the open end: FLARE at B, fading quadratically to 0 at FLARE_LEN."""
-    return FLARE * (1 - d / FLARE_LEN) ** 2 if d < FLARE_LEN else 0.0
+    """Extra wall d from the open end, and its slope along d: FLARE at B, fading
+    quadratically to 0 at FLARE_LEN. Kept together so the two cannot drift apart."""
+    if d >= FLARE_LEN:
+        return 0.0, 0.0
+    k = 1 - d / FLARE_LEN
+    return FLARE * k ** 2, -2 * FLARE / FLARE_LEN * k
 
 
 def rim_profile():
@@ -187,14 +191,11 @@ def rim_profile():
     """
     r, a = RIM_R, math.radians(RIM_ANGLE)
 
-    def slope(d):
-        return -2 * FLARE / FLARE_LEN * (1 - d / FLARE_LEN)
-
     def centre(t):
         """Centre of the circle of radius r that touches the flare at d = t, inside it."""
-        m = slope(t)
+        g, m = flare(t)
         q = math.hypot(1.0, m)
-        return t + r * m / q, flare(t) - r / q
+        return t + r * m / q, g - r / q
 
     lo, hi = 0.0, FLARE_LEN        # the touch point whose circle also touches the bed
     for _ in range(60):
@@ -203,7 +204,8 @@ def rim_profile():
     t = (lo + hi) / 2
     gc = centre(t)[1]
     start = 180.0 - RIM_ANGLE                           # the circle slopes at RIM_ANGLE here
-    stop = math.degrees(math.atan2(1.0, -slope(t)))     # and touches the flare here
+    m = flare(t)[1]
+    stop = math.degrees(math.atan2(1.0, -m))            # and touches the flare here
     bd = r + r * math.cos(math.radians(start))
     bg = gc + r * math.sin(math.radians(start))
     pts = [(0.0, bg - bd / math.tan(a))]                # the bevel's foot on the bed
@@ -211,10 +213,10 @@ def rim_profile():
     for k in range(n + 1):
         phi = math.radians(start + (stop - start) * k / n)
         pts.append((r + r * math.cos(phi), gc + r * math.sin(phi)))
-    n = max(1, math.ceil(math.degrees(math.atan(-slope(t))) / RIM_STEP))
+    n = max(1, math.ceil(math.degrees(math.atan(-m)) / RIM_STEP))
     for k in range(1, n + 1):                           # the rest of the flare
         d = t + (FLARE_LEN - t) * k / n
-        pts.append((d, flare(d)))
+        pts.append((d, flare(d)[0]))
     return pts
 
 

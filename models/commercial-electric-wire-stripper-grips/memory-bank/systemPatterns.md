@@ -41,7 +41,7 @@ Each fact has one home:
     - Print 2 swapped the flare for a bead that bulged out and back in. The edge was good, but the flare was lost.
     - The design now keeps the flare and rounds only its edge on the bed.
 - `grips.rim_profile` gives the open end's outline, from the bed to `FLARE_LEN`. It is a ruled loft of closely spaced sections; a smooth loft would ring through the round.
-- On the side facing the other handle, the wall at the open end is at most `WALL_SIDE + FLARE`. It must stay within the 5 mm the closed tool allows (`CONVEX_LIMIT`, asserted). The round trims the widest point a little below that, and `grips.py` prints the actual figure. Constant walls keep the closest approach to the other handle at the open end, where the gap was measured.
+- On the side facing the other handle, the wall at the open end is at most `WALL_SIDE + FLARE`. It must stay within the 5 mm the closed tool allows (`CONVEX_LIMIT`, asserted). The round trims the widest point below that, and `grips.py` prints the actual figure. Constant walls keep the closest approach to the other handle at the open end, where the gap was measured.
 - The grip is the same on both sides in W and in T. That is load-bearing: it makes a mirrored tracing harmless.
 - The dome starts at the height of the bore's roof ridge and shrinks along a quarter circle of radius `DOME_LEN`. Starting it any lower thins the T wall at the ridge's ends below the body's. The cap over the ridge is then `DOME_LEN`, at least `END`.
 
