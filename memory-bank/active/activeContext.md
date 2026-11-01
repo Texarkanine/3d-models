@@ -1,11 +1,10 @@
 # Active Context
 
 ## Current Task: commercial-electric-wire-stripper-curved-grip (rework: round the open end)
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Rework opened on the first test print: it fits and holds dry; the open end's outer edge on the bed is sharp.
-- Level 1: one defect, confined to the outside's open end in `grips.py`.
+- A rounded lip replaces the open end's flare. The bed edge is a 130-degree bevel, where the first print had an acute corner of about 71 degrees. The wall facing the other handle is still within `CONVEX_LIMIT`. Details are in `tasks.md`.
 
 ## Next Step
-- Load the Level 1 workflow and build.
+- QA (subagent). Then the operator prints the new grip.

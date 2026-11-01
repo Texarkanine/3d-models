@@ -159,3 +159,15 @@ The first cycle (2026-10-31) was Level 3. The 2026-11-01 rework is Level 1.
     - Classified the rework.
 * Decisions made
     - Level 1. It fixes one defect found in a print, the sharp edge at the open end. The fix is confined to the outside's open end in `grips.py`; the bore, ribs and dome are unchanged.
+
+## 2026-11-01 - BUILD - COMPLETE
+
+* Work completed
+    - A rounded lip replaces the flare at the open end. The outputs were regenerated, and the model's `systemPatterns.md` and `techContext.md` updated.
+    - An ad hoc check, `.scratch/wirestripper-grip/lip.py`, reproduced the defect first (71 degrees, widest on the bed). It passes after the fix (130 degrees, crown 1.75 up, back on the body by about 4). The first cycle's `verify.py` and `tools/overhang.py` show no regressions. Catalog suite: 88 OK.
+* Decisions made
+    - The lip starts flush with the body wall on the bed and stands `LIP` out at the crown. Its maximum matches the old flare's, so the wall facing the other handle stays where `CONVEX_LIMIT` allowed it.
+    - The lip is a separate ruled loft fused to the body's smooth loft.
+* Insights
+    - The old flare had also left the smooth body loft 0.02 to 0.03 over its wall for several millimetres past the flare. Taking the lip out of the smooth loft brought that back to 0.000.
+    - The footprint on the bed drops from 231 to 164 mm². The operator should watch bed adhesion on the 92 mm tall print.

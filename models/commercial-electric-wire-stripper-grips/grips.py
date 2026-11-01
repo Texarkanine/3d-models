@@ -4,7 +4,7 @@ A grip is a closed tube that slides onto the bare steel from its tip A to B,
 where the old grip's open end sat. The inside follows the steel's measured
 centre line and taper (`steel.py`). The outside is a new design shared by both
 grips: the steel's own outline grown by a set wall on each side, with rounded
-corners, flared a little at the open end and domed at the closed end.
+corners, with a rounded lip at the open end and a dome at the closed end.
 
 Inside: the bore is the steel plus BORE_CLEAR on every side, with tight
 corners so even a sharp steel corner clears it. Eight lengthwise ribs, two
@@ -21,8 +21,9 @@ way the tip leans. The outside's dome starts at the ridge's height, so the wall
 over the roof is never thinner than the body's.
 
 Print: standing on the open end, closed end up. Its lean follows the steel's
-curve (about 15 degrees at the tip). The flare is widest on the bed, and the
-dome and roof face up, so no supports are needed.
+curve (about 15 degrees at the tip). The lip's underside rises from the bed at
+LIP_ANGLE, so the edge on the bed is a bevel, not a sharp corner. The dome and
+roof face up, so no supports are needed.
 
 Coordinates are those of `steel.py` (use position: the handle flat in XY, T
 along Z, s along the centre line from A). Each cross-section is in the plane
@@ -56,8 +57,10 @@ RIDGE_W = 0.2        # the roof's ridge is a strip this wide
 WALL_SIDE = 3.8      # steel face to outside, in the plane of the handles
 WALL_FACE = 2.5      # steel face to outside, across that plane
 CORNER_R = 4.8       # outside corner radius (>= 2 mm over each bore corner)
-FLARE = 1.0          # extra wall each side at the open end ...
-FLARE_LEN = 5.0      # ... fading out over this length
+LIP = 1.0            # the open end's lip stands this far out from the body wall
+LIP_R = 1.5          # radius of the lip's crown, and of its blend back into the body
+LIP_ANGLE = 50.0     # the lip's underside, degrees above horizontal in print
+LIP_STEP = 6.0       # degrees of arc between the lip's lofted sections
 DOME_LEN = 5.0       # the dome's length, and how far it shrinks each side
 END = 3.0            # thinnest cap over the roof's ridge
 
@@ -164,26 +167,53 @@ def ribs(h):
     return out
 
 
+def lip_profile():
+    """The lip's outline: (d, grow) points from the open end, d along the centre
+    line toward A, grow past the body wall.
+
+    It starts on the bed flush with the body wall. The underside rises at
+    LIP_ANGLE above horizontal (in print) to meet the crown, a circle of radius
+    LIP_R whose top stands LIP out. A second circle of the same radius curves
+    back into the body wall. The outline is smooth from the bed to the body.
+    """
+    r, a = LIP_R, math.radians(LIP_ANGLE)
+    g1 = LIP - r                                # crown centre: grow, and the distance
+    d1 = g1 * math.tan(a) + r / math.cos(a)     # at which the underside from (0, 0) meets it
+    d2 = d1 + math.sqrt((2 * r) ** 2 - (r - g1) ** 2)   # blend circle's centre: (d2, r)
+    m = math.degrees(math.atan2(r - g1, d2 - d1))       # where the two circles touch
+    pts = [(0.0, 0.0)]
+
+    def arc(cd, cg, start, stop):
+        n = max(1, math.ceil(abs(stop - start) / LIP_STEP))
+        for k in range(n + 1):
+            phi = math.radians(start + (stop - start) * k / n)
+            pts.append((cd + r * math.cos(phi), cg + r * math.sin(phi)))
+
+    arc(d1, g1, 180 - LIP_ANGLE, m)             # crown, from the underside over the top
+    pts.pop()                                   # the circles share that point
+    arc(d2, r, m + 180, 270)                    # blend, ending tangent to the body wall
+    pts[-1] = (d2, 0.0)
+    return pts
+
+
 def outside(h):
-    """Outside: steel + walls, flared at B, straight past A to the ridge, then a dome."""
+    """Outside: steel + walls, a lip at B, straight past A to the ridge, then a dome."""
     _, rise = roof(h)
     s_dome = -END_CLEAR - rise
-    secs = []
 
-    def add(s, grow):
+    def sec(s, grow):
         w = h.width(s) + 2 * (WALL_SIDE + grow)
         t = h.thickness(s) + 2 * (WALL_FACE + grow)
-        secs.append(rrect(section_plane(h, s), w, t, CORNER_R + max(grow, 0.0)))
+        return rrect(section_plane(h, s), w, t, CORNER_R + max(grow, 0.0))
 
-    for k in range(4):                          # flare: quadratic, smooth into the body
-        d = FLARE_LEN * k / 4
-        add(h.length - d, FLARE * (1 - d / FLARE_LEN) ** 2)
-    for s in loft_positions(h.length - FLARE_LEN, s_dome):
-        add(s, 0.0)
+    lip = lip_profile()
+    # ruled: a smooth loft would ring through the lip's S-curve
+    lip_solid = cq.Solid.makeLoft([sec(h.length - d, g) for d, g in lip], ruled=True)
+    secs = [sec(s, 0.0) for s in loft_positions(h.length - lip[-1][0], s_dome)]
     for deg in (20, 38, 54, 67, 78, 90):       # dome: quarter circle of radius DOME_LEN
         phi = math.radians(deg)
-        add(s_dome - DOME_LEN * math.sin(phi), -DOME_LEN * (1 - math.cos(phi)))
-    return cq.Solid.makeLoft(secs)
+        secs.append(sec(s_dome - DOME_LEN * math.sin(phi), -DOME_LEN * (1 - math.cos(phi))))
+    return lip_solid.fuse(cq.Solid.makeLoft(secs)).clean()
 
 
 def grip(h):
@@ -229,7 +259,9 @@ def check_design(h):
     gap_u, gap_v = WALL_SIDE - CORNER_R - (c - r), WALL_FACE - CORNER_R - (c - r)
     corner_wall = CORNER_R - math.hypot(gap_u, gap_v) - r
     assert corner_wall >= 2.0, f"only {corner_wall:.2f} over the bore's corners"
-    assert WALL_SIDE + FLARE <= CONVEX_LIMIT, "too thick at B for the tool to close"
+    assert WALL_SIDE + LIP <= CONVEX_LIMIT, "too thick near B for the tool to close"
+    assert LIP >= LIP_R * (1 - math.sin(math.radians(LIP_ANGLE))), \
+        "the lip's underside would start inside the body wall"
     assert h.width(0) / 2 + WALL_SIDE - DOME_LEN > 0.4, "the dome would shrink to nothing"
     assert DOME_LEN >= END, "the dome is too short to cap the roof"
     assert RIB_INSET - RIB_BASE / 2 > r - c, "ribs would sit in the bore's corners"
@@ -243,14 +275,18 @@ def sizes(h, printed):
     L = h.length
     print(f"{h.name} grip: stands {span[2]:.1f} tall on its open end; leaning, it spans "
           f"{span[0]:.1f} x {span[1]:.1f}; volume {printed.Volume() / 1000:.1f} cm3")
-    for name, s, grow in (("open end (B)", L, FLARE), ("body near B", L - FLARE_LEN, 0.0),
-                          ("at A", 0.0, 0.0)):
+    lip = lip_profile()
+    crown = max(lip, key=lambda p: p[1])[0]
+    for name, s, grow in (("open end (B)", L, 0.0), ("lip's crown", L - crown, LIP),
+                          ("body near B", L - lip[-1][0], 0.0), ("at A", 0.0, 0.0)):
         w, t = h.width(s), h.thickness(s)
         print(f"  {name:13s} steel {w:5.2f} x {t:5.2f}  bore {w + 2 * BORE_CLEAR:5.2f} x "
               f"{t + 2 * BORE_CLEAR:5.2f}  ribs {w - 2 * RIB_BITE:5.2f} x {t - 2 * RIB_BITE:5.2f}  "
               f"outside {w + 2 * (WALL_SIDE + grow):5.2f} x {t + 2 * (WALL_FACE + grow):5.2f}")
     _, rise = roof(h)
-    print(f"  wall at B on the side facing the other handle: {WALL_SIDE + FLARE:.1f} (limit {CONVEX_LIMIT})")
+    print(f"  lip: {LIP} out, crown {crown:.2f} from B, back into the body by {lip[-1][0]:.2f}")
+    print(f"  wall at the crown on the side facing the other handle: {WALL_SIDE + LIP:.1f} "
+          f"(limit {CONVEX_LIMIT})")
     print(f"  steel corner clears the bore by {gap:.2f}; {wall:.2f} over each bore corner")
     print(f"  bore ends {END_CLEAR} past A, its roof rises {rise:.2f} more; dome {DOME_LEN} beyond that")
 
