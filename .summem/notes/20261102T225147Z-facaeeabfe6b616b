@@ -1,0 +1,1 @@
+Cults category ids (read from the API 2026-11-02): Tool Q2F0ZWdvcnkvMjc, with Hand Tools Q2F0ZWdvcnkvMTAz and Spare Parts Q2F0ZWdvcnkvMTA1. Gadget Q2F0ZWdvcnkvMjU with Vehicle Accessories Q2F0ZWdvcnkvODY. Query: categories { id name(locale: EN) children { id name } }.
