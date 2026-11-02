@@ -190,7 +190,7 @@ No new technology - validation not required.
     - `techContext.md` and the README: the pinned CadQuery versions (preflight A3), the `END_CLEAR` guard, and no committed tests.
     - `grips.py`: the ribs paragraph, the section headers, and the `SHUT_GAP` comment, which now points to the measurement log instead of a hash (preflight A8). A rebuild gave byte-identical STLs; the STEP headers were restored, and `pair_check.py` passes.
     - SumMem: the decision and where the alternatives live.
-- [ ] 4. Final verification.
+- [x] 4. Final verification. Every check is green on the committed files (`.scratch/wirestripper-grip/runs/rework-final.txt`): the pair byte for byte, built and committed; the guards; the report; the closed ends; `verify.py` on both grips. Catalog suite 88 OK. The tree is clean.
 
 ## Status
 
@@ -199,6 +199,6 @@ No new technology - validation not required.
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
-- [ ] Build
+- [x] Preflight
+- [x] Build
 - [ ] QA

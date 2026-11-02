@@ -207,3 +207,12 @@ Take the hollow space out of both grips' closed ends. The bore's roof comes down
     - The operator's calls: A4 (shipping the fit tests is not the catalog's practice) and A5 (add photos before merging the release pull request).
 * Insights
     - Byte identity depends on the toolchain uv resolves, as well as on the source. Nothing pins it today.
+
+## 2026-11-02 - BUILD (rework) - COMPLETE
+
+* Work completed
+    - The pair from one source (`ceaf1d8`). `pair_check.py` was red first (8 curved failures), then green.
+    - The publish record and the clean-up (`154d883`). The rebuild stayed byte-identical.
+    - Every check is green on the committed files; catalog suite 88 OK.
+* Insights
+    - Keeping two printed iterations byte-identical took each closed end's own rib rule. The straight grip's last loft position is 4.299999999999997, so one shared `>=` rule would have flipped a section.
