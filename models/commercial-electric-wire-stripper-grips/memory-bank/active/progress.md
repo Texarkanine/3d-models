@@ -142,3 +142,19 @@ Take the hollow space out of both grips' closed ends. The bore's roof comes down
     - A rebuild gave byte-identical STLs. Every check rerun green on the final source, and the catalog suite gives 88 OK (`.scratch/wirestripper-grip/runs/final2.txt`).
 * Insights
     - A printed size table can go stale when the shape near one of its stations changes. The build's own report is part of what QA reads.
+
+## 2026-11-01 - QA (run 2) - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed `f5fefa5` against QA run 1's findings, and checked again that `0e75770` and `a61aa6d` meet the brief. The results are in `tasks.md`, "QA (2026-11-01, run 2)".
+    - Independent checks:
+        - `report_check.py` fails on `a61aa6d`'s source and passes on the current source.
+        - A scratchpad rebuild gives byte-identical STLs. The STEP files differ only in their timestamp.
+        - `tip_check.py`, `report_check.py`, `design_guards.py` and `closed_end.py` all pass.
+        - Catalog suite: 88 OK.
+* Decisions made
+    - PASS. Q1 is fixed: the size report's "round starts" row gives the bore at s = `tip_r` (W + 2 `BORE_CLEAR`) and no ribs.
+    - Run 1's advisories are fixed, except A-2 (`ridge`), which is kept as the plan asked.
+    - Two new advisories, N-1 and N-2, block nothing.
+* Insights
+    - When a fix touches only the build's printed report, a rebuild that gives byte-identical STLs shows that the printed files did not move.

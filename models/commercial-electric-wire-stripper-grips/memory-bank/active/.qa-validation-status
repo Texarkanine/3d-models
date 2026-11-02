@@ -1,0 +1,8 @@
+PASS
+
+QA run 2 of wire-stripper-grips-closed-end, 2026-11-01.
+- Q1 is fixed. sizes() prints "round starts" (s = tip_r): bore 6.99 and 7.40 (W + 2 BORE_CLEAR), no ribs. The "at A" row is gone. report_check.py fails on a61aa6d's source and passes on f5fefa5's.
+- Advisories A-1, A-3 to A-6 are fixed. A-2 (ridge) is kept, as the plan asked.
+- A scratchpad rebuild gives byte-identical STLs. The STEP files differ only in their timestamp.
+- tip_check, report_check, design_guards and closed_end all pass. Catalog suite: 88 OK.
+- Advisories N-1 and N-2, neither blocking, are in tasks.md under "QA (2026-11-01, run 2)".

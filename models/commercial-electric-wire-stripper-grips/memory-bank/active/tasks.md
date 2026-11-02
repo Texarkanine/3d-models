@@ -372,7 +372,7 @@ Acceptance criteria 1 to 5 are met. The figures are those under Build Progress, 
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA (run 1: FAIL (fixable); Build reruns for Q1)
+- [x] QA (run 1: FAIL (fixable), Q1; run 2: PASS)
 
 ## Build (re-run after QA run 1)
 
@@ -386,3 +386,49 @@ Acceptance criteria 1 to 5 are met. The figures are those under Build Progress, 
 - **A-5:** `roof()`'s comment on duplicate heights is corrected. `techContext.md` lists the "slopes close only above the tip" guard.
 - **A-6:** the Preflight box is ticked.
 - A rebuild gave byte-identical STLs. The STEP files changed only in their headers and were restored.
+
+## QA (2026-11-01, run 2): PASS
+
+Reviewed `f5fefa5` (the fixes for QA run 1) against run 1's findings, and checked again that `0e75770` and `a61aa6d` still meet the brief.
+
+### Run 1's findings
+
+- **Q1: fixed.** `sizes()` prints a "round starts" row at s = `tip_r` in place of "at A".
+    - At that row the bore is still the body's last section: 6.99 (curved) and 7.40 (straight), which is W + 2 `BORE_CLEAR`.
+    - The row prints "none" for ribs, because they have faded out at `tip_r`.
+    - The outside, 13.99 and 14.40, is still the body's: the dome starts at s = −`past`.
+    - The closed-end line below it describes the tip. No row now contradicts the model.
+    - No doc names the old row, so none needed a change.
+- **A-1: fixed.** The `systemPatterns.md` wording now matches the code.
+- **A-2: kept, as the plan asked.** Accepted: B3's cap check reads `ridge`.
+- **A-3: fixed.** `Handle.tip_flat()` is now used by `tip_short`, `steel_solid` and `roof`.
+- **A-4: fixed.**
+    - `OLD_DEPTH_EDGE_IN` is named beside `OLD_STRAIGHT_DEPTH` and marked as inferred.
+    - The 0.15 half-circle threshold has a comment. The straight tip's flat of 0.10 checks out: W at 3.3 is 6.80.
+- **A-5: fixed.** `roof()`'s comment on coinciding heights is now accurate. `techContext.md` lists the "closing only above it" guard.
+- **A-6: fixed.**
+
+### What QA checked independently
+
+- **TDD order:** `report_check.py`, run on `a61aa6d`'s source in the session scratchpad, fails 4 times ("at A" present, no "round starts"). On the current source it passes.
+- **Rebuild:** `grips.py` and `steel.py` were copied to the session scratchpad and run there (57 s).
+    - All four STLs are byte-identical to the committed files.
+    - The four STEP files differ only in their `FILE_NAME` timestamp.
+    - The printed report has the rows above.
+- **Reruns on the committed files:** `tip_check.py`, `report_check.py`, `design_guards.py` and `closed_end.py` all pass, with the build's figures (`past` 2.887 and 2.300; the straight STL 3.028 lower).
+- **`python steel.py`:** the tip lines and the cross-check, 1.21 against 1.20, are unchanged.
+- **Catalog suite:** 88 OK.
+
+### Advisories (none blocks)
+
+- **N-1 (very low, KISS):** `sizes()`'s `ribbed` flag is set by hand for each row. It is not derived from `s >= h.tip_r + RIB_FADE`.
+    - It is correct for any plausible parameters, because the other three rows sit within `FLARE_LEN` of B.
+    - The scratch `report_check.py` docstring claims it checks that condition, but it does not. The script is scratch only.
+- **N-2 (no effect):** `report_tip`'s test for a half circle went from "flat ≤ 0.15" to "flat < 0.15". The two differ only at exactly 0.15, and the straight flat is 0.10.
+
+### Still for the operator (carried, not new)
+
+- Preflight run 2, A1: the STL export strays up to 0.094 from its CAD at the bore's corners.
+- Preflight run 3, A3: the curved tip's 1.5 has no cross-check.
+- The tip-test print was offered and not built.
+- What to watch in the print: an open end that stops short of where the steel widens means `tip_r` is too big.
