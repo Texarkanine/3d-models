@@ -272,8 +272,34 @@ No new technology - validation not required. The checks use packages already in 
     - `tip_check.py` was red first (no `tip_r`), then green. `python steel.py` keeps every baseline line and only adds the tip lines.
     - A rebuild gave byte-identical STLs. The STEP files changed only in their headers and were restored.
     - Log entry "Tips and depths (2026-11-01)".
-- [ ] 2. The closed end in `grips.py`.
-- [ ] 3. Model docs.
+- [x] 2. The closed end in `grips.py`: `roof()` returns `(rows, past, ridge)`; `tip_plane()`; `bore()` with a ruled cap through the rows; `steel_solid()` with the rounded tip; ribs fading over `RIB_FADE` and ending at `tip_r`; `s_dome = -past`; four new guards; `sizes()` reports the closed end. `END_CLEAR` is gone.
+    - Red first:
+        - `closed_end.py` and `design_guards.py` failed;
+        - `verify.py`'s hug check failed on the committed square-tip design (gaps 0.30 to 1.03).
+    - The guards `roof_angles.py` and `slice_compare.py` passed on the old files, and `--shift 0.2` failed.
+    - Green on the rebuilt files:
+        - B2: `past` 2.887 (curved, 30 rows) and 2.300 (straight, 16 rows). The straight STL is 3.028 lower; the curved one 1.714 lower, against 1.77 along the steel.
+        - B3: no steel in the wall. The tip's arcs are 0.2994 to 0.3000 (curved) and 0.2989 to 0.2999 (straight) from the bore. A is 1.54 and 1.56 from it. The cap is 4.9948 and 5.0000.
+        - B4: no rib past `tip_r`. The bite volume is +0.39% and +0.21%.
+        - B5, CAD: the bore moved at most 0.0134 (curved) and 0.0019 (straight); the open end, 0.0000; the outside above the flare, 0.0053.
+        - B6: `roof_angles.py` gives 50.00 to 90.00 degrees with a 2.9 mm² ridge strip. `tools/overhang.py` flags only that strip, which bridges on the straight grip; the fit tests have nothing.
+        - B7: every guard fires with its own message; the square tip builds, with the ridge row 4.318 past A.
+        - B8, all unchanged:
+            - `lip.py`: widest 1.464 and 1.463, at z 1.50;
+            - `corner_bevel.py`: 49.9 and 50.2, at the same z and direction as at `5d73490`;
+            - `shut_gap.py`;
+            - the fit tests equal their grips cut at `FIT_LEN`, both STLs are watertight, and the fit tests' CAD moved 0.0074 and 0.0003.
+    - **Deviation (check tolerance, with evidence):** `verify.py`'s rib-bite rows went from ± 0.015 to ± 0.02. The curved grip's W-face rib read 0.115 at S2.
+        - The ribs are ruled between sections up to 4 apart. On the curved bend, and across S2's kink in W, a rib bites up to about 0.015 more on one side and less on the other between sections.
+        - The `5d73490` build reads 0.089 and 0.112 midway between its own sections near S2. It read 0.101 at S2 only because a section happened to sit there.
+        - So the geometry is unchanged in kind, and 0.02 matches B5's allowance for moving the sections. The rows also start at `tip_r + RIB_FADE` (preflight run 3, A1).
+    - The STL files changed size with the new tessellation: curved 2.84 to 3.11 MB, straight 1.52 to 2.12 MB, fit tests 1.12 to 0.78 and 0.49 to 0.74 MB.
+- [x] 3. Model docs:
+    - `systemPatterns.md`: the tip's round, each handle's tip, the ribs' end, the closed end and its history, and the roof in "Print orientation";
+    - `productContext.md`: no hollow past the tip;
+    - `techContext.md`: all four new guards (preflight run 3, A4), the hug check, comparing CAD rather than STL, and the steel report;
+    - `README.md`: `steel.py` names the tip;
+    - `grips.py`'s and `steel.py`'s docstrings.
 - [ ] 4. Final verification.
 
 ## Status

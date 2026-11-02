@@ -9,17 +9,20 @@ closed end.
 
 Inside: the bore is the steel plus BORE_CLEAR on every side, with tight
 corners so even a sharp steel corner clears it. Eight lengthwise ribs, two
-on each face near the corners, reach RIB_BITE past the steel's face. They
-locate the grip on the steel. The valleys between them, BORE_CLEAR deep, give
-glue something to fill and key into, and they stay there if the outside is
-vapor-smoothed. Glue and air escape along the valleys when you push the grip
-on. The ribs are glue keys, not crush ribs: test prints decide whether the grip
-also holds dry.
+on each face near the corners, reach RIB_BITE past the steel's face, from B to
+just short of the tip's round. They locate the grip on the steel. The valleys
+between them, BORE_CLEAR deep, give glue something to fill and key into, and
+they stay there if the outside is vapor-smoothed. Glue and air escape along the
+valleys when you push the grip on. The ribs are glue keys, not crush ribs: test
+prints decide whether the grip also holds dry.
 
-The bore's closed end is a gable roof. Its ridge is placed so that both slopes
-are ROOF_ANGLE above horizontal when the grip stands on its open end, whichever
-way the tip leans. The outside's dome starts at the ridge's height, so the wall
-over the roof is never thinner than the body's.
+The bore's closed end sits on the steel's rounded tip (`steel.Handle.tip_r`),
+BORE_CLEAR off it as everywhere else, so there is no hollow past the tip but the
+clearance and a small roof. The roof is a gable: each slope is ROOF_ANGLE above
+horizontal when the grip stands on its open end, whichever way the tip leans,
+and the bore follows the tip's round up to where the round turns flatter than
+that. The outside's dome starts at the ridge's height, so the wall over the
+roof is never thinner than the body's.
 
 Print: standing on the open end, closed end up. The curved grip leans with the
 steel's curve (about 15 degrees at the tip); the straight grip stands upright,
@@ -53,7 +56,7 @@ RIB_BASE = 1.2       # rib width at the wall
 RIB_TIP = 0.5        # rib width at its tip
 RIB_INSET = 1.5      # rib centre line from the steel's corner
 RIB_EMBED = 0.05     # rib roots sink this far into the wall, so they fuse
-END_CLEAR = 1.0      # the bore runs this far past A
+RIB_FADE = 1.0       # the ribs fade into the wall over this, ending where the tip's round starts
 ROOF_ANGLE = 50.0    # both roof slopes, degrees above horizontal in print
 RIDGE_W = 0.2        # the roof's ridge is a strip this wide
 
@@ -71,7 +74,7 @@ END = 3.0            # thinnest cap over the roof's ridge
 
 # ---- Build -----------------------------------------------------------------
 SECTION_STEP = 4.0   # longest gap between lofted cross-sections
-RIM_STEP = 3.0       # degrees the outline turns between the open end's lofted sections
+RIM_STEP = 3.0       # degrees an arc turns between lofted sections (the open end's round, the tip's)
 FIT_LEN = 15.0       # the fit test is the grip's first FIT_LEN mm from the open end
 
 # ---- Tool shut -------------------------------------------------------------
@@ -107,46 +110,112 @@ def loft_positions(start, stop, step=SECTION_STEP):
     return [start + (stop - start) * k / n for k in range(n + 1)]
 
 
+def tip_plane(h, z):
+    """Plane square to the centre line z past the start of the tip's round
+    (s = h.tip_r), toward A and beyond; at z = 0 it is section_plane(h, h.tip_r)."""
+    rc = h.tip_r
+    return cq.Plane(origin=V(h.point(rc)) - V(h.tangent(rc)) * z, xDir=h.normal(rc), normal=h.tangent(rc))
+
+
 def steel_solid(h):
-    """Mock bare steel from A to B: sharp W x T rectangles along the centre line."""
+    """Mock bare steel from A to B: sharp W x T rectangles along the centre line,
+    and the tip's corners rounded to h.tip_r in the plane of the handles."""
+    rc = h.tip_r
     secs = [cq.Workplane(section_plane(h, s)).rect(h.width(s), h.thickness(s)).val()
-            for s in loft_positions(h.length, 0.0)]
-    return cq.Solid.makeLoft(secs)
+            for s in loft_positions(h.length, rc)]
+    body = cq.Solid.makeLoft(secs)
+    if rc <= 0:
+        return body
+    cu = h.width(rc) / 2 - rc
+    m = max(1, math.ceil(90 / RIM_STEP))
+    tip = []
+    for i in range(m + 1):
+        phi = math.radians(90 * i / m)
+        z = rc * math.sin(phi)
+        tip.append(cq.Workplane(tip_plane(h, z))
+                   .rect(max(0.02, 2 * (cu + rc * math.cos(phi))), h.thickness(rc - z)).val())
+    return body.fuse(cq.Solid.makeLoft(tip, ruled=True)).clean()
 
 
 def roof(h):
-    """The bore's roof: its ridge centre R and its axial height past the bore's end.
+    """The bore's closed end, seated on the steel's rounded tip.
 
-    Worked in the plane of the handles, in print orientation (up is away from B
-    along B's tangent): the two roof slopes rise at ROOF_ANGLE from the ends of
-    the bore's end section and meet at R.
+    Worked in the plane of the handles, in a frame at the start of the tip's
+    round (s = h.tip_r): z runs from there toward A and past it, u along W. The
+    steel's corners are arcs of radius tip_r; the bore follows them grown by
+    BORE_CLEAR. Each roof slope is the lowest line at ROOF_ANGLE above horizontal
+    in print that clears the grown tip, so the bore hugs the tip from its sides up
+    to where an arc gets flatter than the roof, then runs straight up. The last
+    row is where the two slopes are RIDGE_W apart: the ridge strip.
+
+    Returns (rows, past, ridge):
+    - rows: (z, u_lo, u_hi), the bore's extent in W at each z, from the body's
+      last section (z = 0) to the ridge strip;
+    - past: how far the ridge strip sits past A; the dome starts there;
+    - ridge: the ridge strip's centre point.
     """
-    p = V(h.point(-END_CLEAR))
-    n, ta = V(h.normal(0)), V(h.tangent(0))
-    up = -V(h.tangent(h.length))
-    ex = (n - up * n.dot(up)).normalized()
-    hw = h.width(0) / 2 + BORE_CLEAR
-    ends = sorted(((p + n * k * hw - p).dot(ex), (p + n * k * hw - p).dot(up)) for k in (-1, 1))
-    (x0, z0), (x1, z1) = ends
-    k = math.tan(math.radians(ROOF_ANGLE))
-    xr = (x0 + x1) / 2 + (z1 - z0) / (2 * k)
-    r = p + ex * xr + up * (z0 + (xr - x0) * k)
-    return r, (r - p).dot(-ta)
+    rc = h.tip_r
+    cu, R = h.width(rc) / 2 - rc, rc + BORE_CLEAR       # the grown corners: centres at u = +-cu
+    a, n = V(h.tangent(rc)), V(h.normal(rc))
+    up = -V(h.tangent(h.length))                        # print's up, and its horizontal toward +u
+    upz, upu = up.dot(-a), up.dot(n)
+    hz, hu = -upu, upz
+    k = math.radians(ROOF_ANGLE)
+    touch = {}
+    for sg in (1, -1):
+        nz = math.sin(k) * sg * hz + math.cos(k) * upz  # the slope's outward normal
+        nu = math.sin(k) * sg * hu + math.cos(k) * upu
+        phi = math.atan2(nz, sg * nu)                   # where the corner's arc turns that way
+        assert 0 <= phi < math.pi / 2, (
+            "a roof slope misses its own corner of the tip: the lean must be less than "
+            "ROOF_ANGLE, and ROOF_ANGLE plus the lean under 90")
+        touch[sg] = (phi, R * math.sin(phi), sg * (cu + R * math.cos(phi)), nz, nu)
+
+    def edge(sg, z):
+        """The bore's edge on side sg at z: on the corner's arc up to where the
+        slope touches it, then on the slope."""
+        _, pz, pu, nz, nu = touch[sg]
+        if z <= pz:
+            return sg * (cu + math.sqrt(max(0.0, R * R - z * z)))
+        return pu - nz * (z - pz) / nu
+
+    z1 = max(t[1] for t in touch.values())
+    w1 = edge(1, z1) - edge(-1, z1)
+    assert w1 > RIDGE_W, "the roof's slopes close before they leave the tip"
+    narrowing = touch[1][3] / touch[1][4] - touch[-1][3] / touch[-1][4]
+    z_r = z1 + (w1 - RIDGE_W) / narrowing               # the slopes are RIDGE_W apart here
+
+    zs = {z_r, touch[1][1], touch[-1][1]}
+    keep = set(zs)
+    for phi, *_ in touch.values():
+        m = max(1, math.ceil(math.degrees(phi) / RIM_STEP))
+        zs |= {R * math.sin(phi * i / m) for i in range(m)}
+    heights = []
+    for z in sorted(zs):                                # both sides sample the same heights
+        if heights and z - heights[-1] < 1e-3:
+            if z in keep:
+                heights[-1] = z
+            continue
+        heights.append(z)
+    rows = [(z, edge(-1, z), edge(1, z)) for z in heights]
+    _, lo, hi = rows[-1]
+    ridge = V(h.point(rc)) - a * z_r + n * ((lo + hi) / 2)
+    return rows, z_r - rc, ridge
 
 
 def bore(h):
-    """The cavity: steel plus BORE_CLEAR from B to END_CLEAR past A, then the roof."""
+    """The cavity: steel plus BORE_CLEAR from B to where the tip's round starts,
+    then the roof over the tip (see roof). The roof's first row is the body's
+    last section, so the two lofts share a face."""
+    rc = h.tip_r
     secs = [rrect(section_plane(h, s), h.width(s) + 2 * BORE_CLEAR,
                   h.thickness(s) + 2 * BORE_CLEAR, BORE_CORNER_R)
-            for s in loft_positions(h.length, -END_CLEAR)]
+            for s in loft_positions(h.length, rc)]
     body = cq.Solid.makeLoft(secs)
-    r, _ = roof(h)
-    end = section_plane(h, -END_CLEAR)
-    du = (r - end.origin).dot(end.xDir)
-    ridge_plane = cq.Plane(origin=end.origin + end.zDir * (r - end.origin).dot(end.zDir),
-                           xDir=end.xDir, normal=end.zDir)
-    ridge = rrect(ridge_plane, RIDGE_W, h.thickness(0) + 2 * BORE_CLEAR, BORE_CORNER_R, du)
-    cap = cq.Solid.makeLoft([secs[-1], ridge], ruled=True)
+    rows, _, _ = roof(h)
+    caps = [rrect(tip_plane(h, z), hi - lo, h.thickness(rc - z) + 2 * BORE_CLEAR, BORE_CORNER_R, (lo + hi) / 2)
+            for z, lo, hi in rows]
+    cap = cq.Solid.makeLoft(caps, ruled=True)
     return body.fuse(cap).clean()
 
 
@@ -162,16 +231,17 @@ def rib_wire(plane, u, v, du, dv, height):
 
 
 def ribs(h):
-    """Eight lengthwise ribs from B to A, fading into the wall over END_CLEAR past A."""
-    ss = loft_positions(h.length, 0.0) + [-END_CLEAR]
+    """Eight lengthwise ribs from B, fading into the wall over RIB_FADE and ending
+    where the tip's round starts, so none stands in the roof."""
+    full = BORE_CLEAR + RIB_BITE
+    ss = [(s, full) for s in loft_positions(h.length, h.tip_r + RIB_FADE)] + [(h.tip_r, 0.0)]
     out = []
     for side in (1, -1):
         for off in (1, -1):
             for on_face in (False, True):
                 secs = []
-                for s in ss:
+                for s, height in ss:
                     w, t = h.width(s), h.thickness(s)
-                    height = BORE_CLEAR + RIB_BITE if s >= 0 else 0.0
                     if on_face:   # on a T face (the faces with the holes)
                         args = (off * (w / 2 - RIB_INSET), side * (t / 2 + BORE_CLEAR), 0, -side)
                     else:         # on a W face
@@ -263,8 +333,8 @@ def shut_gap():
 
 def outside(h):
     """Outside: steel + walls, flared at B, straight past A to the ridge, then a dome."""
-    _, rise = roof(h)
-    s_dome = -END_CLEAR - rise
+    _, past, _ = roof(h)
+    s_dome = -past
 
     def sec(s, grow, corner_r):
         w = h.width(s) + 2 * (WALL_SIDE + grow)
@@ -331,6 +401,10 @@ def corner_wall(grow=0.0):
 
 def check_design(h):
     """Script assertions on the parameters; geometry checks belong to the test prints."""
+    assert 0 <= h.tip_r <= h.width(h.tip_r) / 2, "the tip's corner radius must be between 0 and half the tip's W"
+    assert ROOF_ANGLE >= 45, "the roof would need support"
+    assert RIB_FADE > 0, "the ribs need a length to fade over"
+    roof(h)                                             # asserts each slope meets its own corner
     c, r = BORE_CLEAR, BORE_CORNER_R
     corner_gap = c if r <= c else r - math.sqrt(2) * (r - c)
     assert corner_gap >= 0.15, f"a sharp steel corner clears the bore by only {corner_gap:.2f}"
@@ -365,7 +439,7 @@ def sizes(h, printed):
         print(f"  {name:13s} steel {w:5.2f} x {t:5.2f}  bore {w + 2 * BORE_CLEAR:5.2f} x "
               f"{t + 2 * BORE_CLEAR:5.2f}  ribs {w - 2 * RIB_BITE:5.2f} x {t - 2 * RIB_BITE:5.2f}  "
               f"outside {w + 2 * (WALL_SIDE + grow):5.2f} x {t + 2 * (WALL_FACE + grow):5.2f}")
-    _, rise = roof(h)
+    _, past, _ = roof(h)
     print(f"  open end: edge on the bed {rim[0][1]:+.2f} from the body wall "
           f"({corner_wall(rim[0][1]):.2f} over the bore corners); bevel up to {rim[1][0]:.2f}, "
           f"then rounding to the widest, {most:.2f} out at {d_most:.2f} from B; "
@@ -373,7 +447,8 @@ def sizes(h, printed):
     print(f"  wall at the widest, on the side facing the other handle: {WALL_SIDE + most:.2f}; "
           f"tool shut, the two grips' open ends come within {shut_gap():.2f} (at least {MIN_SHUT_GAP})")
     print(f"  steel corner clears the bore by {gap:.2f}; {wall:.2f} over each bore corner")
-    print(f"  bore ends {END_CLEAR} past A, its roof rises {rise:.2f} more; dome {DOME_LEN} beyond that")
+    print(f"  closed end: the tip's corners are {h.tip_r} in radius; the bore stays {BORE_CLEAR} off the tip, "
+          f"its ridge {past:.2f} past A; the dome {DOME_LEN} beyond that, so the grip ends {past + DOME_LEN:.2f} past A")
 
 
 def build(h, stem, out):

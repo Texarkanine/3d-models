@@ -29,5 +29,6 @@
 
 - Material is TPU 95A. TPU 95 is stiff to stretch over a part (see the jerry can buffer), so the fit must still slide on by hand.
 - Each grip fits only this tool's steel. The listing must say which tool.
+- No hollow past the steel's tip beyond the clearance and the small roof a print needs. Hollow there flexes and carries no load. A longer grip is fine.
 - The steel handles stay as they are, including the hard black plastic insert in the curved handle's channel.
 - Everything in the repository may become public, so it must be shareable.
