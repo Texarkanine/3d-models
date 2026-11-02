@@ -233,3 +233,9 @@ Take the hollow space out of both grips' closed ends. The bore's roof comes down
         - Q-A5: the photos must go in before the release pull request merges.
 * Insights
     - When a refactor must reproduce printed files, comparing git blob ids of the committed outputs with the printed commits is a quick first check. A rebuild into a temporary folder then proves that the source makes them.
+
+## 2026-11-02 - REFLECT (rework) - COMPLETE
+
+* Work completed
+    - Rework reflection appended to `reflection/reflection-wire-stripper-grips-closed-end.md`.
+    - Persistent files reconciled: no change. The build's clean-up already rewrote all three for the shipped pair.

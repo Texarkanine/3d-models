@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: wire-stripper-grips-closed-end (rework: the pair that fits, ready to publish)
-**Phase:** QA - COMPLETE (PASS)
+**Phase:** REFLECT - COMPLETE
 
 Memory bank: `models/commercial-electric-wire-stripper-grips/memory-bank/` (the operator's direction, 2026-11-01).
 
@@ -17,4 +17,4 @@ Memory bank: `models/commercial-electric-wire-stripper-grips/memory-bank/` (the 
 - A4, the fit tests: shipped, for the operator to confirm.
 
 ## Next Step
-- QA, in a subagent. Then reflect, archive, and a draft PR (operator, 2026-11-02).
+- `/niko-archive` (operator, 2026-11-02), then a draft PR.

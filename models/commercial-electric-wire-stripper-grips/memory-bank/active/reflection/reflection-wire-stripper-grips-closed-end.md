@@ -46,3 +46,43 @@ Both grips' bores now end on the steel's rounded tip, with the same 0.3 clearanc
 ### Million-Dollar Question
 
 If the steel's full outline, tip included, had been part of `steel.Handle` from the start, the bore would be one general operation: the steel grown by `BORE_CLEAR`, then filled up to the printer's overhang limit above it in print orientation. Preflight run 3 sketched it as a running maximum of `edge(z') + cot(ROOF_ANGLE)·(z − z')`. `END_CLEAR`, the special roof and the tip-radius arithmetic would fold into it, and it would take a traced or uneven tip as easily as a round one. What was built is that operation solved in closed form for two arcs. That is enough while the tips are modelled as arcs; the general form earns its place when a tip is traced point by point.
+
+---
+
+# Reflection: Rework (2026-11-02): the pair that fits, ready to publish
+
+## Summary
+
+The operator printed both closed ends on both grips and kept curved iteration 5 and straight iteration 2, the pair that fits as the original grips did. One source now builds exactly that pair, byte for byte. The model is ready to publish: the listing record is filled out, and the docs describe only the two grips that ship. QA passed first time.
+
+## Requirements vs Outcome
+
+- **The pair from one source:** met, byte for byte, both from a fresh build and in the commit. The curved grip's code is the old code line for line, reading `END_CLEAR` per grip.
+- **The publish record:** met, apart from the photos, which are the operator's. Two judgement calls go to the operator:
+    - the fit tests ship, unlike the bulb models';
+    - the tool-closing line is worded as design intent, not as a tested fact (QA Q-A1).
+- **The clean-up:** met. The iteration histories and hashes are gone, the reasons stay, and the alternatives are recorded in SumMem.
+
+## Plan Accuracy
+
+- Right as planned.
+- The one hazard the plan named, byte identity, was real. It needed one thing the plan had not spelled out: each closed end keeps its own rib rule. The straight grip's last loft position is 4.299999999999997, so one shared `>=` rule would have changed its STL. A quick probe of the float caught this before any code was written.
+
+## Build & QA Observations
+
+- **Build:** went straight through.
+- **Preflight's advisories improved the result.** A fresh build in a temporary folder proves the source, not only the committed files. The pinned CadQuery versions make the byte check repeatable.
+- **QA:** passed. Its notes were wording, and they were fixed before reflect.
+
+## Insights
+
+### Technical
+- **To keep printed files exact across a refactor, keep each variant's code path whole,** down to comparisons and section positions. Unify only what is provably bit-identical, such as `−(a + b)` and `−a − b`. A fresh build compared byte for byte is the proof.
+- **A rebuild matches byte for byte only on the same CadQuery and OCP versions,** so the build command pins them.
+
+### Process
+- **Test prints chose between alternatives that were each committed on their own** (the operator's one-commit-per-iteration rule). That made "keep this one from that one, and that one from this" a precise, cheap request.
+
+### Million-Dollar Question
+
+Nothing notable. With two printed closed ends to keep exactly, a per-grip setting and two code paths is the simplest honest source. A general closed-end operation (see the first reflection above) would serve a new design, not these two printed ones.
