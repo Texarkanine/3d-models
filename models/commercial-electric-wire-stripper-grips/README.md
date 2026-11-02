@@ -1,6 +1,6 @@
 # Commercial Electric wire stripper grips
 
-Replacement grips for a Commercial Electric wire stripper and crimper whose rubber grips have gone sticky. Print a grip in TPU 95A, pull the old one off, and slide the new one onto the bare steel handle. There is a grip for each handle, the curved one and the straight one. Both share one outside design, and each one's inside is shaped to its own steel. This directory is the source.
+Replacement grips for a Commercial Electric wire stripper and crimper whose rubber grips have gone sticky. Print a grip in TPU 95A, pull the old one off, and slide the new one onto the bare steel handle. There is a grip for each handle: `curved_grip` for the curved one and `straight_grip` for the straight one. Both share one outside design, and each one's inside is shaped to its own steel. This directory is the source.
 
 ## Where things are
 
@@ -17,9 +17,9 @@ Replacement grips for a Commercial Electric wire stripper and crimper whose rubb
 ## Build
 
 ```sh
-uv run --no-project --with cadquery python grips.py
+uv run --no-project --with cadquery==2.8.0 --with cadquery-ocp==7.9.3.1.1 python grips.py
 ```
 
-That rewrites both grips and their fit tests, and prints each grip's main sizes. `python steel.py` prints both handles' cross-checks without CadQuery. Read `memory-bank/systemPatterns.md` before you change a parameter, and `memory-bank/techContext.md` for the checks to run after.
+That rewrites both grips and their fit tests, and prints each grip's main sizes. The CadQuery versions are pinned because the committed files are the ones that were printed and fit; `memory-bank/techContext.md` says why. `python steel.py` prints both handles' cross-checks without CadQuery. Read `memory-bank/systemPatterns.md` before you change a parameter, and `memory-bank/techContext.md` for the checks to run after.
 
 Releases and the Cults publish work the same for every model in this repository; see the [repository README](../../README.md).

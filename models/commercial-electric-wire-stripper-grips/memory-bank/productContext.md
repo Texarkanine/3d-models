@@ -9,7 +9,7 @@
 
 - Pull off a ruined grip, print a new one in TPU, and slide it onto the bare steel.
 - Print another whenever a grip wears out or gets contaminated again.
-- Glue a grip on if wanted. The inside has texture for the glue to key into. That texture is still there if someone vapor-smooths the outside, which removes the print lines.
+- Glue a grip on if wanted. The grips hold without glue, and the inside has grooves for glue to key into. The grooves are inside, so smoothing the outside to remove the print lines leaves them.
 - Fit both handles: a curved grip and a straight grip with the same outside design.
 
 ## Key Benefits
@@ -21,6 +21,7 @@
 
 - The curved grip slides onto the bare curved steel as far as the original went (83 mm from the tip) and stays on in use.
 - The straight grip slides onto the bare straight steel as far as the original went (85 mm from the tip) and stays on in use.
+- On the tool, the pair sits as the original grips did.
 - The tool still closes fully with the grips on.
 - Each grip prints open end down with no supports.
 - Files open in a slicer (STL) and in CAD (STEP).
@@ -29,6 +30,6 @@
 
 - Material is TPU 95A. TPU 95 is stiff to stretch over a part (see the jerry can buffer), so the fit must still slide on by hand.
 - Each grip fits only this tool's steel. The listing must say which tool.
-- No hollow past the steel's tip beyond the clearance and the small roof a print needs. Hollow there flexes and carries no load. A longer grip is fine.
+- Hollow past the steel's tip flexes and carries no load: keep it to what the fit and a printable roof need. A longer grip is fine.
 - The steel handles stay as they are, including the hard black plastic insert in the curved handle's channel.
 - Everything in the repository may become public, so it must be shareable.

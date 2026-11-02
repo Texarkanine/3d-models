@@ -178,8 +178,18 @@ No new technology - validation not required.
         - R2, R3 and R5 pass.
         - R4 (`verify.py`): the curved grip's bite is −0.52% against 8 ribs over L, and its cap is 5.000. The straight grip's checks are as before.
         - `tools/overhang.py` flags only the ridge strips.
-- [ ] 2. The publish record.
-- [ ] 3. Publishing clean-up.
+- [x] 2. The publish record.
+    - Description, which names the tool and which grip is which.
+    - Manufacturing: TPU 95A, open end down, no supports.
+    - 13 tags; `gpl`; Tool (`Q2F0ZWdvcnkvMjc`), with Hand Tools and Spare Parts.
+    - Files: 8, both grips and both fit tests as STL and STEP. The fit tests ship because a 15 mm check print is useful before a full grip; the bulb models do not list theirs (preflight A4, for the operator).
+    - `name` and `cults_creation_id` unchanged. Photos are the operator's.
+- [x] 3. Publishing clean-up:
+    - `systemPatterns.md`: the iteration histories and hashes are gone. The reasons stay: the flare, the bevel, the closed end per grip, and the shut gap's source. "Test prints" became "Fit tests".
+    - `productContext.md`: the glue, the pair, and the hollow constraint.
+    - `techContext.md` and the README: the pinned CadQuery versions (preflight A3), the `END_CLEAR` guard, and no committed tests.
+    - `grips.py`: the ribs paragraph, the section headers, and the `SHUT_GAP` comment, which now points to the measurement log instead of a hash (preflight A8). A rebuild gave byte-identical STLs; the STEP headers were restored, and `pair_check.py` passes.
+    - SumMem: the decision and where the alternatives live.
 - [ ] 4. Final verification.
 
 ## Status

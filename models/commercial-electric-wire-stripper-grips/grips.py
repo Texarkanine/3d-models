@@ -9,12 +9,11 @@ closed end.
 
 Inside: the bore is the steel plus BORE_CLEAR on every side, with tight
 corners so even a sharp steel corner clears it. Eight lengthwise ribs, two
-on each face near the corners, reach RIB_BITE past the steel's face, from B to
-just short of the tip's round. They locate the grip on the steel. The valleys
-between them, BORE_CLEAR deep, give glue something to fill and key into, and
-they stay there if the outside is vapor-smoothed. Glue and air escape along the
-valleys when you push the grip on. The ribs are glue keys, not crush ribs: test
-prints decide whether the grip also holds dry.
+on each face near the corners, reach RIB_BITE past the steel's face, from B
+toward the tip. They locate the grip on the steel, and the grips hold without
+glue. The valleys between them, BORE_CLEAR deep, give glue something to fill and
+key into for a permanent fit; they are inside, so smoothing the outside leaves
+them. Glue and air escape along the valleys when you push the grip on.
 
 The bore's closed end is set per grip (END_CLEAR): each grip keeps the closed
 end whose test print fitted as the original grip did. The curved grip's bore
@@ -37,7 +36,7 @@ Coordinates are those of `steel.py` (use position: the handle flat in XY, T
 along Z, s along the centre line from A). Each cross-section is in the plane
 square to the centre line: u along the W direction, v along T.
 
-Run:  python grips.py   (needs cadquery)
+Run:  python grips.py   (needs cadquery; the README pins the versions)
 Writes STEP (opens in CAD) and STL (for the slicer) for each grip and its fit
 test (curved_grip, straight_grip), already standing on the open end, and
 prints each grip's main sizes.
@@ -50,7 +49,7 @@ import cadquery as cq
 
 import steel
 
-# ---- Bore (creative-bore-fit-and-glue-key; ribs as glue keys) --------------
+# ---- Bore ------------------------------------------------------------------
 BORE_CLEAR = 0.3     # steel face to bore wall, each side
 BORE_CORNER_R = 0.5  # bore corner radius; a sharp steel corner clears it by >= 0.15
 RIB_BITE = 0.1       # how far a rib tip reaches past the steel face
@@ -66,7 +65,7 @@ END_CLEAR = {"curved": 1.0, "straight": None}
 ROOF_ANGLE = 50.0    # both roof slopes, degrees above horizontal in print
 RIDGE_W = 0.2        # the roof's ridge is a strip this wide
 
-# ---- Outside (creative-outside-shape) --------------------------------------
+# ---- Outside ---------------------------------------------------------------
 WALL_SIDE = 3.8      # steel face to outside, in the plane of the handles
 WALL_FACE = 2.5      # steel face to outside, across that plane
 CORNER_R = 4.8       # outside corner radius (>= 2 mm over each bore corner)
@@ -84,13 +83,14 @@ RIM_STEP = 3.0       # degrees an arc turns between lofted sections (the open en
 FIT_LEN = 15.0       # the fit test is the grip's first FIT_LEN mm from the open end
 
 # ---- Tool shut -------------------------------------------------------------
-# The operator's reading of 2026-11-01: with the tool squeezed shut and an
-# iteration-4 curved grip (87e777c) on each handle, the two open ends were
-# SHUT_GAP apart. Those grips' wall at the widest point, on the side facing the
-# other handle, was SHUT_WALL from the steel face. Both describe the grips that
-# were measured, so they stay as they are when WALL_SIDE or the open end changes.
+# The operator's reading (reference/measurements.md, 2026-11-01): with the tool
+# squeezed shut and a test curved grip with a smaller flare on each handle, the
+# two open ends were SHUT_GAP apart. Those grips' wall at the widest point, on the
+# side facing the other handle, was SHUT_WALL from the steel face. Both describe
+# the grips that were measured, so they stay as they are when WALL_SIDE or the
+# open end changes.
 SHUT_GAP = 3.3
-SHUT_WALL = 4.274    # iteration 4: WALL_SIDE 3.8 + its widest point's 0.474
+SHUT_WALL = 4.274    # the measured grips: WALL_SIDE 3.8 + their widest point's 0.474
 MIN_SHUT_GAP = 0.8   # least gap to leave; the operator called 0.3 "pushing it"
 
 
