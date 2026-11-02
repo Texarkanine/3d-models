@@ -3,7 +3,8 @@
 ## How This System Works
 
 Each fact has one home:
-- **Readings of the bare steel** live in `steel.py`, which prints them and their cross-checks when run. `reference/measurements.md` is the dated log of how and when each reading was taken, with the photos. A new reading goes into both: a dated entry in the log, and the value in use in `steel.py`.
+- **Readings of the bare steel** live in `steel.py`, which prints them and their cross-checks when run. `reference/measurements.md` says how and when each reading was taken. A new reading goes into both: dated in the log, and the value in use in `steel.py`.
+- **Reference material earns its place** only if a future change would need it. Keep a photo while it holds information not yet captured in numbers; drop one, and its mentions, once everything in it is extracted. Do not keep proof of how an answer was reached.
 - **Design values** live in `grips.py` as named parameters at the top. It prints the main sizes on each run.
 - **This file** holds the reasoning behind them. It names parameters but does not copy their values, so it stays true when one is retuned.
 
@@ -64,6 +65,7 @@ Each fact has one home:
 ## The tool must still close
 
 - The operator measured the room the grips have. With the tool shut and a test grip on each handle (curved grips with a smaller flare), the two open ends were `SHUT_GAP` apart, with a wall of `SHUT_WALL` at the widest point on each.
+- With the shipped pair on, the tool closes, and the two grips do not touch (operator, 2026-11-02).
 - `grips.shut_gap()` works out the gap for the grips built now. Each grip's wall at the widest point moves out by its change from `SHUT_WALL`, which is why `SHUT_WALL` stays what was measured even if `WALL_SIDE` or the open end changes.
 - One more term: the grip measured on the straight handle was a curved grip, built for the curved steel, which is narrower at B. On the straight steel its bore still cleared, but its ribs bit harder, so its wall may have moved out by up to half the difference in W. The straight grip, built for its own steel, sits a full half-difference further out than that grip's wall would have without the ribs pushing. The worst case counts it in full.
 - `check_design` asserts at least `MIN_SHUT_GAP` left. The operator called 0.3 "pushing it" and chose about a millimetre each side. `grips.py` prints the gap on each build.

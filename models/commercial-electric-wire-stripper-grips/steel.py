@@ -203,11 +203,11 @@ CURVED = Handle("curved", CENTRE, _tip_y(), Y_B, STATIONS, HOLES, tip_r=TIP_R)
 
 
 # ---- Straight handle: readings of 2026-11-01 --------------------------------
-# Pencil tracing of the bare steel, tip up (reference/straight-tracing.jpg). Two
+# Pencil tracing of the bare steel, tip up (reference/measurements.md). Two
 # straight lines STRAIGHT_PW apart; rows STRAIGHT_PU apart, rows 0 to 7. The paper
 # edge is B, where the old grip stopped. It is taken to be one row below row 7
-# (row 8, as on the curved tracing; the photo shows 10.2), so A sits
-# STRAIGHT_B_CHORD above it. The tracing reads to 0.5; there are no caliper widths.
+# (row 8, as on the curved tracing; the photo of the tracing showed 10.2), so A
+# sits STRAIGHT_B_CHORD above it. The tracing reads to 0.5; there are no caliper widths.
 STRAIGHT_PW, STRAIGHT_PU = 30.0, 10.0
 STRAIGHT_LEFT = [11.5, 11.5, 11, 11, 10.5, 10.5, 10.5, 10]    # left line -> left traced edge
 STRAIGHT_RIGHT = [11.5, 11.5, 11, 11, 11, 10.5, 10.5, 10]     # right line -> right traced edge
