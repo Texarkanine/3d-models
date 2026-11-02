@@ -189,3 +189,21 @@ Take the hollow space out of both grips' closed ends. The bore's roof comes down
     - Baselines for the straight grip's iteration 2 saved beside the curved grip's iteration 5. The curved baselines equal `e1b3528`.
 * Decisions made
     - R1 asks for byte-identical STLs for both grips, so that what ships is exactly what was printed.
+
+## 2026-11-02 - PREFLIGHT (rework) - COMPLETE
+
+* Work completed
+    - Checked the rework plan against the code. The first line of `.preflight-status` is `PASS WITH ADVISORY`. No plan edits.
+    - Probes, run in the session scratchpad:
+        - `5d73490`'s `grips.py` with today's `steel.py` rebuilds curved iteration 5's STLs byte for byte (cadquery 2.8.0, cadquery-ocp 7.9.3.1.1).
+        - A trial `grips.py`, patched as the plan's Design says, built all four STLs byte-identical to their baselines. The STEP files differ only on the `FILE_NAME` line.
+        - On that build, the unchanged checks pass, and R2's and R4's figures hold. The curved rib bite is -0.52% against 8 ribs over L, and the cap over the apex is 5.0000.
+        - Catalog suite: 88 OK.
+* Decisions made
+    - Advisories A1 to A9 are in `.preflight-status`. The ones the build would meet first:
+        - A1: restore the STEP files from git after the rebuild.
+        - A2: R1 should rebuild into a temporary directory.
+        - A3: pin cadquery and cadquery-ocp in the documented build command.
+    - The operator's calls: A4 (shipping the fit tests is not the catalog's practice) and A5 (add photos before merging the release pull request).
+* Insights
+    - Byte identity depends on the toolchain uv resolves, as well as on the source. Nothing pins it today.
