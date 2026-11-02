@@ -104,3 +104,17 @@ Take the hollow space out of both grips' closed ends. The bore's roof comes down
     - The radical idea, a one-pass sweep for the roof over any tip outline, is in `.preflight-status`. It is not applied.
 * Insights
     - Today's slopes are steeper than `ROOF_ANGLE`, because today's ridge strip sits at the apex's height. The plan's slopes are exactly `ROOF_ANGLE`, so `roof_angles.py`'s margin falls to its 0.5 by design.
+
+## 2026-11-01 - BUILD - COMPLETE
+
+* Work completed
+    - Step 1 (`0e75770`): `Handle.tip_r` and `tip_short()`; curved 1.5, straight 3.3; the old straight grip's depth for the cross-check (1.21 modelled against 1.20); log entry "Tips and depths (2026-11-01)". A rebuild gave byte-identical STLs.
+    - Steps 2 and 3 (`a61aa6d`): the roof on the rounded tip; the ribs ending `RIB_FADE` short of the round; four guards; regenerated outputs; model docs.
+        - The ridge sits 2.887 and 2.300 past A.
+        - The STLs stand 1.714 and 3.028 lower.
+    - Step 4: catalog suite 88 OK; every check rerun green on the committed files.
+* Decisions made
+    - The rib-bite tolerance in `verify.py` is ± 0.02. It is an evidence-backed correction of a tolerance the plan never stated, not a change to the geometry.
+* Insights
+    - Ruled ribs between sections 4 apart already bite ± 0.012 to 0.015 between sections on the curved bend. A check sampled at a fixed s sees that whenever the sections move.
+    - The STL files changed size with the new tessellation; the fit tests too, though their CAD moved under 0.01.

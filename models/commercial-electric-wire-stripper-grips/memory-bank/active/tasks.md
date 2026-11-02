@@ -300,7 +300,7 @@ No new technology - validation not required. The checks use packages already in 
     - `techContext.md`: all four new guards (preflight run 3, A4), the hug check, comparing CAD rather than STL, and the steel report;
     - `README.md`: `steel.py` names the tip;
     - `grips.py`'s and `steel.py`'s docstrings.
-- [ ] 4. Final verification.
+- [x] 4. Final verification. Catalog suite: 88 OK. Every check was rerun on the committed files (`a61aa6d`), and all pass with the figures above (`.scratch/wirestripper-grip/runs/final.txt`). A SumMem note records the iterations.
 
 ## Status
 
@@ -310,5 +310,5 @@ No new technology - validation not required. The checks use packages already in 
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
 - [ ] Preflight
-- [ ] Build
+- [x] Build
 - [ ] QA
