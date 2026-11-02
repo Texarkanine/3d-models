@@ -1,1 +1,0 @@
-Cults updateCreation treats numeric downloadPrice 0 as paid (needs >= 0.5; h7 run 38833253910). A free listing omits it. New files are added only after that update succeeds, and the previous set is removed then; a failed update leaves the new files added.

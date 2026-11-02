@@ -1,1 +1,0 @@
-A free Cults updateCreation must send downloadPrice 0: omitting it fails 'Price must be >= 0.5' even with only id (run 38835243248; probed 2026-10-16), though the schema defaults it to null (EUR, openPriced false). 0 succeeds and the listing stays free.

@@ -1,0 +1,1 @@
+Free Cults updateCreation: send downloadPrice 0 (live probe 2026-10-16); omitting it fails 'Price must be >= 0.5', though the schema defaults it null. Run 38833253910 once rejected 0. New files are added only after the update succeeds; the old set is removed then.
