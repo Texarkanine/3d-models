@@ -179,3 +179,13 @@ Take the hollow space out of both grips' closed ends. The bore's roof comes down
     - Level 2. One model. The closed end becomes a per-grip choice that reproduces the two printed iterations exactly, followed by the publish record and the documentation clean-up.
 * Insights
     - The Cults categories, read from the API (read-only, 2026-11-02): Tool `Q2F0ZWdvcnkvMjc`, with Hand Tools `Q2F0ZWdvcnkvMTAz` and Spare Parts `Q2F0ZWdvcnkvMTA1`.
+
+## 2026-11-02 - PLAN (rework) - COMPLETE
+
+* Work completed
+    - The plan is in `tasks.md`.
+        - `END_CLEAR` becomes a per-grip dict. The curved grip runs `5d73490`'s closed-end code verbatim, and the straight grip keeps the roof on its tip.
+        - Then the publish record and the clean-up.
+    - Baselines for the straight grip's iteration 2 saved beside the curved grip's iteration 5. The curved baselines equal `e1b3528`.
+* Decisions made
+    - R1 asks for byte-identical STLs for both grips, so that what ships is exactly what was printed.
