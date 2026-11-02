@@ -55,3 +55,32 @@ Take the hollow space out of both grips' closed ends. The bore's roof comes down
 * Decisions made
     - Kept the planned construction: the slopes stay exactly at `ROOF_ANGLE`, and the ridge strip sits where they are `RIDGE_W` apart. `past` and `ridge` belong to that row. The grips get 3.03 (straight) and 1.77 (curved) shorter.
     - Preflight's tip-test print is offered in the report, not built.
+
+## 2026-11-01 - PREFLIGHT (run 2) - COMPLETE
+
+* Work completed
+    - Checked the re-planned Level 2 plan. The first line of `.preflight-status` is `FAIL (fixable)`.
+    - Built the plan's step 2 in the session scratchpad, by patching `grips.py` exactly as the Geometry says. Both grips build as one valid solid, and the build confirms run 1's figures:
+        - `past` is 2.887 (curved) and 2.300 (straight). The straight STL is 3.028 lower.
+        - No steel is inside the bore wall. The tip's arcs lie 0.2989 to 0.3000 from the bore.
+        - The rib bite is within 0.4% of B4's formula.
+        - `overhang.py` flags only the ridge strip, and the guards fire at `ROOF_ANGLE` 75 and 80.
+        - `lip.py` and `corner_bevel.py` pass.
+* Decisions made
+    - F1, a required fix: B5 slices STLs, and the STLs' own mesh error is larger than B5's 0.02 bore limit.
+        - On the built files the STL comparison gives 0.129 (curved), 0.037 (straight) and 0.029 (curved fit test).
+        - The CAD moved at most 0.013, 0.002 and 0.007, and passes every B5 limit.
+        - The re-plan should measure B5 and B8 on CAD sections against the `5d73490` STEP files, and report the STL comparison without a limit.
+    - Advisories:
+        - A1: the printed STLs stray up to 0.094 (committed curved) and 0.134 (built curved) from their CAD at the bore's corners. Exporting at `tolerance` 0.002 brings that to 0.029. It is outside this brief; the operator weighs it.
+        - A2: B3's cap needs a tolerance (4.9948 on the curved grip).
+* Insights
+    - `tolerance` 0.01 in the STL export does not hold the mesh within 0.01 on the curved bore's long lofted faces. Compare CAD with CAD whenever a lofted face changes.
+
+## 2026-11-01 - PLAN (re-plan after preflight run 2) - COMPLETE
+
+* Work completed
+    - Resolved F1 and A2 in `tasks.md` (section "Preflight run 2"). The `5d73490` STEP files are saved in `.scratch/wirestripper-grip/baseline/` for B5 and B8.
+* Decisions made
+    - B5 and B8 compare CAD sections (STEP against STEP). STL slices are only reported.
+    - A1 (the STL export strays up to 0.094 from the CAD model) goes to the operator. The brief keeps the export as it is.

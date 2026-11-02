@@ -62,7 +62,7 @@ The operator's standing direction (`techContext.md`) is no committed tests while
     - With `steel_solid(h)` modelling the rounded tip, no steel is inside the bore wall (0 mm³).
     - Points on the tip's arcs, from the wall to φσ, both sides, at mid-T and 1 in from each T face: each lies `BORE_CLEAR` ± 0.02 from the bore's surface.
     - The point at A on the centre line is at least `BORE_CLEAR` from it.
-    - The cap over the ridge is `DOME_LEN`, at least `END`.
+    - The cap over the ridge is `DOME_LEN` ± 0.01, and at least `END` (preflight run 2, A2: the curved grip gives 4.9948).
 
     Red now: the gap at the tip is 1.0 or more, and the mock tip is square.
 - **B4. The ribs end before the round** (`verify.py`):
@@ -71,11 +71,13 @@ The operator's standing direction (`techContext.md`) is no committed tests while
     - The bite into the mock steel (`verify.py`'s mock ∩ grip) is 8 ribs' bite cross-section times (L − `tip_r` − `RIB_FADE`), within 2%. Over the fade, only the last quarter of the rib reaches past the steel face, so it adds about an eighth of a rib-length, about 0.2 mm³ in about 38 (preflight A3).
 
     Red now: the ribs run to A.
-- **B5. Nothing else moves** (`slice_compare.py`, generalised to `curved|straight` against `baseline/*-iter5.stl` and `*-iter1.stl`): from the bed up to 1 below where the ribs start to fade, in print:
-    - the bore's outline is within 0.02 of the baseline's (Hausdorff);
-    - the outside's is within 0.02 below `FLARE_LEN + 0.5` and within 0.1 above it.
+- **B5. Nothing else moves** (`slice_compare.py`, rewritten for `curved|straight`). It compares CAD sections: the new STEP against `baseline/<stem>-5d73490.step` (preflight run 2, F1). The range is from the bed to 1 below where the ribs start to fade, in print.
+    - The bore's outline is within 0.02 of the baseline's (Hausdorff).
+    - The outside's is within 0.02 below `FLARE_LEN + 0.5`, and within 0.1 above it.
 
-    The body lofts' section positions move with their end, so a few hundredths are expected (as in the last task's F1). `--shift 0.2` shows the check can fail.
+    The body lofts' section positions move with their end, so a few hundredths are expected. Preflight's trial build gave at most 0.013 (curved), 0.002 (straight) and 0.007 (curved fit test).
+
+    STL slices are not held to these limits, because the STL export's own error is larger: up to 0.094 on the curved grip's bore at `5d73490`. The script prints the STL comparison too, without a limit. `--shift 0.2` must make the CAD comparison fail.
 - **B6. It prints without supports:**
     - `tools/overhang.py` flags only the ridge strip on each full grip, and nothing on the fit tests.
     - `roof_angles.py` (new): every downward-facing bore face above the ribs' fade is at least `ROOF_ANGLE` − 0.5 above horizontal, except the ridge strip. The arcs are steeper than the slopes.
@@ -94,7 +96,7 @@ The operator's standing direction (`techContext.md`) is no committed tests while
     - `shut_gap.py` passes.
     - Each fit test equals its grip cut at `FIT_LEN` (`verify.py`).
     - Both STLs are watertight and stand on z = 0.
-    - The fit tests match their baselines within B5's tolerances.
+    - The fit tests match their `5d73490` STEP files within B5's tolerances, by the same CAD comparison.
 - **B9. Catalog suite:** `uv run --no-project --with pyyaml python -m unittest discover -s tests` gives 88 OK.
 - **Edge cases:**
     - `tip_r` 0 (a square tip) still builds a valid roof; `design_guards.py` builds the straight roof with it. The tip is then 0.3 past A, against 1.0 now, and the ridge row 4.32 past A. `steel_solid` then skips the round (preflight A4).
@@ -248,6 +250,21 @@ No new technology - validation not required. The checks use packages already in 
 - **A6:** step 4 commits the SumMem files.
 - **A7:** B1 no longer repeats the radii.
 - **Tip test print:** offered in the report, not built.
+
+## Preflight run 2 (2026-11-01): FAIL (fixable), resolved in the plan
+
+- **The trial build.** Preflight built step 2 as planned. Every check passed except B5.
+    - `past` is 2.887 and 2.300.
+    - The bore stays 0.2989 to 0.3000 from the tip.
+    - The straight grip comes out 3.028 lower.
+    - Only the ridge strip overhangs.
+- **F1:** B5 and B8 compare CAD sections against the `5d73490` STEP files, which are saved in `baseline/`. STL slices are reported only: the STL export strays up to 0.094 from its own CAD on the curved bore.
+- **A1 (STL accuracy, outside this brief):** the STLs already stray up to 0.094 (curved) and 0.040 (straight) from the CAD model where the bore's corner rounds meet its W faces. There, the side clearance drops from 0.3 to about 0.18.
+    - Exporting at `tolerance` 0.002 would bring that to 0.029, but the curved STL would grow from 3.0 to 4.2 MB.
+    - The brief keeps everything else unchanged, so this goes to the operator in the report. It is not done here.
+    - A SumMem note records the fact.
+- **A2:** B3's cap check is `DOME_LEN` ± 0.01.
+- **A self-checking export** (`mesh_error`, an `STL_TOL`): not taken, for the same reason as A1. It belongs to the operator's decision on A1.
 
 ## Status
 

@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: wire-stripper-grips-closed-end
-**Phase:** PLAN - COMPLETE (re-plan after preflight run 1)
+**Phase:** PLAN - COMPLETE (re-plan after preflight run 2)
 
 Memory bank: `models/commercial-electric-wire-stripper-grips/memory-bank/` (the operator's direction, 2026-11-01).
 
@@ -10,4 +10,4 @@ Memory bank: `models/commercial-electric-wire-stripper-grips/memory-bank/` (the 
 - The checks are scratch scripts in `.scratch/wirestripper-grip/`, written first and run red, as in earlier tasks for this model.
 
 ## Next Step
-- Preflight run 2, in a subagent.
+- Preflight run 3, in a subagent.
