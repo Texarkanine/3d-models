@@ -36,3 +36,27 @@ As the owner of the Commercial Electric wire stripper, I want each grip's closed
 3. The open ends are unchanged, within the loft's few hundredths.
 4. `tools/overhang.py` flags only the roof's ridge strip.
 5. The catalog tests pass.
+
+## Rework (2026-11-02): the pair that fits, ready to publish
+
+The operator printed both iterations of each grip. The pair that fits the way the original grips did is:
+- straight grip iteration 2 (`a61aa6d`): its closed end sits on the steel's rounded tip;
+- curved grip iteration 5 (`e1b3528`, still current at `5d73490`): the longer one, whose bore runs 1.0 past a square-modelled tip.
+
+1. **One source builds the pair that ships.**
+    - The curved grip is iteration 5, byte for byte.
+    - The straight grip is iteration 2, byte for byte.
+    - The closed end becomes a design choice per grip.
+2. **The publish record (`publish.yaml`) is filled out as well as the facts allow:**
+    - name and description, saying which tool;
+    - material and print orientation;
+    - tags, license and category;
+    - the files that ship.
+
+   The operator adds the photos (`img/`) later.
+3. **The model directory is clean for publishing.**
+    - The README, the model's memory bank, and the docstrings in `grips.py` and `steel.py` describe the two grips that ship, and why they are shaped as they are.
+    - Iteration-by-iteration history and in-progress wording go.
+    - The dated measurement log (`reference/measurements.md`) stays a log of readings.
+4. **The alternatives stay findable.** The full-length straight grip (`3046d4e`) and the shorter curved grip (`a61aa6d`) are recorded in the model's SumMem notes, not in the published docs.
+5. **One commit holds the printable pair,** apart from the publishing clean-up.

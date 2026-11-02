@@ -165,3 +165,10 @@ Take the hollow space out of both grips' closed ends. The bore's roof comes down
     - Reflection written. Persistent files reconciled: no further changes, since the build already updated all three.
 * Insights
     - See the reflection. In short: compare CAD sections, not STL slices; ruled ribs carry ± 0.015 between sections on the bend; quote the modelled quantity, not a proxy; check the build's printed report.
+
+## 2026-11-02 - REWORK INITIATED
+
+* Operator feedback (2026-11-02):
+    - "we're going to keep the slightly-shortened straight one we just did, but we're going to go back on the curved one and keep the immediately-preceding curved one - the one that was slightly longer. Those two are the combination that fit the same way the originals did!"
+    - Then clean up the model's directory for publishing. Fill out the publish record as well as possible; the operator will take and add the photos. Clean up stray wording and old in-progress material, so that what merges to main describes only the two grips that ship.
+* Complexity: Level 2 (unchanged; re-assessed at classification).
