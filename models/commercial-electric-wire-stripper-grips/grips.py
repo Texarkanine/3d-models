@@ -57,7 +57,7 @@ RIB_BASE = 1.2       # rib width at the wall
 RIB_TIP = 0.5        # rib width at its tip
 RIB_INSET = 1.5      # rib centre line from the steel's corner
 RIB_EMBED = 0.05     # rib roots sink this far into the wall, so they fuse
-RIB_FADE = 1.0       # the ribs fade into the wall over this, ending where the tip's round starts
+RIB_FADE = 1.0       # on a grip seated on its tip, the ribs fade over this, ending where the round starts
 # The closed end, per grip: the pair whose test prints fit as the original grips
 # did. A length: the bore runs that far past A at full width, as over a square
 # tip, and a gable rises from there. None: the roof sits on the rounded tip.

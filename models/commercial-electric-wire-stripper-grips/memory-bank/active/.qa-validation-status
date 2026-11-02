@@ -1,0 +1,8 @@
+PASS
+
+QA of the wire-stripper-grips-closed-end rework (the pair that fits, ready to publish), 2026-11-02.
+- The pair from one source: a rebuild into a temporary folder (pair_check.py, cadquery 2.8.0 / OCP 7.9.3.1.1) gives all four STLs byte for byte equal to e1b3528 (curved) and a61aa6d (straight), and the STEP files equal past FILE_NAME. The eight committed files are the same git blobs as the printed iterations.
+- gap_roof() and the length branches of bore() and ribs() are 5d73490's code, changed only to read END_CLEAR[h.name].
+- design_guards.py and report_check.py pass. Catalog suite: 88 OK. The working tree is clean.
+- publish.yaml, the README, the model's memory bank and the grips.py docstrings describe the two grips that ship. No hashes or iteration history remain outside the dated measurement log, which the plan keeps as a log.
+- Advisories Q-A1 to Q-A5, none blocking, are in tasks.md under "QA (2026-11-02, rework)".

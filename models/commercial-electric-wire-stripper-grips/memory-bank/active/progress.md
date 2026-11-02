@@ -216,3 +216,20 @@ Take the hollow space out of both grips' closed ends. The bore's roof comes down
     - Every check is green on the committed files; catalog suite 88 OK.
 * Insights
     - Keeping two printed iterations byte-identical took each closed end's own rib rule. The straight grip's last loft position is 4.299999999999997, so one shared `>=` rule would have flipped a section.
+
+## 2026-11-02 - QA (rework) - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed `ceaf1d8` and `154d883` against the rework brief and the plan. The results are in `tasks.md`, under "QA (2026-11-02, rework)".
+    - Independent checks:
+        - `pair_check.py` rebuilt both grips into a temporary folder. All four STLs equal `e1b3528`'s and `a61aa6d`'s byte for byte, and the STEP files are equal past `FILE_NAME`.
+        - The eight committed files are the same git blobs as the printed iterations.
+        - `design_guards.py` and `report_check.py` pass. Catalog suite: 88 OK.
+        - The length branches were read line by line against `5d73490`'s code.
+* Decisions made
+    - PASS. All five rework items are met.
+    - Advisories Q-A1 to Q-A5 block nothing. For the operator:
+        - Q-A1: the listing says the tool still closes fully. For this pair, that is a model figure, not a recorded reading.
+        - Q-A5: the photos must go in before the release pull request merges.
+* Insights
+    - When a refactor must reproduce printed files, comparing git blob ids of the committed outputs with the printed commits is a quick first check. A rebuild into a temporary folder then proves that the source makes them.

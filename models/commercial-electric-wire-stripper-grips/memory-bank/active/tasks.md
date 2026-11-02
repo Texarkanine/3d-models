@@ -192,6 +192,51 @@ No new technology - validation not required.
     - SumMem: the decision and where the alternatives live.
 - [x] 4. Final verification. Every check is green on the committed files (`.scratch/wirestripper-grip/runs/rework-final.txt`): the pair byte for byte, built and committed; the guards; the report; the closed ends; `verify.py` on both grips. Catalog suite 88 OK. The tree is clean.
 
+## QA (2026-11-02, rework): PASS
+
+Reviewed `ceaf1d8` (the pair from one source) and `154d883` (the publish record and the clean-up) against the rework brief and this plan.
+
+### How each rework item stands
+
+1. **One source builds the pair that ships.** Met.
+    - `gap_roof()` is `5d73490`'s `roof()`. The only change is that it reads `END_CLEAR[h.name]`. The length branch of `bore()` and the `ribs()` rule (`full if s >= 0 else 0.0` over `loft_positions(L, 0.0) + [-end_clear]`) are `5d73490`'s code with the same change.
+    - The `None` branches are `a61aa6d`'s code. `outside()` and `sizes()` take `past` from `closed_end()`.
+    - `check_design` refuses an `END_CLEAR` of 0 or less, and a grip missing from the dict raises `KeyError`.
+2. **The publish record.** Met.
+    - The description names the tool and the handle shapes, and says which grip is which. It covers the fit in TPU 95A, the glue grooves, the flare and the fit tests.
+    - Manufacturing: TPU 95A, open end down, no supports.
+    - There are 13 tags, the licence is `gpl`, and the category is Tool, with Hand Tools and Spare Parts. All 8 files are listed. `name` and `cults_creation_id` are unchanged.
+    - The format matches the catalog's other records.
+3. **The model directory is clean for publishing.** Met.
+    - `systemPatterns.md`, `productContext.md`, `techContext.md`, the README and the `grips.py` docstring describe the two closed ends and the reason for each.
+    - No commit hashes or iteration history remain outside `reference/measurements.md`. The plan keeps that file as a dated log, so its iteration names and `3046d4e` stay.
+    - `steel.py` needed no change. `systemPatterns.md` says the curved tip's reading feeds only the checks.
+4. **The alternatives stay findable.** Met: the model's SumMem note names `3046d4e` and `a61aa6d`.
+5. **One commit holds the printable pair.** Met: `ceaf1d8`. Its body names curved iteration 5 and straight iteration 2. In `154d883`, `grips.py` changes only in comments and docstrings.
+
+### What QA checked independently
+
+- **The pair, rebuilt:** `pair_check.py` builds both grips from `grips.py` into a temporary folder. With the pinned toolchain, all four STLs equal `e1b3528`'s and `a61aa6d`'s byte for byte. The STEP files are equal apart from the `FILE_NAME` line. All 8 committed files are the same git blobs as at `e1b3528` and `a61aa6d`.
+- **Code against `5d73490`:** QA read the length branches line by line against `5d73490`'s `roof()`, `bore()` and `ribs()`.
+- **Reruns:** `design_guards.py` and `report_check.py` pass. On the curved grip, the report's "at A" row shows the full-width bore (6.92) and full ribs. Catalog suite: 88 OK.
+- **The readiness guard:** QA read it in `tools/cults_publish.py` (see Q-A5).
+- The working tree is clean after the checks.
+
+### Advisories (none blocks)
+
+- **Q-A1 (listing claim, for the operator):** the description says "With both grips on, the tool still closes fully."
+    - For this pair, that is a model figure: the shut gap is 1.08, worked out from the reading taken with iteration-4 grips.
+    - Neither the log nor a SumMem note records squeezing the tool shut with curved iteration 5 and straight iteration 2 on. The pre-mortem says the listing claims only what prints showed.
+    - Fix: squeeze the tool shut once and record the result as a SumMem note, or soften the line.
+- **Q-A2 (comment, very low):** the `RIB_FADE` comment ("ending where the tip's round starts") and `techContext.md`'s "the ribs' fade length" read as if both grips use `RIB_FADE`. Only the straight grip does. The curved grip's ribs fade over `END_CLEAR`. `systemPatterns.md` already states this correctly for each grip. The fix is a comment change only, so the rebuild stays byte-identical.
+- **Q-A3 (DRY, low):** `bore()` builds its body sections with the same three lines in both branches; only the stop differs (`-end_clear` or `h.tip_r`). Sharing them would not change the bytes. The plan chose to keep `5d73490`'s code verbatim as its guard for byte identity, so this is acceptable as it is.
+- **Q-A4 (YAGNI, carried from run 1's A-2):** `closed_end()` returns `ridge`, but only the scratch `verify.py` reads it. The plan kept it on purpose.
+- **Q-A5 (for the operator, carried from preflight):**
+    - A4: the fit tests are in `files`. The bulb models do not ship theirs.
+    - A5: the photos must go in before the release pull request merges. For a new listing, `tools/cults_publish.py` sends `imageUrls` as it finds them. It refuses an empty `img/` only on an update. The description says "as pictured" and "Compare yours with the photos". Every commit on this branch is `chore`, so this component gets a release only from a `feat` or `fix` commit or squash title.
+    - A7: the lean guard for a gap-mode closed end is optional and not added.
+    - A9: archive both active memory banks before merging.
+
 ## Status
 
 - [x] Initialization complete
@@ -201,4 +246,11 @@ No new technology - validation not required.
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA (rework: PASS, advisories Q-A1 to Q-A5)
+
+### QA advisories resolved before reflect
+
+- **Q-A1:** the listing now says the grips are sized to leave room for the tool to close. It no longer claims a tested fact.
+- **Q-A2:** the `RIB_FADE` comment and the guard list in `techContext.md` say that it applies to a tip-seated grip only.
+- After the edits, `pair_check.py` still passes, and the catalog suite gives 88 OK.
+- **Q-A3 and Q-A4:** kept as the plan chose. Q-A5 goes to the operator in the PR's "Before merge" list.
