@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: wire-stripper-grips-closed-end
-**Phase:** QA - COMPLETE (FAIL)
+**Phase:** BUILD - COMPLETE (re-run after QA run 1)
 
 Memory bank: `models/commercial-electric-wire-stripper-grips/memory-bank/` (the operator's direction, 2026-11-01).
 
@@ -21,4 +21,4 @@ Memory bank: `models/commercial-electric-wire-stripper-grips/memory-bank/` (the 
 - Deviation: `verify.py`'s rib-bite tolerance is ± 0.02, not ± 0.015. The evidence is in `tasks.md`, Build Progress, step 2: the `5d73490` build already read 0.089 and 0.112 between its sections near S2.
 
 ## Next Step
-- QA, in a subagent.
+- QA run 2, in a subagent.

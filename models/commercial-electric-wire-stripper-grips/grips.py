@@ -126,7 +126,7 @@ def steel_solid(h):
     body = cq.Solid.makeLoft(secs)
     if rc <= 0:
         return body
-    cu = h.width(rc) / 2 - rc
+    cu = h.tip_flat()
     m = max(1, math.ceil(90 / RIM_STEP))
     tip = []
     for i in range(m + 1):
@@ -155,7 +155,7 @@ def roof(h):
     - ridge: the ridge strip's centre point.
     """
     rc = h.tip_r
-    cu, R = h.width(rc) / 2 - rc, rc + BORE_CLEAR       # the grown corners: centres at u = +-cu
+    cu, R = h.tip_flat(), rc + BORE_CLEAR               # the grown corners: centres at u = +-cu
     a, n = V(h.tangent(rc)), V(h.normal(rc))
     up = -V(h.tangent(h.length))                        # print's up, and its horizontal toward +u
     upz, upu = up.dot(-a), up.dot(n)
@@ -191,7 +191,7 @@ def roof(h):
         m = max(1, math.ceil(math.degrees(phi) / RIM_STEP))
         zs |= {R * math.sin(phi * i / m) for i in range(m)}
     heights = []
-    for z in sorted(zs):                                # both sides sample the same heights
+    for z in sorted(zs):                                # the sides' samples can coincide (z = 0; the straight's all)
         if heights and z - heights[-1] < 1e-3:
             if z in keep:
                 heights[-1] = z
@@ -433,11 +433,14 @@ def sizes(h, printed):
           f"{span[0]:.1f} x {span[1]:.1f} across (with any lean); volume {printed.Volume() / 1000:.1f} cm3")
     rim = rim_profile()
     d_most, most = widest()
-    for name, s, grow in (("open end (B)", L, rim[0][1]), ("widest", L - d_most, most),
-                          ("body near B", L - FLARE_LEN, 0.0), ("at A", 0.0, 0.0)):
+    # Rows where the bore is still a section of the body. Past the round's start it is the
+    # roof over the tip (the closed-end line below), and the ribs have faded out there.
+    for name, s, grow, ribbed in (("open end (B)", L, rim[0][1], True), ("widest", L - d_most, most, True),
+                                  ("body near B", L - FLARE_LEN, 0.0, True), ("round starts", h.tip_r, 0.0, False)):
         w, t = h.width(s), h.thickness(s)
+        rib = f"{w - 2 * RIB_BITE:5.2f} x {t - 2 * RIB_BITE:5.2f}" if ribbed else f"{'none':13s}"
         print(f"  {name:13s} steel {w:5.2f} x {t:5.2f}  bore {w + 2 * BORE_CLEAR:5.2f} x "
-              f"{t + 2 * BORE_CLEAR:5.2f}  ribs {w - 2 * RIB_BITE:5.2f} x {t - 2 * RIB_BITE:5.2f}  "
+              f"{t + 2 * BORE_CLEAR:5.2f}  ribs {rib}  "
               f"outside {w + 2 * (WALL_SIDE + grow):5.2f} x {t + 2 * (WALL_FACE + grow):5.2f}")
     _, past, _ = roof(h)
     print(f"  open end: edge on the bed {rim[0][1]:+.2f} from the body wall "

@@ -133,3 +133,12 @@ Take the hollow space out of both grips' closed ends. The bore's roof comes down
     - Every requirement and acceptance criterion is met in the geometry and the files. Advisories A-1 to A-6 are non-blocking.
 * Insights
     - A report row tied to a fixed station (A) goes stale when a change moves what is at that station. Check the build's printed sizes against the model, as well as the files.
+
+## 2026-11-01 - BUILD (re-run after QA run 1) - COMPLETE
+
+* Work completed
+    - Q1: `sizes()` reports a "round starts" row, with no ribs, in place of "at A". `report_check.py` was red first, then green.
+    - A-1 and A-3 to A-6 applied. A-2 (`ridge`) kept.
+    - A rebuild gave byte-identical STLs. Every check rerun green on the final source, and the catalog suite gives 88 OK (`.scratch/wirestripper-grip/runs/final2.txt`).
+* Insights
+    - A printed size table can go stale when the shape near one of its stations changes. The build's own report is part of what QA reads.

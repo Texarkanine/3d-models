@@ -370,6 +370,19 @@ Acceptance criteria 1 to 5 are met. The figures are those under Build Progress, 
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
+- [x] Preflight
 - [x] Build
 - [ ] QA (run 1: FAIL (fixable); Build reruns for Q1)
+
+## Build (re-run after QA run 1)
+
+- **Q1, fixed:** `sizes()`'s fourth row is now "round starts" (s = `tip_r`). There the bore is still the body's section, and the row says the ribs are none, because they have faded out by then. The "at A" row is gone; the closed-end line covers the tip.
+    - `report_check.py` was red first: an "at A" row, and no "round starts" row.
+    - Green: curved bore 6.99, straight 7.40, equal to W + 2 `BORE_CLEAR` at `tip_r`.
+- **A-1:** `systemPatterns.md` now says the ribs fade over the last `RIB_FADE` before the round and end where it starts.
+- **A-2:** `ridge` is kept. The plan asked for it, and B3's cap check reads it.
+- **A-3:** `Handle.tip_flat()` is the one home for the flat's half-width, used by `tip_short`, `steel_solid` and `roof`.
+- **A-4:** `OLD_DEPTH_EDGE_IN` (0.75) is named, with a comment saying it is inferred, not read. The 0.15 half-circle threshold has a comment.
+- **A-5:** `roof()`'s comment on duplicate heights is corrected. `techContext.md` lists the "slopes close only above the tip" guard.
+- **A-6:** the Preflight box is ticked.
+- A rebuild gave byte-identical STLs. The STEP files changed only in their headers and were restored.

@@ -151,10 +151,14 @@ class Handle:
     def thickness(self, s):
         return _lerp_stations(max(s, 0.0), self._t)
 
+    def tip_flat(self):
+        """Half the width of the flat between the tip's two rounded corners."""
+        return self.width(self.tip_r) / 2 - self.tip_r
+
     def tip_short(self, u):
         """How far short of A the steel ends at u from the centre line (in W)."""
         rc = self.tip_r
-        x = abs(u) - (self.width(rc) / 2 - rc)        # past the flat between the corners
+        x = abs(u) - self.tip_flat()                  # past the flat between the corners
         if x <= 0:
             return 0.0
         return rc - math.sqrt(max(0.0, rc * rc - min(x, rc) ** 2))
@@ -225,6 +229,9 @@ STRAIGHT_TIP_R = 3.3
 # and its inside depth from the mouth, at the centre and near the edge.
 OLD_STRAIGHT_OPENING = (10.12, 14.6)
 OLD_STRAIGHT_DEPTH = (84.8, 83.6)
+# Where "near the edge" is taken for the cross-check: about where a depth rod held
+# against the side wall touches. Inferred, not read.
+OLD_DEPTH_EDGE_IN = 0.75
 
 # ---- Build the straight handle from the tracing and the calipers -------------
 # Same frame as the curved tracing: row 0 at y = 0, B one row below the last.
@@ -278,16 +285,16 @@ def report_straight():
           f"at B W {h.width(h.length) - c.width(c.length):+.2f}, T {h.thickness(h.length) - c.thickness(c.length):+.2f}")
     report_tip(h)
     centre, edge = OLD_STRAIGHT_DEPTH
-    print(f"  0.75 in from the side, it ends {h.tip_short(h.width(h.tip_r) / 2 - 0.75):.2f} short of A. "
+    print(f"  {OLD_DEPTH_EDGE_IN} in from the side, it ends {h.tip_short(h.width(h.tip_r) / 2 - OLD_DEPTH_EDGE_IN):.2f} short of A. "
           f"The old grip's floor was {centre - edge:.2f} deeper at the centre than near the edge ({centre} and {edge}).")
 
 
 def report_tip(h):
     """Print the tip's shape: the corner radius and where the round starts."""
-    w = h.width(h.tip_r)
-    shape = "a half circle" if h.tip_r >= w / 2 - 0.15 else "a flat end with rounded corners"
+    # A flat under 0.15 each side of the centre line reads as a half circle (the straight tip's is 0.10).
+    shape = "a half circle" if h.tip_flat() < 0.15 else "a flat end with rounded corners"
     print(f"Tip: {shape}, corners of radius {h.tip_r} in the plane of the handles; "
-          f"the sides run straight to {h.tip_r} from A, where W is {w:.2f}.")
+          f"the sides run straight to {h.tip_r} from A, where W is {h.width(h.tip_r):.2f}.")
 
 
 def report_curved():
