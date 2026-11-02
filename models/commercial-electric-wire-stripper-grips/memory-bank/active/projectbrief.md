@@ -32,7 +32,7 @@ As the owner of the Commercial Electric wire stripper, I want each grip's closed
 ## Acceptance Criteria
 
 1. With the steel's rounded tip modelled, the steel is nowhere inside the grip's wall, and the bore hugs the tip at `BORE_CLEAR` from its sides up to where the roof's slopes take over.
-2. The roof's ridge sits about 2.4 (straight) and 3.0 (curved) past the tip, against 5.3 and 4.7 now.
+2. The roof's ridge sits about 2.3 (straight) and 2.9 (curved) past the tip, against 5.3 and 4.7 now. The grips get about 3.0 and 1.8 shorter (preflight run 1: the agreed 2.9 and 1.7 were the apex).
 3. The open ends are unchanged, within the loft's few hundredths.
 4. `tools/overhang.py` flags only the roof's ridge strip.
 5. The catalog tests pass.

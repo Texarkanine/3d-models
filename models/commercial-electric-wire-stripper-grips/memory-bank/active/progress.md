@@ -29,3 +29,29 @@ Take the hollow space out of both grips' closed ends. The bore's roof comes down
     - The commits are the readings first, then curved iteration 6 and straight iteration 2 together, as one printable iteration.
 * Insights
     - Moving the body lofts' end moves their sections, so the open end can shift by hundredths. B5 bounds it rather than requiring identical files.
+
+## 2026-11-01 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Checked the plan against the code: TDD order, conventions, dependencies, conflicts and completeness. The first line of `.preflight-status` is `FAIL (fixable)`.
+    - Probes, run in the session scratchpad:
+        - Worked the Geometry independently. The `RIDGE_W` row sits 2.300 (straight) and 2.887 (curved) past A. The apex sits 2.419 and 2.992 past A.
+        - Moving the bore loft's end moves the bore at most 0.0075 (curved) and 0.0013 (straight).
+        - Today the cap over the ridge is 5.000 on both grips.
+        - The straight's half-circle tip ends 1.205 short of A at 0.75 in from the side.
+        - The current files pass `overhang.py`, `corner_bevel.py` and `lip.py`. The catalog suite gives 88 OK.
+* Decisions made
+    - F1, a required fix: B2's `past` figures (2.42 and 3.00 ± 0.1) are the apex. The Geometry ends the bore at the `RIDGE_W` row, 0.12 and 0.10 lower, so B2 fails on a correct build. The re-plan should define `past` as that row's height past A and restate the figures. With that definition, the grips shorten by 3.03 and 1.77 and end 7.30 and 7.89 past A.
+    - Advisories A1 to A7 and a tip-test print idea are in `.preflight-status`. A1 and A2 are the ones the build would hit:
+        - A1: B7's `ROOF_ANGLE` 10 case is also caught by the ≥ 45 guard; use 80 on the curved grip instead.
+        - A2: both sides' arc samples give duplicate row heights, so the rows must be deduplicated.
+* Insights
+    - B5's 0.02 bore tolerance has real margin. Unlike the outside in the last task (0.075), the bore's loft barely moves when its sections shift.
+
+## 2026-11-01 - PLAN (re-plan after preflight run 1) - COMPLETE
+
+* Work completed
+    - Resolved F1 and A1 to A7 in `tasks.md` (section "Preflight run 1"). Acceptance criterion 2 of `projectbrief.md` now gives the ridge row's figures.
+* Decisions made
+    - Kept the planned construction: the slopes stay exactly at `ROOF_ANGLE`, and the ridge strip sits where they are `RIDGE_W` apart. `past` and `ridge` belong to that row. The grips get 3.03 (straight) and 1.77 (curved) shorter.
+    - Preflight's tip-test print is offered in the report, not built.

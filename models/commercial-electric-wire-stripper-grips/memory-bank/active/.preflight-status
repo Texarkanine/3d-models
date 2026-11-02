@@ -1,0 +1,92 @@
+FAIL (fixable)
+
+Preflight run 1 of the Level 2 plan for wire-stripper-grips-closed-end, 2026-11-01. Memory bank: `models/commercial-electric-wire-stripper-grips/memory-bank/` (the operator's direction).
+
+Read: this memory bank's `tasks.md`, `progress.md`, `projectbrief.md`, `activeContext.md`, `systemPatterns.md`, `techContext.md` and `productContext.md`; `steel.py`, `grips.py`, `tools/overhang.py`, the model README, `publish.yaml` and the headings of `reference/measurements.md`; the scratch checks (`closed_end.py`, `tip_roof.py`, `tip_roof_sweep.py`, `verify.py`, `slice_compare.py`, `lip.py`, `corner_bevel.py`, `shut_gap.py`) and their baselines; both SumMem stores; the root memory bank's last-task notes on the loft shift (its F1).
+
+Probes, run from the session scratchpad, nothing written to the repository:
+- The plan's Geometry, worked independently in pure Python on `steel.py`:
+    - Curved (`tip_r` 1.5): W at `tip_r` 6.391, `cu` 1.695, `R` 1.80. The lean in the tip frame is 15.05 degrees. The slopes touch at φ 55.05 (z 1.475) and 24.95 (z 0.759) degrees. The two slopes meet (the apex) 2.992 past A. The rows are `RIDGE_W` apart 2.887 past A, at u −1.640 to −1.440.
+    - Straight (`tip_r` 3.3): W at `tip_r` 6.799, `cu` 0.100, `R` 3.60. The slopes touch at φ 40 degrees on both sides (z 2.314). The apex is 2.419 past A, and the `RIDGE_W` row is 2.300 past A.
+    - Straight with `tip_r` 0: the apex is 4.438 past A, and the `RIDGE_W` row is 4.318.
+    - With a half-circle tip, the straight steel ends 1.205 short of A at 0.75 in from the side. B1 allows 1.2 ± 0.15.
+- The bore's smooth body loft, built with its end at s −1.0 (now) and at s = `tip_r` (planned), and compared in section planes every 0.5 from `tip_r` + 2 to B. The worst Hausdorff distance is 0.0075 on the curved grip (at s 82.5) and 0.0013 on the straight. B5's 0.02 on the bore can pass.
+- Today's cap from the roof ridge point to the outside: 5.000 on both grips. The curved ridge is 1.741 off the centre line, inside the 1.96 half-width of the dome's flat top. The planned curved ridge, 1.54 off, is also inside it, so the cap stays `DOME_LEN` if the dome starts at the ridge row.
+- `python steel.py` equals `baseline/steel-report-5d73490.txt`. The four baseline STLs equal the committed ones byte for byte. `3046d4e` rebuilt the curved grip without changing its STL, so STL export repeats exactly (commit 1's byte check can pass).
+- On the current files:
+    - `tools/overhang.py` flags only the ridge strip on each full grip (2.9 mm²) and nothing on either fit test.
+    - `corner_bevel.py` passes, at 49.9 degrees (curved) and 50.2 (straight).
+    - `lip.py` passes on both grips.
+    - Catalog suite: 88 OK.
+
+## Checks
+
+- Wrong-reference guard: the task is Level 2, so the default reference applies.
+- Prerequisites: planning is complete (the Status list in `tasks.md`). Level 2 needs no creative phase.
+- TDD plan encoding: PASS. Steps 1 and 2 change executable behaviour: the steel model and the printed shape. Each step orders the work the same way: stubbed checks, stubbed interface, checks run red, then code. Step 3 is prose and owes no tests. Step 4 reruns the checks. Nothing was struck or reordered. See A7 on one value assertion.
+- Convention compliance: PASS. The plan follows the model's conventions:
+    - Readings go to `steel.py` and the dated log, design values to `grips.py`, and the reasoning to `systemPatterns.md`.
+    - `TIP_R` and `STRAIGHT_TIP_R` follow the bare-curved and `STRAIGHT_`-prefix naming. `OLD_STRAIGHT_DEPTH` sits beside `OLD_STRAIGHT_OPENING`.
+    - Placing `tip_r` before `step` in `Handle(...)` breaks no caller: only `steel.py` constructs a `Handle`, and no caller passes `step`.
+    - The commits use the task's `chore` titles and touch one model.
+- Dependency impact: PASS, with A5 and A6. `verify.py` unpacks `roof()` and is scheduled. `sizes()`, the module docstring and the docs that name `END_CLEAR` are scheduled. `publish.yaml` (`files: []`) and the catalog tests do not change.
+- Conflict detection: PASS. The plan reuses `rrect`, `section_plane`, `loft_positions` and `RIM_STEP` and duplicates nothing. The model is unreleased, so no public contract changes.
+- Completeness: FAIL, finding F1. The plan maps all eight requirements and five acceptance criteria to steps, files and checks, but B2's `past` figures disagree with the Geometry.
+
+## Required fix
+
+F1. B2's figures for `past` belong to the apex. The construction stops lower, so B2 cannot pass on a correct build.
+- The Geometry puts the last row "at the z where the two lines are `RIDGE_W` apart". That row is the top of the bore. `outside()` starts the dome at `-past`, and systemPatterns says the dome starts at the ridge's height. So `past` must be that row's height past A.
+- That height is 2.300 (straight) and 2.887 (curved). B2 asserts 2.42 ± 0.1 (lower limit 2.32) and 3.00 ± 0.1 (lower limit 2.90). Both checks fail, by 0.020 and 0.013.
+- The expected figures come from `tip_roof_sweep.py`. It intersects the two slope lines, so it gives the apex: 2.419 and 2.992. The apex is 0.119 (straight) and 0.105 (curved) above the `RIDGE_W` row.
+- The Geometry never defines `past` or `ridge`. B3's "cap over the ridge is `DOME_LEN`" and the operator's report figures depend on that definition.
+- Fix: in the Geometry, define `past` as the ridge row's z − `tip_r`, and `ridge` as that row's centre point. Restate the figures:
+
+    | | Curved | Straight |
+    |---|---|---|
+    | Ridge row past A | 2.89 | 2.30 |
+    | Grip end past A | 7.89 | 7.30 |
+    | Grip shortening | 1.77 | 3.03 |
+
+  Update these places: the Expected table, B2 (for example 2.30 ± 0.05 and 2.89 ± 0.05), the progress summary and the Pre-Mortem's "about 2.9 and 1.7". The new shortening is closer to the 3 and 1.7 the operator expected.
+- If the planner prefers to keep today's construction (strip at the apex, slopes a little steeper than `ROOF_ANGLE` at the top), say so in the Geometry and keep the figures. Do not leave the Geometry and the figures disagreeing.
+
+## Advisory findings
+
+A1. B7's lean case cannot isolate the guard it tests (low to medium).
+- With `ROOF_ANGLE` 10, the curved grip's φ is 95.1 degrees, so `roof()`'s assertion would fire. But the new `ROOF_ANGLE >= 45` guard in `check_design` also fires. B7 says each guard's message names its problem, and which message appears depends on the order of the assertions.
+- The Geometry gives one condition for 0 ≤ φσ ≤ 90 degrees: the lean is less than `ROOF_ANGLE`. A second condition is missing: `ROOF_ANGLE` + lean ≤ 90. On the curved grip the second condition breaks first, at `ROOF_ANGLE` 75: the lower φ is 0.9 at 74, −0.1 at 75 and −5.1 at 80.
+- Fix: use `ROOF_ANGLE` 80 on the curved grip as B7's case. It passes the ≥ 45 guard and is caught only by `roof()`. Alternatively, call `grips.roof(steel.CURVED)` directly with 10. Have the message name both bounds.
+
+A2. The row list will hold duplicates (medium).
+- Both sides sample arcs of the same radius `R` on the same `RIM_STEP` grid, so each shared φ gives the same z twice. On the straight grip, the two tangent points also coincide.
+- "Sorted" alone gives coincident sections, and a ruled loft through coincident sections fails or makes slivers.
+- Fix: in the Geometry's Rows bullet, merge both sides' z values and drop any within about 1e-3 of the previous one, keeping the tangent points and the ridge row.
+- `RIM_STEP`'s comment ("the open end's lofted sections") should also name the tip arcs.
+
+A3. B4's rib-volume expectation needs a definition and a tolerance (low).
+- "Half a rib over the fade" fits the rib solids' own volume: about 0.56 of a full section over `RIB_FADE`, counting `RIB_EMBED`.
+- It does not fit the bite into the mock steel, which is what `verify.py` measures today. Only the last quarter of the fade reaches past the steel face, so the fade adds about one eighth of a rib.
+- The difference is about 0.17 mm³ in about 38 mm³. Say which volume B4 means and how close it must be.
+
+A4. `steel_solid` with `tip_r` 0 puts every round section at z = 0 (low).
+- `tip_r` 0 is `Handle`'s default and one of the edge cases. With it, the round has no length, and the loft through it fails.
+- The edge case builds only `roof()`, so this does not block. Still, `steel_solid` should skip the round when `tip_r` is 0.
+
+A5. `tip_roof.py` and `tip_roof_sweep.py` stop running after commit 2 (low). They read `END_CLEAR` and the old two-value `roof()`. They are one-off scratch, so leave them, but do not list them as checks. Their figures are the apex (F1).
+
+A6. Step 4.3's SumMem note writes files under the model's `.summem/` (low). Commit them before "confirm the working tree is clean". SumMem says its files are part of the work.
+
+A7. B1's `tip_r is 1.5 / 3.3` assertion is a change-detector in form (no action). It can only go red if someone edits the constant. It is an uncommitted scratch check that shows the readings went in, and B1's range and cross-check halves carry the behaviour. Nothing struck.
+
+## Radical idea (advisory, not applied)
+
+A tip test print, the closed-end twin of the fit test. It checks the Pre-Mortem's first risk, a real tip squarer than modelled, for a few minutes of TPU instead of a full grip.
+- Sketch: `tip_test(printed)` in `grips.py`, beside `fit_test`.
+    - Keep the printed grip from about 2 mm below where the ribs start to fade up to the dome's top. That is about 14 mm on the straight grip and 13 on the curved.
+    - Translate it so the cut stands on z = 0, and export `<stem>_tip_test` (STEP, STL).
+    - Check: it equals the grip cut at that height.
+- Use: push it onto the bare tip until it stops, then caliper from its dome end to a mark on the steel such as B. Compare with the bare A to B reading.
+    - Modelled: the dome end stands `past` + `DOME_LEN` − the travel past A. The travel is the push along the steel that closes `BORE_CLEAR` where a slope touches the tip: 0.3 / sin φσ, so about 0.47 (straight) and 0.37 (curved). That gives about 6.8 (straight) and 7.5 (curved).
+    - If it stands well further out, that handle's `tip_r` is too big.
+- Cost: about ten lines, two more STL/STEP pairs, a B8-style check, and one row in the README. `publish.yaml` need not ship it. The operator has not asked for it; it is offered for the operator to weigh.

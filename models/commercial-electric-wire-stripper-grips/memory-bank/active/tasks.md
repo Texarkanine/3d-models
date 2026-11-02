@@ -6,14 +6,15 @@
 
 Take the hollow out of both grips' closed ends (projectbrief). The bore now ends `END_CLEAR` (1.0) past a square-ended tip, then a gable roof rises 4.33 (straight) or 3.66 (curved) more. The real tips are rounded in the plane of the handles. The new bore follows the rounded tip grown by `BORE_CLEAR`, and each roof slope is the lowest line at `ROOF_ANGLE` in print that clears that grown tip. The outside's dome still starts at the ridge's height, so the grip gets shorter by as much as the ridge drops.
 
-Expected, from `.scratch/wirestripper-grip/tip_roof_sweep.py`:
+Expected, from preflight run 1's independent working of the Geometry below. `tip_roof_sweep.py` gave the apex, which sits 0.10 to 0.12 higher; see F1.
 
 | | Curved | Straight |
 |---|---|---|
 | Tip corner radius (`steel.py`) | 1.5 | 3.3 (a half circle; W/2 at the round's start is 3.40) |
-| Ridge past A, now | 4.66 | 5.33 |
-| Ridge past A, new | about 3.00 | about 2.42 |
-| Grip end past A, now / new | 9.66 / about 8.0 | 10.33 / about 7.4 |
+| Ridge row past A, now (today's strip sits at the apex) | 4.66 | 5.33 |
+| Ridge row past A, new | 2.89 | 2.30 |
+| Grip end past A, now / new | 9.66 / 7.89 | 10.33 / 7.30 |
+| Shorter by | 1.77 | 3.03 |
 
 Two commits:
 1. The tip readings: steel only, so the printed files do not change.
@@ -27,10 +28,14 @@ Worked in the plane of the handles, in a frame at the start of the tip's round. 
 - **Grown tip:** the same arcs with radius `R = rc + BORE_CLEAR`. A point at angle φ on side σ (+1 or -1) is `(R sin φ, σ(cu + R cos φ))`, with outward normal `(sin φ, σ cos φ)`.
 - **Print directions:** up is `-h.tangent(h.length)`. "Horizontal" is the direction in the plane square to up, oriented toward +u.
 - **Slopes:** slope σ's outward normal is `sin(ROOF_ANGLE)·σ·horizontal + cos(ROOF_ANGLE)·up`. It touches side σ's arc at `φσ = atan2(nz, σ·nu)`.
-    - `roof()` asserts 0 ≤ φσ ≤ 90 degrees. That holds when the slope touches its own corner and clears the other corner, which is the case while the lean is less than the roof's angle. Curved: about 15 degrees of lean against 50.
+    - `roof()` asserts 0 ≤ φσ ≤ 90 degrees: the slope touches its own corner and clears the other one. Two bounds: the lean is less than `ROOF_ANGLE`, and `ROOF_ANGLE` plus the lean is at most 90. The curved grip leans about 15 degrees, so with today's 50 its slopes touch at φ 55.05 and 24.95. The message names both bounds.
 - **Bore at height z:** on side σ, the bore's edge follows the arc up to z = `R sin φσ`, and the slope's line after that.
-- **Ridge strip:** the last row is at the z where the two lines are `RIDGE_W` apart. The slopes stay exactly at `ROOF_ANGLE` up to the strip; today's strip sits at the apex.
-- **Rows:** the arc samples on each side every `RIM_STEP` degrees, the two tangent points and the ridge row, sorted. Each row records `(z, u_lo, u_hi)`.
+- **Ridge strip:** the last row is at the z where the two lines are `RIDGE_W` apart. The slopes stay exactly at `ROOF_ANGLE` up to the strip. Today's strip sits at the apex, which is 0.10 to 0.12 higher.
+- **`past` and `ridge`:** `past` is the ridge row's z − `rc`, its distance past A. The dome starts there, so the cap over the strip stays `DOME_LEN`. `ridge` is the ridge row's centre point, in 3D.
+- **Rows:** the arc samples on each side every `RIM_STEP` degrees (its comment now names the tip's arcs too), the two tangent points and the ridge row, merged and sorted.
+    - Both sides sample arcs of the same radius on the same grid, and the straight grip's two tangent points coincide. So a z within 1e-3 of the previous row's is dropped; a ruled loft through coincident sections fails.
+    - The tangent points and the ridge row are always kept.
+    - Each row records `(z, u_lo, u_hi)`.
 
 ## Test Plan (TDD)
 
@@ -39,18 +44,18 @@ The operator's standing direction (`techContext.md`) is no committed tests while
 ### Behaviors to Verify
 
 - **B1. Tip readings** (`tip_check.py`, pure Python):
-    - `steel.CURVED.tip_r` is 1.5, and `steel.STRAIGHT.tip_r` is 3.3. Each lies between 0 and half of W at `tip_r`.
+    - Both handles have a `tip_r` between 0 and half of W at `tip_r`. The values themselves are readings, not behaviour, so there is no check that repeats them (preflight A7).
     - The straight's modelled tip ends 1.2 ± 0.15 short of A at 0.75 in from the side, matching the old straight grip (84.8 at the centre, 83.6 near the edge).
     - `python steel.py`'s output equals the `5d73490` baseline apart from added lines: the readings do not move.
 
     Red now: `Handle` has no `tip_r`.
 - **B2. The ridge drops** (`closed_end.py`, rewritten):
     - `grips.roof(h)` returns `(rows, past, ridge)`.
-    - `past` is 2.42 ± 0.1 (straight) and 3.00 ± 0.1 (curved).
+    - `past` is 2.30 ± 0.05 (straight) and 2.89 ± 0.05 (curved).
     - The rows start at the body's section: z = 0, u = ±(w/2 + `BORE_CLEAR`).
     - The rows rise in z, and widen no more than the arcs allow.
     - The last row is `RIDGE_W` wide.
-    - Each built STL is shorter than its baseline by `old past − new past` ± 0.05 along the print axis (straight); for the curved, the value and the measured drop are both reported.
+    - The straight STL stands 3.03 ± 0.05 lower than its baseline. The curved STL leans, so its drop in height is reported beside 1.77, without a limit.
 
     Red now: `roof` returns `(r, rise)`.
 - **B3. The bore hugs the tip and never touches it** (`verify.py`, extended):
@@ -63,7 +68,7 @@ The operator's standing direction (`techContext.md`) is no committed tests while
 - **B4. The ribs end before the round** (`verify.py`):
     - Rib volume at s < `tip_r` is under 0.01 mm³ (only the embedded roots touch it).
     - The rib bites in cross-sections are still `RIB_BITE`.
-    - Rib volume matches 8 ribs at full bite from B to `tip_r + RIB_FADE`, plus half a rib over the fade.
+    - The bite into the mock steel (`verify.py`'s mock ∩ grip) is 8 ribs' bite cross-section times (L − `tip_r` − `RIB_FADE`), within 2%. Over the fade, only the last quarter of the rib reaches past the steel face, so it adds about an eighth of a rib-length, about 0.2 mm³ in about 38 (preflight A3).
 
     Red now: the ribs run to A.
 - **B5. Nothing else moves** (`slice_compare.py`, generalised to `curved|straight` against `baseline/*-iter5.stl` and `*-iter1.stl`): from the bed up to 1 below where the ribs start to fade, in print:
@@ -80,7 +85,7 @@ The operator's standing direction (`techContext.md`) is no committed tests while
     - for a tip radius over half the tip's W;
     - for a negative tip radius;
     - for `ROOF_ANGLE` 44;
-    - when the lean is steeper than the roof (the curved grip with `ROOF_ANGLE` 10).
+    - when a slope would miss its own corner (the curved grip with `ROOF_ANGLE` 80: 80 plus its 15 degrees of lean is over 90). The ≥ 45 guard does not catch 80, so only `roof()`'s guard can fire (preflight A1).
 
     Each guard's message names the problem. Red now: there are no such guards.
 - **B8. Unchanged elsewhere:**
@@ -92,7 +97,7 @@ The operator's standing direction (`techContext.md`) is no committed tests while
     - The fit tests match their baselines within B5's tolerances.
 - **B9. Catalog suite:** `uv run --no-project --with pyyaml python -m unittest discover -s tests` gives 88 OK.
 - **Edge cases:**
-    - `tip_r` 0 (a square tip) still builds a valid roof; `design_guards.py` builds the straight roof with it. The tip is then 0.3 past A, against 1.0 now.
+    - `tip_r` 0 (a square tip) still builds a valid roof; `design_guards.py` builds the straight roof with it. The tip is then 0.3 past A, against 1.0 now, and the ridge row 4.32 past A. `steel_solid` then skips the round (preflight A4).
     - A full half circle, where `cu` is near 0: the mock's last section stays at least 0.02 wide.
     - The curved lean makes the two tangent heights differ: the rows include both.
     - Commit 1 changes no printed file: a rebuild gives byte-identical STLs, and STEP files whose only changes are header timestamps are restored.
@@ -102,6 +107,7 @@ The operator's standing direction (`techContext.md`) is no committed tests while
 - Framework: none committed for this model (operator's direction). Ad hoc Python in `.scratch/wirestripper-grip/`, run from the repo root with `uv run --no-project --with …`. The catalog `unittest` suite is in `tests/`.
 - Conventions: one script per concern; a `curved|straight` argument; a PASS or FAIL line and the exit code.
 - New check files: `tip_check.py`, `roof_angles.py`, `design_guards.py`. Rewritten: `closed_end.py`. Extended: `verify.py`, `slice_compare.py`.
+- `tip_roof.py` and `tip_roof_sweep.py` were one-off explorations. They read the old `roof()` and `END_CLEAR`, so they stop working after step 2. They are not checks (preflight A5).
 
 ## Implementation Plan
 
@@ -143,7 +149,7 @@ The operator's standing direction (`techContext.md`) is no committed tests while
 1. **Stub tests:** empty `roof_angles.py` and `design_guards.py`. `closed_end.py`, `verify.py` and `slice_compare.py` get the new B2 to B5 sections, still empty.
 2. **Stub interface,** in `grips.py`:
     - `END_CLEAR` goes. New: `RIB_FADE = 1.0`: the ribs fade into the wall over this length and end where the tip's round starts.
-    - `roof(h)` becomes `-> (rows, past, ridge)`, documented as in "Geometry" above.
+    - `roof(h)` becomes `-> (rows, past, ridge)`, documented as in "Geometry" above: `past` and `ridge` belong to the ridge row, not the apex.
     - `steel_solid(h)` documents the rounded tip.
 3. **Write tests and run red:**
     - `closed_end.py` and `verify.py` fail on the current build (B2 to B4).
@@ -155,7 +161,7 @@ The operator's standing direction (`techContext.md`) is no committed tests while
         - the smooth loft from B to `s = tip_r`;
         - a ruled loft through one `rrect` per row, in planes square to `tangent(rc)` at `O − tangent(rc)·z`. Each is `u_hi − u_lo` by `thickness(rc − z) + 2·BORE_CLEAR`, with `BORE_CORNER_R`, offset by the row's centre;
         - the first row's `rrect` is the body's last section, so the two lofts share a face. Fuse and clean.
-    - `steel_solid(h)`: rectangles from B to `tip_r`, then the tip's round in the same frame, ruled. Arc samples every `RIM_STEP` degrees; the last section at least 0.02 wide.
+    - `steel_solid(h)`: rectangles from B to `tip_r`, then the tip's round in the same frame, ruled. Arc samples every `RIM_STEP` degrees; the last section at least 0.02 wide. When `tip_r` is 0, the rectangles run to A and there is no round.
     - `ribs(h)`: full height from B to `tip_r + RIB_FADE`, then down to height 0 at `tip_r`.
     - `outside(h)`: `s_dome = -past`.
     - `check_design(h)` adds three assertions, each with a message:
@@ -195,7 +201,7 @@ The operator's standing direction (`techContext.md`) is no committed tests while
 
 1. Catalog suite (B9).
 2. Rerun every check on the committed outputs, for both grips.
-3. Record the iterations in a SumMem note for the model: the commit, the figures, and what to watch in the print. Then confirm the working tree is clean.
+3. Record the iterations in a SumMem note for the model: the commit, the figures, and what to watch in the print. Commit the note's files (preflight A6), then confirm the working tree is clean.
 
 ## Technology Validation
 
@@ -225,9 +231,23 @@ No new technology - validation not required. The checks use packages already in 
     - Both radii are read small, and the straight one agrees with the old grip's floor.
     - If the real corners do stand proud of the modelled round, the first 0.3 is clearance. The open end lands short only by the rest; TPU may also give a little.
     - The report says what to watch for: the open end sitting short of where the steel widens. Then name the fix: a smaller `tip_r` for that handle.
-- **The operator expected the grips to shrink by exactly 3 and 1.7.** The report gives the modelled figures: about 2.9 and 1.7.
+- **The operator expected the grips to shrink by about 3 and 1.7.** The report gives the modelled figures, 3.03 and 1.77. They are a little more than the 2.9 and 1.7 given in chat, which were the apex (F1).
 - **Taking `END_CLEAR` out changes how the grip seats.** The fit was always meant to come from the steel's taper near B. The old grip had no gap at the tip at all. The report says the tip now has the same 0.3 as the sides.
-- **A full grip print is needed to see the tip change.** The fit test covers only the open end. Name the full straight grip as the print that shows the most change. A closed-end-only test print could be offered, but none is built: the operator has not asked for one.
+- **A full grip print is needed to see the tip change.** The fit test covers only the open end. Name the full straight grip as the print that shows the most change.
+    - Preflight's tip-test idea goes in the report as an offer, with its figures. It would be the closed end alone (about 14 mm), pushed onto the bare tip, with its end expected about 6.8 (straight) and 7.5 (curved) past A.
+    - It is not built: the operator has not asked for it, and the brief keeps everything else unchanged.
+
+## Preflight run 1 (2026-11-01): FAIL (fixable), resolved in the plan
+
+- **F1:** `past` and `ridge` are defined as the ridge row's. The figures are restated: the ridge row sits 2.89 and 2.30 past A, and the grips get 1.77 and 3.03 shorter. B2's limits are ± 0.05.
+- **A1:** B7's lean case is `ROOF_ANGLE` 80 on the curved grip. The Geometry gives both bounds.
+- **A2:** rows within 1e-3 of the previous one are dropped.
+- **A3:** B4 measures the bite into the mock steel, within 2%.
+- **A4:** `steel_solid` skips the round when `tip_r` is 0.
+- **A5:** the two exploration scripts are not checks.
+- **A6:** step 4 commits the SumMem files.
+- **A7:** B1 no longer repeats the radii.
+- **Tip test print:** offered in the report, not built.
 
 ## Status
 
