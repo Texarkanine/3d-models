@@ -158,3 +158,10 @@ Take the hollow space out of both grips' closed ends. The bore's roof comes down
     - Two new advisories, N-1 and N-2, block nothing.
 * Insights
     - When a fix touches only the build's printed report, a rebuild that gives byte-identical STLs shows that the printed files did not move.
+
+## 2026-11-02 - REFLECT - COMPLETE
+
+* Work completed
+    - Reflection written. Persistent files reconciled: no further changes, since the build already updated all three.
+* Insights
+    - See the reflection. In short: compare CAD sections, not STL slices; ruled ribs carry ± 0.015 between sections on the bend; quote the modelled quantity, not a proxy; check the build's printed report.
