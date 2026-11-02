@@ -1,81 +1,94 @@
-FAIL (fixable)
+PASS WITH ADVISORY
 
-Preflight run 2 of the Level 2 plan for wire-stripper-grips-closed-end, 2026-11-01, after the re-plan for run 1. Memory bank: `models/commercial-electric-wire-stripper-grips/memory-bank/` (the operator's direction).
+Preflight run 3 of the Level 2 plan for wire-stripper-grips-closed-end, 2026-11-01, after the re-plan for run 2 (`ea90cf6`). Memory bank: `models/commercial-electric-wire-stripper-grips/memory-bank/` (the operator's direction).
 
-Read: this memory bank's `tasks.md`, `progress.md`, `projectbrief.md`, `activeContext.md`, run 1's `.preflight-status`, `systemPatterns.md`, `techContext.md` and `productContext.md`; the re-plan's diff (`db88367`); `steel.py`, `grips.py`, `tools/overhang.py`, the model README, `publish.yaml` and the headings of `reference/measurements.md`; the scratch checks and their baselines; both SumMem stores.
+Read: this memory bank's `tasks.md`, `progress.md`, `projectbrief.md`, `activeContext.md`, run 2's `.preflight-status`, `systemPatterns.md`, `techContext.md` and `productContext.md`; the re-plan's diff (`db88367..ea90cf6`); `steel.py`, `grips.py`, the model README, `publish.yaml` and `reference/measurements.md`; the scratch checks (`verify.py`, `closed_end.py`, `slice_compare.py`, `lip.py`, `corner_bevel.py`, `shut_gap.py`, `tip_roof.py`, `tip_roof_sweep.py`) and `baseline/`; `tests/test_publish_records.py`; both SumMem stores.
 
 ## Probes
 
-All in the session scratchpad. Nothing was written to the repository.
+Read-only, or in the session scratchpad. This run wrote nothing to the repository except this phase's memory bank files. It did not rebuild step 2: run 2's trial build stands, and the re-plan changed only how B5 and B8 measure, and B3's tolerance.
 
-- **The plan's step 2, built.** A module patched `grips.py` exactly as the Geometry and step 2.4 say: `roof()` rows, the bore's ruled cap, the rounded mock tip, the ribs ending at `tip_r`, and `s_dome = -past`. It built both grips and exported them to STEP and STL.
-    - Each grip builds as one valid solid in about 21 s. The curved grip has 22 rows and the straight 16. The closest rows are 0.019 and 0.049 apart, so the 1e-3 rule drops only true duplicates.
-    - B2: `past` is 2.887 (curved) and 2.300 (straight). The first row is 6.9906 and 7.3994 wide, the body's last section. The last row is 0.2000 wide. The straight STL is 3.028 lower than its baseline (passes 3.03 ± 0.05). The curved STL is 1.714 lower, against 1.77 along the steel.
-    - B3: no steel is inside the bore wall (0.00000 mm³ on both). The tip's arc points, both sides, at mid-T and 1 in from each T face, lie 0.2989 to 0.3000 from the bore. A is 1.54 (curved) and 1.56 (straight) from it. The ridge is 4.9948 (curved) and 5.0000 (straight) from the outside.
-    - B4: the bite into the mock steel is 0.39% (curved) and 0.21% (straight) over the plan's formula. The 2% limit passes.
-    - B6: `tools/overhang.py` flags only the 2.9 mm² ridge strip on each full grip, and nothing on the fit tests. No downward face above the ribs' fade is flatter than 49.5 degrees except the strip, on the new STLs and on the committed ones.
-    - B7: `roof()`'s guard fires at `ROOF_ANGLE` 75 and 80 on the curved grip, not at 74. With `tip_r` 0, the straight roof has 16 rows and its ridge row is 4.318 past A.
-    - B8: `corner_bevel.py` gives 49.9 and 50.2 degrees on all four STLs. `lip.py` passes on both grips.
-    - B1: the half-circle straight tip ends 1.205 short of A at 0.75 in from the side.
-- **B5 on the built STLs,** as the plan words it (bore 0.02; outside 0.02 below `FLARE_LEN` + 0.5 and 0.1 above), from the bed to 1 below the ribs' fade:
-    - Curved grip: bore 0.129 (at z 14.25), FAIL. Outside 0.018 low and 0.074 high.
-    - Straight grip: bore 0.037 (at z 78.0), FAIL. Outside 0.0002 low and 0.045 high.
-    - Curved fit test: bore 0.029, FAIL. Straight fit test: bore 0.002, passes.
-- **STL against its own CAD,** slicing each STEP and its STL at the same heights, every 1 mm:
-    - committed curved grip (iteration 5): bore 0.094, outside 0.066;
-    - committed straight grip (iteration 1): bore 0.040, outside 0.044;
-    - built curved grip: bore 0.134, outside 0.092;
-    - built straight grip: bore 0.050, outside 0.055.
-- **CAD against CAD:** the built STEP against the committed STEP over B5's range, every 1 mm (0.5 mm on the fit tests):
-    - curved grip: bore 0.0134 (at z 36.5), outside 0.0000 below the flare and 0.0053 above it;
-    - straight grip: bore 0.0019, outside 0.0000 and 0.0029;
-    - curved fit test: bore 0.0074; straight fit test: bore 0.0003.
-    - All pass B5's limits. The curved bore's 0.0134 is more than run 1's 0.0075, because run 1 probed the bore's loft alone. This build also moves the ribs' sections.
-- At z 14.25 on the curved grip, the two CAD bores agree to 0.0011, while the two STLs differ by 0.125. The STL error sits where the bore's corner rounds meet its W faces, and moves both sides the same way across the slice. That fits long triangles laid along the curved bore.
-- Exporting the built curved grip at `tolerance` 0.005 brings its bore to within 0.079 of the CAD (3.5 MB). At 0.002 it is within 0.029 (4.2 MB, against 3.0 MB at 0.01).
+- **Run 2's fix is in place.** B5 and B8 compare CAD sections, STEP against STEP.
+    - The four `baseline/*-5d73490.step` files are byte-identical to the `5d73490` files in git (blob hashes). So are the baseline STLs (`*-iter5.stl`, `*-iter1.stl`).
+    - `grips.py`, `steel.py` and the eight committed outputs have not changed since `5d73490`.
+- **B5's margin holds by construction.** Run 2's CAD-against-CAD probe of a build of this plan gave a bore of 0.0134 (curved), 0.0019 (straight) and 0.0074 (curved fit test), against the 0.02 limit.
+    - The ribs are ruled lofts between sections up to `SECTION_STEP` (4) apart. Moving those sections moves a rib by at most its chord's sag.
+    - On the curved handle's bend (14.9 degrees, mostly mid-length) that sag is about 0.013. The straight handle has none.
+- B3's ± 0.01 on the cap covers run 2's 4.9948.
 - `python steel.py` still equals `baseline/steel-report-5d73490.txt`. Catalog suite: 88 OK.
+- **Roof angles on the committed STLs.** The flattest downward face in the top 12 mm, other than the ridge strip, is 50.525 degrees (curved) and 50.786 (straight).
+    - Today's strip sits at the apex's height, which makes today's slopes steeper than `ROOF_ANGLE`.
+    - The plan's slopes are exactly `ROOF_ANGLE`. So `roof_angles.py`'s margin over its 49.5 limit falls from about 1 degree now to 0.5, by design.
+    - Run 2 found no face under 49.5 on its build. Not a finding.
+- **`corner_bevel.py` on the committed STLs, unrounded:** 49.8952 degrees (curved grip and its fit test) and 50.1573 (straight). The script prints one decimal, 49.9. See A2.
+- **`verify.py`'s cross-section rows:** see A1.
 
 ## Checks
 
 - Wrong-reference guard: the task is Level 2, so the default reference applies.
 - Prerequisites: planning is complete (the Status list in `tasks.md`). Level 2 needs no creative phase.
-- TDD plan encoding: PASS. The re-plan kept run 1's order. In steps 1 and 2: stubbed checks, stubbed interface, checks run red, then code. Step 3 is prose and owes no tests. B1 no longer asserts the radii, so the change-detector run 1 noted is gone. Nothing was struck or reordered.
-- Convention compliance: PASS, as in run 1. Readings go to `steel.py` and the log, design values to `grips.py`, reasoning to `systemPatterns.md`. The names follow the model's patterns, and each commit touches one model.
-- Dependency impact: PASS. `verify.py` and `closed_end.py` read `roof()` and are scheduled. `render.py` and `render_lip.py` (scratch) call `steel_solid(h)`, whose signature does not change. `tools/plot_curve.py` reads `steel.CURVED` and is unaffected by the new field. `publish.yaml` and the catalog tests do not change.
-- Conflict detection: PASS. The plan reuses `rrect`, `section_plane`, `loft_positions`, `rib_wire` and `RIM_STEP`. The model is unreleased, so no public contract changes.
-- Completeness: FAIL, finding F1. Run 1's F1 and A1 to A7 are resolved in the plan, and the build probe confirms each figure. But B5, and B8's fit-test comparison, cannot pass on a correct build.
-
-## Required fix
-
-F1. B5 compares STL slices against the baseline STLs. The STLs' own mesh error is larger than B5's bore limit, so B5 fails on a correct build.
-- B5's bore limit is 0.02, and B8 holds the fit tests to the same limits. The STL export (`tolerance` 0.01) does not keep its mesh within 0.01 of the CAD. On the committed files the bore's mesh strays up to 0.094 (curved) and 0.040 (straight).
-- Any build that changes the bore's loft lays a new mesh. The built STLs then differ from the baselines by 0.129 (curved), 0.037 (straight) and 0.029 (curved fit test), while the CAD moved at most 0.013, 0.002 and 0.007.
-- Run 1's insight that "B5's 0.02 bore tolerance has real margin" (`progress.md`) is true of the CAD, which run 1 probed, not of the STLs that B5 slices.
-- The outside's 0.1 above the flare passed on the built curved STL, at 0.074. But the mesh alone strays up to 0.092 there, so that pass is luck, not margin.
-- Fix: B5 and B8 measure the CAD, not the mesh.
-    - Slice the built STEP (or the built shape) and the committed `5d73490` STEP at the same print heights, and keep B5's limits for that comparison.
-    - The baseline STEP files are in git at `5d73490`; save them beside the STLs in `baseline/`.
-    - Keep the STL comparison as a report, with no limit. The two meshes' errors can add up to about 0.23 on the curved grip, so a limit there would only measure the mesh. The CAD comparison is the one that catches a real change.
-    - `--shift 0.2` must still make the CAD comparison fail.
+- TDD plan encoding: PASS.
+    - Steps 1 and 2 each run in this order: stub the checks, stub the interface, run the checks red, then write the code.
+    - Step 3 is prose and owes no tests. Step 4 is verification.
+    - No scheduled check is a change-detector. Nothing was struck or reordered.
+- Convention compliance: PASS.
+    - Readings go to `steel.py` and the dated log, design values to `grips.py`, and reasoning to `systemPatterns.md`.
+    - `TIP_R` and `STRAIGHT_TIP_R` follow the files' prefixes. `OLD_STRAIGHT_DEPTH` sits beside `OLD_STRAIGHT_OPENING` as a cross-check.
+    - Every commit touches this one model, and the commit titles match this model's earlier work.
+- Dependency impact: PASS.
+    - The plan schedules every script that reads `roof()`, `END_CLEAR` or `ribs`: `verify.py` and `closed_end.py`.
+    - `render.py` and `render_lip.py` call `steel_solid(h)`, whose signature does not change.
+    - `tip_roof.py` and `tip_roof_sweep.py` are marked as non-checks.
+    - `shut_gap.py` calls `check_design` on both handles. Adding `roof()`'s guard there changes none of its three cases.
+    - `tests/test_publish_records.py` reads only `publish.yaml`, whose `files` stays empty.
+- Conflict detection: PASS. The plan reuses `rrect`, `section_plane`, `loft_positions`, `rib_wire` and `RIM_STEP`. The model is unreleased (0.0.0), so no public contract changes.
+- Completeness: PASS. Each requirement has a step and a check:
+    - requirement 1: step 2's rows and the bore's cap, checked by B3;
+    - requirement 2: the slopes at `ROOF_ANGLE`, checked by B6;
+    - requirement 3: `s_dome = -past`, checked by B3's cap;
+    - requirements 4 and 5: step 1;
+    - requirement 6: the ribs ending at `tip_r`, checked by B5 and B8;
+    - requirement 7: commit 2;
+    - requirement 8: no step touches `publish.yaml`;
+    - acceptance criteria 1 to 5: B3, B2, B5, B6 and B9.
 
 ## Advisory findings
 
-A1. The printed mesh is up to 0.13 off the model at the bore's corners (medium; outside this brief).
-- The slicer gets the STL, not the STEP. On the curved grip that error is a third to almost half of `BORE_CLEAR`, and it already exists in iteration 5 (0.094). It sits where the corner rounds meet the W faces. Where the mesh comes inward there, the side clearance is about 0.18 instead of 0.3. The steel still clears it.
-- `tolerance` 0.002 cuts it to 0.029 for an STL about 40% larger. That changes the printed files. The brief says nothing else changes, so it is for the operator to weigh, not for this build to slip in.
-- If it is taken up, B5's STL comparison could hold a tight limit again, after one re-baseline.
+A1 (low). B4's "the rib bites in cross-sections are still `RIB_BITE`" fails on a correct build if it is checked at every row that `verify.py` cuts today.
+- `verify.py` cuts at s = 0.5 on both grips. On the straight grip it also cuts at the first station, A (s = 0).
+- Those rows lie inside the tip's round and the ribs' fade. The ribs end at `tip_r` (1.5 and 3.3), and they are full height only from `tip_r + RIB_FADE` (2.5 and 4.3) toward B.
+- The steel's corners there are rounded, so the row's "corner gap" also measures a corner that is no longer there.
+- Fix during the build: check rib bites only at s ≥ `tip_r + RIB_FADE`. For example, move the 0.5 row to `tip_r + RIB_FADE + 0.5`, and report the straight grip's A row without a limit. Every other station (the straight's J at 5.14 included) is past the fade.
 
-A2. B3's "the cap over the ridge is `DOME_LEN`" needs a tolerance (low). The build gives 4.9948 on the curved grip. The likely cause: the ridge row's plane is square to `tangent(tip_r)`, the dome's to `tangent(0)`, and the ridge sits 1.54 off the centre line. ± 0.01 passes.
+A2 (low). B8's "`corner_bevel.py` on all four STLs: at least 49.9 degrees" is the script's rounded figure.
+- The curved grip's unrounded minimum is already 49.8952, so a raw ≥ 49.9 test fails on an open end that has not changed.
+- Read B8 as "unchanged from `5d73490`": 49.895 (curved) and 50.157 (straight), ± 0.01, with the script's own limit of 47.
+
+A3 (low; for the operator, not a change to the plan). Nothing cross-checks the curved tip's radius.
+- The straight grip's 3.3 agrees with the old straight grip's floor (1.205 modelled against 1.2 read). The curved grip's 1.5 comes from the tracing alone.
+- In the model, the curved steel ends only 0.20 short of A at 0.75 in from the side.
+- The old curved grip is intact (it was slid back on to mark B) and ruined anyway. A straight depth rod may not reach its floor past the bend: the centre line bows 3.82 off the line A–B.
+- Cutting the old grip lengthwise in the plane of the handles, near its closed end, would show its floor's profile. That profile can be read on a grid, like the tracings. Swelling from the chemicals may blur it.
+- This would test the pre-mortem's first risk, a squarer tip than modelled, before the curved grip is printed.
+
+A4 (very low; prose). Step 3.3 adds only the tip-radius guard to `techContext.md`'s list of assertions. Step 2 adds three more: `ROOF_ANGLE` ≥ 45, `RIB_FADE` > 0, and `roof()`'s lean bounds. The list should name all four.
 
 ## Radical idea (advisory, not applied)
 
-Ship the mesh you checked: make `grips.py` measure its own STL against the model on every build.
-- Sketch:
-    - Add `STL_TOL` (0.002 by the probe above) in the Build block, and pass it to `export()`.
-    - Add `mesh_error(shape)`. It tessellates each face as the STL export does, projects each triangle's centroid and edge midpoints onto that face's own surface (OCP's `GeomAPI_ProjectPointOnSurf`), and returns the worst distance. That needs only cadquery, and takes a few seconds per grip.
-    - `sizes()` prints the figure, and `check_design`-style assertions keep it under a set limit, for example 0.05.
+Build the roof in one sweep over the grown tip's outline, and let a tip be an outline, not a single radius.
+- Sketch, in the plan's local frame (z toward the tip, u across):
+    - Sample each side of the grown tip as a polyline of (z, u). Today that is the arcs every `RIM_STEP`. Later it could be any outline.
+    - In this frame, one side's slope is `ROOF_ANGLE` plus the lean and the other's is `ROOF_ANGLE` minus it. The plan's two lean bounds become: both angles lie strictly between 0 and 90 degrees. Let c be the cotangent of a side's angle.
+    - Every line one side may follow has the same slope. So the bore's edge is a running maximum: `u_hi(z) = max over z' ≤ z of (hi(z') + c·z') − c·z`, and `u_lo` is its mirror. This is exact at the polyline's vertices.
+    - Stop at the z where `u_hi − u_lo = RIDGE_W`, solved on the last straight piece.
+    - Only narrowing matters: where a cavity widens upward, the material faces up and needs no support. So this one pass gives the lowest printable roof over any outline.
+    - The output stays `(rows, past, ridge)`. `bore()`, the checks B2 to B7, and the figures do not change. For round corners, the rows match the tangent construction to the chord's sag, about 0.001.
 - Gain:
-    - The file people print matches the model to a stated figure, on every future iteration.
-    - Checks like B5 can work on STLs again.
-    - It closes a hidden error of up to 0.13 at the bore's corners.
-- Cost: about 25 lines, STLs about 40% larger, and one regeneration of the printed files with a test print. It is outside this brief. The operator has not asked for it; it is offered for the operator to weigh.
+    - No tangent angles φσ, no merged tangent rows, and no 1e-3 deduplication.
+    - A square tip (`tip_r` 0), unequal corners, or a traced outline all go through the same dozen lines.
+    - It pairs with A3: a floor profile read from the old curved grip could replace the radius "read small", without touching `grips.py`.
+- Cost:
+    - None of step 2 is built yet, so the code is about the same size.
+    - The Geometry section, B7's lean message and B2's "red now" note would change.
+    - Reading an outline would be a new kind of reading in `steel.py`, if taken that far.
+- The operator decides. Not applied.

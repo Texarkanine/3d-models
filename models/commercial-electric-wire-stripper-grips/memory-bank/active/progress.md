@@ -84,3 +84,23 @@ Take the hollow space out of both grips' closed ends. The bore's roof comes down
 * Decisions made
     - B5 and B8 compare CAD sections (STEP against STEP). STL slices are only reported.
     - A1 (the STL export strays up to 0.094 from the CAD model) goes to the operator. The brief keeps the export as it is.
+
+## 2026-11-01 - PREFLIGHT (run 3) - COMPLETE
+
+* Work completed
+    - Checked the plan as re-planned after run 2. The first line of `.preflight-status` is `PASS WITH ADVISORY`.
+    - Probes, read-only or in the session scratchpad:
+        - The baseline STEP and STL files are byte-identical to the `5d73490` files in git.
+        - `python steel.py` still equals its baseline. The catalog suite gives 88 OK.
+        - On the committed STLs, the roof's flattest slope is 50.525 degrees (curved) and 50.786 (straight). The bevel's unrounded minimum is 49.8952 (curved) and 50.1573 (straight).
+    - Step 2 was not rebuilt: run 2's trial build stands.
+* Decisions made
+    - Run 2's F1 and A2 are resolved. No finding requires a change to the plan.
+    - Advisories, for the build and the operator:
+        - A1: check rib bites only at s ≥ `tip_r + RIB_FADE`. `verify.py`'s 0.5 row, and the straight grip's A row, now fall inside the tip's round.
+        - A2: read B8's 49.9 degrees as "unchanged from `5d73490`". The curved grip's raw figure is 49.895.
+        - A3: the curved tip's 1.5 has no cross-check. A lengthwise cut through the ruined old curved grip would show its floor.
+        - A4: `techContext.md` should list all four new guards.
+    - The radical idea, a one-pass sweep for the roof over any tip outline, is in `.preflight-status`. It is not applied.
+* Insights
+    - Today's slopes are steeper than `ROOF_ANGLE`, because today's ridge strip sits at the apex's height. The plan's slopes are exactly `ROOF_ANGLE`, so `roof_angles.py`'s margin falls to its 0.5 by design.
