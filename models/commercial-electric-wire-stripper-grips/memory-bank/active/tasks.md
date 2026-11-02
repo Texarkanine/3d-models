@@ -266,6 +266,16 @@ No new technology - validation not required. The checks use packages already in 
 - **A2:** B3's cap check is `DOME_LEN` ± 0.01.
 - **A self-checking export** (`mesh_error`, an `STL_TOL`): not taken, for the same reason as A1. It belongs to the operator's decision on A1.
 
+## Build Progress
+
+- [x] 1. Tip readings. `Handle(tip_r=…)` and `Handle.tip_short(u)`; `TIP_R` 1.5, `STRAIGHT_TIP_R` 3.3, `OLD_STRAIGHT_DEPTH` (84.8, 83.6). `report_tip()` prints each tip, and the straight report adds the cross-check: 1.21 modelled, 1.20 on the old grip.
+    - `tip_check.py` was red first (no `tip_r`), then green. `python steel.py` keeps every baseline line and only adds the tip lines.
+    - A rebuild gave byte-identical STLs. The STEP files changed only in their headers and were restored.
+    - Log entry "Tips and depths (2026-11-01)".
+- [ ] 2. The closed end in `grips.py`.
+- [ ] 3. Model docs.
+- [ ] 4. Final verification.
+
 ## Status
 
 - [x] Initialization complete

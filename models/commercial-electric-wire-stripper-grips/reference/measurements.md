@@ -83,3 +83,24 @@ The operator cut the old straight grip off and measured the bare steel with cali
 - **Old straight grip, inside at the open end:** 10.12 wide × 14.6 high. The operator: the new straight grip "should match inner and outer dimensions the same as the other side".
 - **A curved grip on the straight handle:** an iteration-4 curved grip also slides onto the straight handle and works.
 - **Tool shut:** with an iteration-4 curved grip on each handle and the tool squeezed shut, the two open ends are about 3.3 apart. For the design, this replaces F.
+
+## Tips and depths (2026-11-01)
+
+The operator compared a print of straight grip iteration 1 (`3046d4e`) with the old straight grip, and gave these readings in chat.
+
+| Item | Reading |
+|---|---|
+| Old straight grip, inside depth from the mouth, at the centre | 84.8 |
+| Old straight grip, inside depth from the mouth, near the edge | about 83.6 (the operator: "might be") |
+| Printed straight grip, inside depth from the mouth | about 87.7 |
+| Printed straight grip against the old one, overall | about 7 longer |
+| Printed curved grip against the factory one, overall | about 5 longer |
+
+- The old straight grip's floor sat about on the steel's tip: 84.8 against 85.14 from A to B.
+- Its floor is 1.2 deeper at the centre than near the edge. A half-circle tip as wide as the steel ends 1.2 short of A about 0.75 in from the side, so the floor fits a half-circle tip.
+- The printed grip's 87.7 fits its model. Its bore runs full width to 86.1 from the mouth, then a sloped roof rises to 90.5 at the centre. A rod about 1.3 in from a side wall meets that slope at 87.7.
+
+**The tips' shape**, read off the tracings (`straight-tracing.jpg`, `curve-tracing-offsets.jpg`). The tracings show the outline in the plane of the handles; across that plane the tips are square.
+- **Straight tip:** a half circle. Its radius is half of W where the round starts, about 3.4, read as 3.3.
+- **Curved tip:** a flat end with rounded corners of about 2, read as 1.5.
+- **Why both are read small:** a pencil rounds a corner a little, and a grip whose roof follows a radius larger than the steel's would come down on the steel's corners. `steel.py` holds the radii in use (`TIP_R`, `STRAIGHT_TIP_R`).

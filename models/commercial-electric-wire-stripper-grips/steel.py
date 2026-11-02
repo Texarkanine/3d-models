@@ -20,9 +20,13 @@ handle the two are the same.
 The curved handle takes W and T from calipers. The straight handle has T from
 calipers and W from the tracing alone, as a straight line through its rows.
 
+Both tips are rounded in the plane of the handles: each `Handle.tip_r` is the
+radius of its tip's corners, from the tracings, read on the small side so that a
+grip's bore cannot come down on the steel. The straight tip is a half circle.
+
 Run:  python steel.py   (pure Python)
 Prints, for each handle, the centre line and W against the tracing, then the
-caliper stations, the holes, and W and T at A and B.
+caliper stations, the holes, W and T at A and B, and the tip's shape.
 """
 
 import bisect
@@ -42,6 +46,9 @@ TIP_ABOVE_ROW0 = 2.3   # read off the photo; only a cross-check, A is placed fro
 STATIONS = [("S1", 16.93, 7.13, 14.04), ("S2", 47.76, 8.61, 14.24), ("S3", 68.17, 9.23, 14.28)]
 HOLES = {"D2": (7.0, 3.0), "D1": (76.5, 3.0)}   # name: (chord from A, diameter); through the T faces
 B_CHORD = 83.15        # A to the mark where the old grip's open end sat
+# The tip, rounded in the plane of the handles: the tracing shows a flat end with
+# rounded corners of about 2. Their radius, read on the small side (2026-11-01).
+TIP_R = 1.5
 
 CENTRE_DEGREE = 4      # least-squares polynomial x(y) through the traced centre points
 
@@ -87,10 +94,15 @@ class Handle:
     that sets W instead of the stations, for a handle whose W comes from a
     tracing rather than calipers. Before A and after B the centre line continues
     straight along its end tangents.
+
+    `tip_r` is the radius of the tip's corners in the plane of the handles: the
+    sides run straight up to tip_r from A, then round off into the tip. 0 is a
+    square tip; half of W there is a full half circle.
     """
 
-    def __init__(self, name, coeffs, y_a, y_b, stations, holes, widths=None, step=0.01):
+    def __init__(self, name, coeffs, y_a, y_b, stations, holes, widths=None, tip_r=0.0, step=0.01):
         self.name, self.co, self.y_a, self.y_b = name, coeffs, y_a, y_b
+        self.tip_r = tip_r
         n = int(math.ceil((y_b - y_a) / step))
         self._ys = [y_a + (y_b - y_a) * k / n for k in range(n + 1)]
         self._ss = [0.0]
@@ -139,6 +151,14 @@ class Handle:
     def thickness(self, s):
         return _lerp_stations(max(s, 0.0), self._t)
 
+    def tip_short(self, u):
+        """How far short of A the steel ends at u from the centre line (in W)."""
+        rc = self.tip_r
+        x = abs(u) - (self.width(rc) / 2 - rc)        # past the flat between the corners
+        if x <= 0:
+            return 0.0
+        return rc - math.sqrt(max(0.0, rc * rc - min(x, rc) ** 2))
+
     def s_at_chord(self, c):
         """Arc length of the centre-line point whose straight distance from A is c."""
         a = (poly(self.co, self.y_a), self.y_a)
@@ -175,7 +195,7 @@ def _tip_y():
     return (lo + hi) / 2
 
 
-CURVED = Handle("curved", CENTRE, _tip_y(), Y_B, STATIONS, HOLES)
+CURVED = Handle("curved", CENTRE, _tip_y(), Y_B, STATIONS, HOLES, tip_r=TIP_R)
 
 
 # ---- Straight handle: readings of 2026-11-01 --------------------------------
@@ -196,9 +216,15 @@ STRAIGHT_T = [("A", None, 13.9), ("J", 0, 14.02), ("K", 3, 14.09), ("L", 5, 14.2
 # edge ("Hole bottom from bd. edge"). Named as the matching holes on the curved handle.
 STRAIGHT_HOLE_EDGES = {"D2": 6.32, "D1": 76.75}
 STRAIGHT_HOLE_D = 3.0
+# The tip is a half circle: the tracing shows one, and the old grip's floor is 1.2
+# deeper at the centre than near the edge, as a half circle is 0.75 in from the
+# side. Its radius, half of W where the round starts (3.40), read small (2026-11-01).
+STRAIGHT_TIP_R = 3.3
 
-# Not steel, kept for cross-checks: the old straight grip's opening, inside (W, T).
+# Not steel, kept for cross-checks: the old straight grip's opening, inside (W, T),
+# and its inside depth from the mouth, at the centre and near the edge.
 OLD_STRAIGHT_OPENING = (10.12, 14.6)
+OLD_STRAIGHT_DEPTH = (84.8, 83.6)
 
 # ---- Build the straight handle from the tracing and the calipers -------------
 # Same frame as the curved tracing: row 0 at y = 0, B one row below the last.
@@ -224,7 +250,8 @@ STRAIGHT = Handle(
     "straight", S_CENTRE, S_Y_A, S_Y_B,
     [(nm, _straight_chord(row), None, t) for nm, row, t in STRAIGHT_T],
     {nm: (e + STRAIGHT_HOLE_D / 2, STRAIGHT_HOLE_D) for nm, e in STRAIGHT_HOLE_EDGES.items()},
-    widths=[(0.0, poly(S_W_LINE, S_Y_A)), (STRAIGHT_B_CHORD, poly(S_W_LINE, S_Y_B))])
+    widths=[(0.0, poly(S_W_LINE, S_Y_A)), (STRAIGHT_B_CHORD, poly(S_W_LINE, S_Y_B))],
+    tip_r=STRAIGHT_TIP_R)
 
 
 def report_straight():
@@ -249,6 +276,18 @@ def report_straight():
     c = CURVED
     print(f"Against the curved handle: at A W {h.width(0) - c.width(0):+.2f}, T {h.thickness(0) - c.thickness(0):+.2f}; "
           f"at B W {h.width(h.length) - c.width(c.length):+.2f}, T {h.thickness(h.length) - c.thickness(c.length):+.2f}")
+    report_tip(h)
+    centre, edge = OLD_STRAIGHT_DEPTH
+    print(f"  0.75 in from the side, it ends {h.tip_short(h.width(h.tip_r) / 2 - 0.75):.2f} short of A. "
+          f"The old grip's floor was {centre - edge:.2f} deeper at the centre than near the edge ({centre} and {edge}).")
+
+
+def report_tip(h):
+    """Print the tip's shape: the corner radius and where the round starts."""
+    w = h.width(h.tip_r)
+    shape = "a half circle" if h.tip_r >= w / 2 - 0.15 else "a flat end with rounded corners"
+    print(f"Tip: {shape}, corners of radius {h.tip_r} in the plane of the handles; "
+          f"the sides run straight to {h.tip_r} from A, where W is {w:.2f}.")
 
 
 def report_curved():
@@ -275,6 +314,7 @@ def report_curved():
     bow = max(abs((bx - ax) * (ay - y) - (ax - x) * (by - ay)) / chord
               for x, y, _ in (h.point(k * h.length / 200) for k in range(201)))
     print(f"\nMost the centre line strays from the straight line A-B: {bow:.2f} over {chord:.2f}")
+    report_tip(h)
 
 
 if __name__ == "__main__":
