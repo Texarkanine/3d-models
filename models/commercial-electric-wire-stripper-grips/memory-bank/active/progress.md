@@ -172,3 +172,10 @@ Take the hollow space out of both grips' closed ends. The bore's roof comes down
     - "we're going to keep the slightly-shortened straight one we just did, but we're going to go back on the curved one and keep the immediately-preceding curved one - the one that was slightly longer. Those two are the combination that fit the same way the originals did!"
     - Then clean up the model's directory for publishing. Fill out the publish record as well as possible; the operator will take and add the photos. Clean up stray wording and old in-progress material, so that what merges to main describes only the two grips that ship.
 * Complexity: Level 2 (unchanged; re-assessed at classification).
+
+## 2026-11-02 - COMPLEXITY-ANALYSIS (rework) - COMPLETE
+
+* Decisions made
+    - Level 2. One model. The closed end becomes a per-grip choice that reproduces the two printed iterations exactly, followed by the publish record and the documentation clean-up.
+* Insights
+    - The Cults categories, read from the API (read-only, 2026-11-02): Tool `Q2F0ZWdvcnkvMjc`, with Hand Tools `Q2F0ZWdvcnkvMTAz` and Spare Parts `Q2F0ZWdvcnkvMTA1`.
