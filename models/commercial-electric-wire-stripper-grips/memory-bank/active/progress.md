@@ -118,3 +118,18 @@ Take the hollow space out of both grips' closed ends. The bore's roof comes down
 * Insights
     - Ruled ribs between sections 4 apart already bite ± 0.012 to 0.015 between sections on the curved bend. A check sampled at a fixed s sees that whenever the sections move.
     - The STL files changed size with the new tessellation; the fit tests too, though their CAD moved under 0.01.
+
+## 2026-11-01 - QA - COMPLETE (FAIL, fixable)
+
+* Work completed
+    - Semantic review of `0e75770`, `a61aa6d` and `9d9b7aa` against the brief and the plan. The results are in `tasks.md`, "QA (2026-11-01, run 1)".
+    - Independent checks:
+        - A scratchpad rebuild gives byte-identical STLs. The STEP files are identical past their headers.
+        - `tip_check.py`, `closed_end.py` and `design_guards.py` are green, with the build's figures.
+        - Catalog suite: 88 OK.
+        - `roof()`'s geometry was worked through by hand.
+* Decisions made
+    - FAIL (fixable). Build must rerun for Q1: `sizes()`'s "at A" row still prints the square-tip bore and ribs at A. The model now has a bore 5.67 (curved) and 4.06 (straight) wide there, and no ribs.
+    - Every requirement and acceptance criterion is met in the geometry and the files. Advisories A-1 to A-6 are non-blocking.
+* Insights
+    - A report row tied to a fixed station (A) goes stale when a change moves what is at that station. Check the build's printed sizes against the model, as well as the files.

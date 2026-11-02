@@ -302,6 +302,67 @@ No new technology - validation not required. The checks use packages already in 
     - `grips.py`'s and `steel.py`'s docstrings.
 - [x] 4. Final verification. Catalog suite: 88 OK. Every check was rerun on the committed files (`a61aa6d`), and all pass with the figures above (`.scratch/wirestripper-grip/runs/final.txt`). A SumMem note records the iterations.
 
+## QA (2026-11-01, run 1): FAIL (fixable)
+
+Reviewed `0e75770` (tip readings), `a61aa6d` (curved iteration 6, straight iteration 2, model docs) and `9d9b7aa` (the SumMem note) against `projectbrief.md` and the plan above.
+
+### How each requirement stands
+
+1. **The bore follows the rounded tip at `BORE_CLEAR`; the extra 1.0 goes.** Met. `END_CLEAR` is gone from the model. The tip's arcs lie 0.2989 to 0.3000 from the bore, and no steel is in the wall.
+2. **Slopes at `ROOF_ANGLE` in print.** Met.
+    - QA worked through `roof()` by hand: the tangent angle φσ, each side's edge (on the arc, then on the slope), the narrowing rate, and the `RIDGE_W` row.
+    - The grown tip is convex, so a line touching it at φσ with that outward normal clears all of it, the other corner included.
+    - The roof's faces read 50.00 to 90.00 degrees.
+3. **Cap stays `DOME_LEN`; the grips get shorter.** Met: the cap is 4.9948 (curved) and 5.0000 (straight). The grips end 7.89 and 7.30 past A, 1.77 and 3.03 shorter.
+4. **Tip readings, read small.** Met: 1.5 and 3.3. The straight tip's cross-check gives 1.21 against the old grip's 1.20.
+5. **Readings in the log and in `steel.py`.** Met: "Tips and depths (2026-11-01)", plus `TIP_R`, `STRAIGHT_TIP_R` and `OLD_STRAIGHT_DEPTH`.
+6. **Nothing else changes.** Met for the geometry. The CAD bore moved at most 0.0134, and the open end 0.0000. The one exception is the build's printed report (Q1).
+7. **One printable iteration, committed on its own.** Met: `a61aa6d`. The readings are in `0e75770`, which changes no printed file.
+8. **`publish.yaml` unchanged.** Met.
+
+Acceptance criteria 1 to 5 are met. The figures are those under Build Progress, and QA reproduced them.
+
+### What QA checked independently
+
+- **Rebuild:** `grips.py` and `steel.py` were copied to the session scratchpad and run there (54 s). All four STLs are byte-identical to the committed files, and the four STEP files are identical past their headers. So the `final.txt` results on the committed files stand for this source.
+- **Reruns:**
+    - `tip_check.py`, `closed_end.py` and `design_guards.py` are all green, with the build's figures.
+    - `python steel.py` prints the tip lines, and the old grip's cross-check gives 1.21 against 1.20.
+    - Catalog suite: 88 OK.
+    - The working tree is clean.
+- **Probe, the bore at A** (worked from `roof()`'s rows at z = `tip_r`): 5.67 wide (curved) and 4.06 (straight). No rib reaches A: the ribs end at s = 1.5 and 3.3.
+
+### Blocking
+
+- **Q1 (regression, the build's printed report):** the "at A" row of `sizes()` still describes the square-tip grip.
+    - `python grips.py` prints `at A ... bore 6.92 x 14.53 ribs 6.12 x 13.73` (curved) and `bore 7.26 x 14.50 ribs 6.46 x 13.70` (straight).
+    - The model now has a bore 5.67 and 4.06 wide at A, and no ribs there at all. Before this task the row was true, because the bore ran full width to 1.0 past A and the ribs reached A.
+    - The row now contradicts the "closed end" line printed just below it. `systemPatterns.md` says `grips.py` "prints the main sizes on each run", and the operator reads those figures.
+    - **Fix (Build):** report a station the grip still has in that form. For example, move the row to where the tip's round starts (s = `tip_r`). There the bore is still the body's section; print the ribs only where they are full height, at s ≥ `tip_r + RIB_FADE`. Otherwise drop the bore and rib columns from the A row. The closed-end line already covers the tip.
+    - Write the ad hoc check first, and run it red on the current output. Rebuild: the STLs should stay byte-identical. Restore STEP files whose only changes are headers.
+
+### Advisories (none blocks)
+
+- **A-1 (low, docs):** `systemPatterns.md` says "The ribs end `RIB_FADE` short of the tip's round, fading into the wall over that length". That reads as if the ribs stop `RIB_FADE` before the round. The code, the `RIB_FADE` comment and the `ribs()` docstring all fade them over the last `RIB_FADE` and end them at the round (B4: rib volume past `tip_r` is 0). Suggested wording: "The ribs fade into the wall over the last `RIB_FADE` before the tip's round, and end where it starts." `a61aa6d`'s commit body uses the same wording; that commit stays as it is.
+- **A-2 (low, YAGNI):** `roof()` returns `ridge`, but no committed code reads it. Only the scratch `verify.py` (B3's cap) does. The plan asked for it, and it costs one line. Keeping it or dropping it is the operator's call.
+- **A-3 (low, DRY):** the tip's flat half-width, `width(tip_r)/2 − tip_r`, is worked out three times: `steel.Handle.tip_short`, `grips.steel_solid` and `grips.roof`. A `Handle` attribute beside `tip_r` would give it one home.
+- **A-4 (low, integrity):** `steel.py`'s tip report has two unnamed literals:
+    - `0.15`: how close to half of W a radius must be to be called "a half circle". The straight tip's flat is 0.20 wide.
+    - `0.75`: where "near the edge" is taken. The log infers it; it is not a reading.
+    
+    Name each beside `OLD_STRAIGHT_DEPTH`, or explain it in a comment.
+- **A-5 (very low, comments):**
+    - The comment "both sides sample the same heights" in `roof()` holds only for the straight grip. The curved grip's arcs end at 55.05 and 24.95 degrees, on different grids. The 1e-3 merge is still needed, for the shared z = 0 and the straight grip's coincident heights.
+    - `techContext.md`'s list of assertions leaves out `roof()`'s second one, "the roof's slopes close before they leave the tip". The build added it beyond the plan. It is a sound guard.
+- **A-6 (bookkeeping):** the Status list below leaves "Preflight" unticked, though run 3 is `PASS WITH ADVISORY`.
+
+### Still for the operator (carried, not new)
+
+- Preflight run 2, A1: the STL export strays up to 0.094 from its CAD at the bore's corners.
+- Preflight run 3, A3: the curved tip's 1.5 has no cross-check.
+- The tip-test print, offered and not built.
+- What to watch in the print: an open end that stops short of where the steel widens means `tip_r` is too big.
+
 ## Status
 
 - [x] Initialization complete
@@ -311,4 +372,4 @@ No new technology - validation not required. The checks use packages already in 
 - [x] Pre-Mortem complete
 - [ ] Preflight
 - [x] Build
-- [ ] QA
+- [ ] QA (run 1: FAIL (fixable); Build reruns for Q1)

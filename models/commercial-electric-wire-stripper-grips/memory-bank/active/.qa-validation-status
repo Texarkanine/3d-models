@@ -1,0 +1,5 @@
+FAIL (fixable)
+
+QA run 1 of wire-stripper-grips-closed-end, 2026-11-01. Build must rerun.
+- Q1 (blocking): sizes()'s "at A" row prints the square-tip bore and ribs at A (6.92 and 7.26 wide, with ribs). The model's bore there is 5.67 and 4.06 wide, and it has no ribs at A.
+- Advisories A-1 to A-6 are in tasks.md, under "QA (2026-11-01, run 1)". None blocks.
