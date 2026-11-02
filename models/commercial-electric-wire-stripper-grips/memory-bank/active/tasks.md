@@ -160,6 +160,28 @@ No new technology - validation not required.
 - **The clean-up drops something a later contributor needs.** The reasons stay; only the narrative and the hashes go. The alternatives' commits go to SumMem, and the measurement log stays whole.
 - **The listing text over-promises.** It says only what the prints showed: both grips fit and hold dry. Whether glue was tested is not claimed.
 
+## Build Progress
+
+- [x] 1. The pair from one source.
+    - `END_CLEAR = {"curved": 1.0, "straight": None}`.
+    - `gap_roof()` is `5d73490`'s `roof()` verbatim. `tip_roof()` is the renamed roof. `closed_end()` returns `(past, ridge)`.
+    - `bore()` and `ribs()` branch, each keeping its own iteration's code. The rib rule must differ per closed end: the straight grip's last rib section is 4.299999999999997, not 4.3, so a shared `s >= s_full` rule would have changed its STL.
+    - Guard: `END_CLEAR` is `None` or above 0. `tip_roof` runs only for `None`.
+    - `sizes()`: the last row and the closed-end line per grip.
+    - Red first:
+        - `pair_check.py`: 8 curved failures;
+        - `design_guards.py`: no `END_CLEAR` guard, and no `KeyError`;
+        - `report_check.py`: the curved grip's rows;
+        - `closed_end.py`: no `closed_end`.
+    - Green:
+        - `pair_check.py`: built and committed, all four STLs byte for byte, and the STEP files past `FILE_NAME`. The curved files equal `e1b3528`'s, and the straight files `a61aa6d`'s. The STEP files were restored from git (preflight A1).
+        - R2, R3 and R5 pass.
+        - R4 (`verify.py`): the curved grip's bite is −0.52% against 8 ribs over L, and its cap is 5.000. The straight grip's checks are as before.
+        - `tools/overhang.py` flags only the ridge strips.
+- [ ] 2. The publish record.
+- [ ] 3. Publishing clean-up.
+- [ ] 4. Final verification.
+
 ## Status
 
 - [x] Initialization complete
