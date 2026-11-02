@@ -1,0 +1,1 @@
+Correction to the Cults downloadPrice nap: in h7 run 38833253910 the publisher of the time added files before updateCreation, so the failed update left them added and skipped removal. The current publisher adds files only after the update succeeds.
