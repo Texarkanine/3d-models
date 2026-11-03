@@ -1,6 +1,6 @@
 # Measurements
 
-The operator's readings of their own tool, with calipers, a ruler and pencil tracings. All sizes are in millimetres. The letters are defined in `../memory-bank/systemPatterns.md`.
+The operator's readings of their own tool, a Commercial Electric CE190205, with calipers, a ruler and pencil tracings. All sizes are in millimetres. The letters are defined in `../memory-bank/systemPatterns.md`.
 
 The values the model uses live in `../steel.py`; this file says how each reading was taken and when. Add a new reading with its date. Keep a photo here only while it holds information not yet captured in numbers.
 

@@ -1,14 +1,12 @@
 name: Commercial Electric Wire Stripper Grips
 description: |
-  Replacement grips for a Commercial Electric wire stripper and crimper whose rubber grips have gone sticky or torn. There is one grip for each handle: `curved_grip` for the curved steel handle and `straight_grip` for the straight one. Pull the old grips off, print the new ones, and slide them onto the bare steel.
+  Replacement grips for the Commercial Electric Double Jaw Wire Stripper, Cutter and Crimper, model CE190205, when its rubber grips have gone sticky or torn. There is one grip for each handle: `curved_grip` for the curved steel handle and `straight_grip` for the straight one. Pull the old grips off, print the new ones, and slide them onto the bare steel.
 
   Each grip's inside is shaped to its own handle's measured steel. Both share one outside: rounded, following the steel's taper, with a flared open end that keeps your fingers from sliding up toward the jaws. With both grips on, the tool still closes, and the grips don't touch.
 
   Printed in TPU 95A, the grips are snug enough to stay on without glue. If you want them permanent, the inside has lengthwise grooves for glue to key into.
 
-  Each fit test is the open end of its grip alone: a quick print to check the fit on your tool before you print the whole grip.
-
-  Made for one tool: the Commercial Electric wire stripper and crimper with one curved and one straight steel handle, as pictured. Compare yours with the photos before printing.
+  Made for one tool: model CE190205 (Home Depot store SKU 1001 249 254), with one curved and one straight steel handle, as pictured. The newer model 91365 (store SKU 1011 098 874) looks the same, but these grips haven't been tried on it. Compare yours with the photos before printing.
 manufacturing: |
   ### Material
 
@@ -21,6 +19,7 @@ tags:
   - wire stripper
   - wire stripper grip
   - commercial electric
+  - ce190205
   - crimper
   - wire crimper
   - replacement grip
@@ -41,8 +40,4 @@ files:
   - curved_grip.step
   - straight_grip.stl
   - straight_grip.step
-  - curved_grip_fit_test.stl
-  - curved_grip_fit_test.step
-  - straight_grip_fit_test.stl
-  - straight_grip_fit_test.step
 cults_creation_id: ""

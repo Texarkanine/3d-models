@@ -85,4 +85,4 @@ The only face `tools/overhang.py` flags is the ridge strip at the roof's top. `R
 
 ## Fit tests
 
-Each grip's fit test (`FIT_LEN` of the open end) checks the bore on the steel near B, where the steel is widest. Slide it on from the tip up to B. It does not test the curve or the closed end; the full grip does. Record each print of a changed grip as a SumMem note for this model: what was printed, how it went on, how it held, and what changed.
+Fit tests are for development: `publish.yaml` lists only the two grips. Each grip's fit test (`FIT_LEN` of the open end) checks the bore on the steel near B, where the steel is widest. Slide it on from the tip up to B. It does not test the curve or the closed end; the full grip does. Record each print of a changed grip as a SumMem note for this model: what was printed, how it went on, how it held, and what changed.
