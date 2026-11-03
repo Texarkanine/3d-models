@@ -1,0 +1,1 @@
+Cults schema: cults3d.com/graphiql; POST /graphql needs Basic auth (401 without). updateCreation takes no file URLs: add via createBlueprint/createIllustration, remove via destroy*. creation() takes a slug. Changelog URL models/<c>/CHANGELOG.md, {version}/{changelog_url} filled.

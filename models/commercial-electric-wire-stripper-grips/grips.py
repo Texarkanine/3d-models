@@ -1,0 +1,541 @@
+"""Slide-on TPU grips for the Commercial Electric wire stripper's bare steel handles.
+
+A grip is a closed tube that slides onto the bare steel from its tip A to B,
+where the old grip's open end sat. The inside follows the steel's measured
+centre line and taper (`steel.py`). The outside is a new design shared by both
+grips: the steel's own outline grown by a set wall on each side, with rounded
+corners, flared a little at the open end with its edge rounded, and domed at the
+closed end.
+
+Inside: the bore is the steel plus BORE_CLEAR on every side, with tight
+corners so even a sharp steel corner clears it. Eight lengthwise ribs, two
+on each face near the corners, reach RIB_BITE past the steel's face, from B
+toward the tip. They locate the grip on the steel, and the grips hold without
+glue. The valleys between them, BORE_CLEAR deep, give glue something to fill and
+key into for a permanent fit; they are inside, so smoothing the outside leaves
+them. Glue and air escape along the valleys when you push the grip on.
+
+The bore's closed end is set per grip (END_CLEAR): each grip keeps the closed
+end whose test print fitted as the original grip did. The curved grip's bore
+runs END_CLEAR past the tip at full width, as over a square tip, and a gable
+roof rises from there. The straight grip's bore sits on the steel's rounded tip
+(`steel.Handle.tip_r`), BORE_CLEAR off it as everywhere else; its gable roof
+starts where the tip's round turns flatter than the roof. Either way each roof
+slope is ROOF_ANGLE above horizontal when the grip stands on its open end,
+whichever way the tip leans. The outside's dome starts at the ridge's height,
+so the wall over the roof is never thinner than the body's.
+
+Print: standing on the open end, closed end up. The curved grip leans with the
+steel's curve (about 15 degrees at the tip); the straight grip stands upright,
+its roof a symmetric gable. The flare is widest a little above the
+bed. Below that, a bevel at BEVEL_ANGLE brings its edge in toward the bed, and a
+round blends the bevel into the flare, so the edge is neither sharp nor
+overhanging. The dome and roof face up, so no supports are needed.
+
+Coordinates are those of `steel.py` (use position: the handle flat in XY, T
+along Z, s along the centre line from A). Each cross-section is in the plane
+square to the centre line: u along the W direction, v along T.
+
+Run:  python grips.py   (needs cadquery; the README pins the versions)
+Writes STEP (opens in CAD) and STL (for the slicer) for each grip and its fit
+test (curved_grip, straight_grip), already standing on the open end, and
+prints each grip's main sizes.
+"""
+
+import math
+from pathlib import Path
+
+import cadquery as cq
+
+import steel
+
+# ---- Bore ------------------------------------------------------------------
+BORE_CLEAR = 0.3     # steel face to bore wall, each side
+BORE_CORNER_R = 0.5  # bore corner radius; a sharp steel corner clears it by >= 0.15
+RIB_BITE = 0.1       # how far a rib tip reaches past the steel face
+RIB_BASE = 1.2       # rib width at the wall
+RIB_TIP = 0.5        # rib width at its tip
+RIB_INSET = 1.5      # rib centre line from the steel's corner
+RIB_EMBED = 0.05     # rib roots sink this far into the wall, so they fuse
+RIB_FADE = 1.0       # on a grip seated on its tip, the ribs fade over this, ending where the round starts
+# The closed end, per grip: the pair whose test prints fit as the original grips
+# did. A length: the bore runs that far past A at full width, as over a square
+# tip, and a gable rises from there. None: the roof sits on the rounded tip.
+END_CLEAR = {"curved": 1.0, "straight": None}
+ROOF_ANGLE = 50.0    # both roof slopes, degrees above horizontal in print
+RIDGE_W = 0.2        # the roof's ridge is a strip this wide
+
+# ---- Outside ---------------------------------------------------------------
+WALL_SIDE = 3.8      # steel face to outside, in the plane of the handles
+WALL_FACE = 2.5      # steel face to outside, across that plane
+CORNER_R = 4.8       # outside corner radius (>= 2 mm over each bore corner)
+FLARE = 2.3          # extra wall each side at the open end ...
+FLARE_LEN = 8.0      # ... fading out over this length
+BEVEL = 1.8          # the open end's edge on the bed comes in this far from the flare's full width
+BEVEL_ANGLE = 50.0   # the bevel up from the bed, degrees above horizontal in print
+RIM_R = 0.8          # radius of the round between the bevel and the flare
+DOME_LEN = 5.0       # the dome's length, and how far it shrinks each side
+END = 3.0            # thinnest cap over the roof's ridge
+
+# ---- Build -----------------------------------------------------------------
+SECTION_STEP = 4.0   # longest gap between lofted cross-sections
+RIM_STEP = 3.0       # degrees an arc turns between lofted sections (the open end's round, the tip's)
+FIT_LEN = 15.0       # the fit test is the grip's first FIT_LEN mm from the open end
+
+# ---- Tool shut -------------------------------------------------------------
+# The operator's reading (reference/measurements.md, 2026-11-01): with the tool
+# squeezed shut and a test curved grip with a smaller flare on each handle, the
+# two open ends were SHUT_GAP apart. Those grips' wall at the widest point, on the
+# side facing the other handle, was SHUT_WALL from the steel face. Both describe
+# the grips that were measured, so they stay as they are when WALL_SIDE or the
+# open end changes.
+SHUT_GAP = 3.3
+SHUT_WALL = 4.274    # the measured grips: WALL_SIDE 3.8 + their widest point's 0.474
+MIN_SHUT_GAP = 0.8   # least gap to leave; the operator called 0.3 "pushing it"
+
+
+def V(p):
+    return cq.Vector(*p)
+
+
+def section_plane(h, s):
+    """Plane square to the centre line at s; x along W, normal toward B."""
+    return cq.Plane(origin=h.point(s), xDir=h.normal(s), normal=h.tangent(s))
+
+
+def rrect(plane, w, t, r, du=0.0):
+    """Rounded rectangle w (along x) by t, centred du along x from the plane's origin."""
+    r = min(r, 0.45 * min(w, t))
+    wire = cq.Workplane(plane).center(du, 0).rect(w, t).val()
+    return wire.fillet2D(r, wire.Vertices())
+
+
+def loft_positions(start, stop, step=SECTION_STEP):
+    """Evenly spaced s values from start to stop, inclusive, no gap over step."""
+    n = max(1, math.ceil(abs(stop - start) / step))
+    return [start + (stop - start) * k / n for k in range(n + 1)]
+
+
+def tip_plane(h, z):
+    """Plane square to the centre line z past the start of the tip's round
+    (s = h.tip_r), toward A and beyond; at z = 0 it is section_plane(h, h.tip_r)."""
+    rc = h.tip_r
+    return cq.Plane(origin=V(h.point(rc)) - V(h.tangent(rc)) * z, xDir=h.normal(rc), normal=h.tangent(rc))
+
+
+def steel_solid(h):
+    """Mock bare steel from A to B: sharp W x T rectangles along the centre line,
+    and the tip's corners rounded to h.tip_r in the plane of the handles."""
+    rc = h.tip_r
+    secs = [cq.Workplane(section_plane(h, s)).rect(h.width(s), h.thickness(s)).val()
+            for s in loft_positions(h.length, rc)]
+    body = cq.Solid.makeLoft(secs)
+    if rc <= 0:
+        return body
+    cu = h.tip_flat()
+    m = max(1, math.ceil(90 / RIM_STEP))
+    tip = []
+    for i in range(m + 1):
+        phi = math.radians(90 * i / m)
+        z = rc * math.sin(phi)
+        tip.append(cq.Workplane(tip_plane(h, z))
+                   .rect(max(0.02, 2 * (cu + rc * math.cos(phi))), h.thickness(rc - z)).val())
+    return body.fuse(cq.Solid.makeLoft(tip, ruled=True)).clean()
+
+
+def tip_roof(h):
+    """The bore's closed end, seated on the steel's rounded tip.
+
+    Worked in the plane of the handles, in a frame at the start of the tip's
+    round (s = h.tip_r): z runs from there toward A and past it, u along W. The
+    steel's corners are arcs of radius tip_r; the bore follows them grown by
+    BORE_CLEAR. Each roof slope is the lowest line at ROOF_ANGLE above horizontal
+    in print that clears the grown tip, so the bore hugs the tip from its sides up
+    to where an arc gets flatter than the roof, then runs straight up. The last
+    row is where the two slopes are RIDGE_W apart: the ridge strip.
+
+    Returns (rows, past, ridge):
+    - rows: (z, u_lo, u_hi), the bore's extent in W at each z, from the body's
+      last section (z = 0) to the ridge strip;
+    - past: how far the ridge strip sits past A; the dome starts there;
+    - ridge: the ridge strip's centre point.
+    """
+    rc = h.tip_r
+    cu, R = h.tip_flat(), rc + BORE_CLEAR               # the grown corners: centres at u = +-cu
+    a, n = V(h.tangent(rc)), V(h.normal(rc))
+    up = -V(h.tangent(h.length))                        # print's up, and its horizontal toward +u
+    upz, upu = up.dot(-a), up.dot(n)
+    hz, hu = -upu, upz
+    k = math.radians(ROOF_ANGLE)
+    touch = {}
+    for sg in (1, -1):
+        nz = math.sin(k) * sg * hz + math.cos(k) * upz  # the slope's outward normal
+        nu = math.sin(k) * sg * hu + math.cos(k) * upu
+        phi = math.atan2(nz, sg * nu)                   # where the corner's arc turns that way
+        assert 0 <= phi < math.pi / 2, (
+            "a roof slope misses its own corner of the tip: the lean must be less than "
+            "ROOF_ANGLE, and ROOF_ANGLE plus the lean under 90")
+        touch[sg] = (phi, R * math.sin(phi), sg * (cu + R * math.cos(phi)), nz, nu)
+
+    def edge(sg, z):
+        """The bore's edge on side sg at z: on the corner's arc up to where the
+        slope touches it, then on the slope."""
+        _, pz, pu, nz, nu = touch[sg]
+        if z <= pz:
+            return sg * (cu + math.sqrt(max(0.0, R * R - z * z)))
+        return pu - nz * (z - pz) / nu
+
+    z1 = max(t[1] for t in touch.values())
+    w1 = edge(1, z1) - edge(-1, z1)
+    assert w1 > RIDGE_W, "the roof's slopes close before they leave the tip"
+    narrowing = touch[1][3] / touch[1][4] - touch[-1][3] / touch[-1][4]
+    z_r = z1 + (w1 - RIDGE_W) / narrowing               # the slopes are RIDGE_W apart here
+
+    zs = {z_r, touch[1][1], touch[-1][1]}
+    keep = set(zs)
+    for phi, *_ in touch.values():
+        m = max(1, math.ceil(math.degrees(phi) / RIM_STEP))
+        zs |= {R * math.sin(phi * i / m) for i in range(m)}
+    heights = []
+    for z in sorted(zs):                                # the sides' samples can coincide (z = 0; the straight's all)
+        if heights and z - heights[-1] < 1e-3:
+            if z in keep:
+                heights[-1] = z
+            continue
+        heights.append(z)
+    rows = [(z, edge(-1, z), edge(1, z)) for z in heights]
+    _, lo, hi = rows[-1]
+    ridge = V(h.point(rc)) - a * z_r + n * ((lo + hi) / 2)
+    return rows, z_r - rc, ridge
+
+
+def gap_roof(h):
+    """The roof of a bore that runs END_CLEAR past A at full width: its ridge
+    centre R and its axial height past the bore's end.
+
+    Worked in the plane of the handles, in print orientation (up is away from B
+    along B's tangent): the two roof slopes rise at ROOF_ANGLE from the ends of
+    the bore's end section and meet at R.
+    """
+    end_clear = END_CLEAR[h.name]
+    p = V(h.point(-end_clear))
+    n, ta = V(h.normal(0)), V(h.tangent(0))
+    up = -V(h.tangent(h.length))
+    ex = (n - up * n.dot(up)).normalized()
+    hw = h.width(0) / 2 + BORE_CLEAR
+    ends = sorted(((p + n * k * hw - p).dot(ex), (p + n * k * hw - p).dot(up)) for k in (-1, 1))
+    (x0, z0), (x1, z1) = ends
+    k = math.tan(math.radians(ROOF_ANGLE))
+    xr = (x0 + x1) / 2 + (z1 - z0) / (2 * k)
+    r = p + ex * xr + up * (z0 + (xr - x0) * k)
+    return r, (r - p).dot(-ta)
+
+
+def closed_end(h):
+    """(past, ridge) for h's closed end: how far past A the bore's top sits, where
+    the dome starts, and the centre of the ridge strip there."""
+    end_clear = END_CLEAR[h.name]
+    if end_clear is None:
+        _, past, ridge = tip_roof(h)
+        return past, ridge
+    r, rise = gap_roof(h)
+    return end_clear + rise, r
+
+
+def bore(h):
+    """The cavity: steel plus BORE_CLEAR from B, closed as END_CLEAR says.
+
+    A length: the bore runs that far past A at full width, then gap_roof's gable.
+    None: it runs to where the tip's round starts, then the roof over the tip
+    (tip_roof), whose first row is the body's last section, so the two lofts
+    share a face."""
+    end_clear = END_CLEAR[h.name]
+    if end_clear is not None:
+        secs = [rrect(section_plane(h, s), h.width(s) + 2 * BORE_CLEAR,
+                      h.thickness(s) + 2 * BORE_CLEAR, BORE_CORNER_R)
+                for s in loft_positions(h.length, -end_clear)]
+        body = cq.Solid.makeLoft(secs)
+        r, _ = gap_roof(h)
+        end = section_plane(h, -end_clear)
+        du = (r - end.origin).dot(end.xDir)
+        ridge_plane = cq.Plane(origin=end.origin + end.zDir * (r - end.origin).dot(end.zDir),
+                               xDir=end.xDir, normal=end.zDir)
+        ridge = rrect(ridge_plane, RIDGE_W, h.thickness(0) + 2 * BORE_CLEAR, BORE_CORNER_R, du)
+        cap = cq.Solid.makeLoft([secs[-1], ridge], ruled=True)
+        return body.fuse(cap).clean()
+    rc = h.tip_r
+    secs = [rrect(section_plane(h, s), h.width(s) + 2 * BORE_CLEAR,
+                  h.thickness(s) + 2 * BORE_CLEAR, BORE_CORNER_R)
+            for s in loft_positions(h.length, rc)]
+    body = cq.Solid.makeLoft(secs)
+    rows, _, _ = tip_roof(h)
+    caps = [rrect(tip_plane(h, z), hi - lo, h.thickness(rc - z) + 2 * BORE_CLEAR, BORE_CORNER_R, (lo + hi) / 2)
+            for z, lo, hi in rows]
+    cap = cq.Solid.makeLoft(caps, ruled=True)
+    return body.fuse(cap).clean()
+
+
+def rib_wire(plane, u, v, du, dv, height):
+    """Rib trapezoid rooted on the wall at (u, v); (du, dv) points into the bore."""
+    pu, pv = -dv, du
+    a, b = -RIB_EMBED, height
+    pts = [(u + pu * RIB_BASE / 2 + du * a, v + pv * RIB_BASE / 2 + dv * a),
+           (u - pu * RIB_BASE / 2 + du * a, v - pv * RIB_BASE / 2 + dv * a),
+           (u - pu * RIB_TIP / 2 + du * b, v - pv * RIB_TIP / 2 + dv * b),
+           (u + pu * RIB_TIP / 2 + du * b, v + pv * RIB_TIP / 2 + dv * b)]
+    return cq.Wire.makePolygon([plane.toWorldCoords(q) for q in pts], close=True)
+
+
+def ribs(h):
+    """Eight lengthwise ribs from B. With END_CLEAR a length, they run to A and fade
+    into the wall over END_CLEAR past it. With None, they fade over RIB_FADE and
+    end where the tip's round starts, so none stands in the roof."""
+    full = BORE_CLEAR + RIB_BITE
+    end_clear = END_CLEAR[h.name]
+    if end_clear is not None:
+        ss = [(s, full if s >= 0 else 0.0) for s in loft_positions(h.length, 0.0) + [-end_clear]]
+    else:
+        ss = [(s, full) for s in loft_positions(h.length, h.tip_r + RIB_FADE)] + [(h.tip_r, 0.0)]
+    out = []
+    for side in (1, -1):
+        for off in (1, -1):
+            for on_face in (False, True):
+                secs = []
+                for s, height in ss:
+                    w, t = h.width(s), h.thickness(s)
+                    if on_face:   # on a T face (the faces with the holes)
+                        args = (off * (w / 2 - RIB_INSET), side * (t / 2 + BORE_CLEAR), 0, -side)
+                    else:         # on a W face
+                        args = (side * (w / 2 + BORE_CLEAR), off * (t / 2 - RIB_INSET), -side, 0)
+                    secs.append(rib_wire(section_plane(h, s), *args, height))
+                # ruled: a smooth loft overshoots where the rib fades out
+                out.append(cq.Solid.makeLoft(secs, ruled=True))
+    return out
+
+
+def flare(d):
+    """Extra wall d from the open end, and its slope along d: FLARE at B, fading
+    quadratically to 0 at FLARE_LEN. Kept together so the two cannot drift apart."""
+    if d >= FLARE_LEN:
+        return 0.0, 0.0
+    k = 1 - d / FLARE_LEN
+    return FLARE * k ** 2, -2 * FLARE / FLARE_LEN * k
+
+
+def rim_profile():
+    """The open end's outline: (d, grow) points from B (d = 0) to FLARE_LEN, d along
+    the centre line toward A, grow past the body wall.
+
+    The flare widens toward B. On the bed its edge sits BEVEL in from the
+    flare's full width, and a straight bevel rises from there at BEVEL_ANGLE
+    above horizontal (in print). A round of radius RIM_R, touching both the
+    bevel and the flare, blends one into the other. Past the round, the flare
+    runs on unchanged into the body.
+    """
+    r = RIM_R
+    c = 1 / math.tan(math.radians(BEVEL_ANGLE))         # the bevel's grow per unit d
+    foot = FLARE - BEVEL                                # the bevel's foot on the bed
+
+    def centre(t):
+        """Centre of the circle of radius r that touches the flare at d = t, inside it."""
+        g, m = flare(t)
+        q = math.hypot(1.0, m)
+        return t + r * m / q, g - r / q
+
+    def gap(t):
+        """centre(t)'s depth inside the bevel's line, less r: 0 where its circle touches it."""
+        cd, cg = centre(t)
+        return (foot + c * cd - cg) / math.hypot(1.0, c) - r
+
+    lo, hi = 0.0, FLARE_LEN        # the touch point whose circle also touches the bevel
+    for _ in range(60):
+        mid = (lo + hi) / 2
+        lo, hi = (mid, hi) if gap(mid) < 0 else (lo, mid)
+    t = (lo + hi) / 2
+    cd, cg = centre(t)
+    m = flare(t)[1]
+    start = 180.0 - BEVEL_ANGLE                         # the round leaves the bevel here
+    stop = math.degrees(math.atan2(1.0, -m))            # and touches the flare here
+    pts = [(0.0, foot)]
+    n = max(1, math.ceil((start - stop) / RIM_STEP))
+    for k in range(n + 1):
+        phi = math.radians(start + (stop - start) * k / n)
+        pts.append((cd + r * math.cos(phi), cg + r * math.sin(phi)))
+    n = max(1, math.ceil(math.degrees(math.atan(-m)) / RIM_STEP))
+    for k in range(1, n + 1):                           # the rest of the flare
+        d = t + (FLARE_LEN - t) * k / n
+        pts.append((d, flare(d)[0]))
+    return pts
+
+
+def widest():
+    """The open end's widest point: (d from B, grow past the body wall)."""
+    return max(rim_profile(), key=lambda p: p[1])
+
+
+def shut_gap():
+    """Gap left between the two grips' open ends with the tool shut, for the pair
+    built here: the curved grip on the curved handle, the straight grip on the
+    straight handle.
+
+    From the measured SHUT_GAP, each grip's wall at the widest point moves out by
+    its change from SHUT_WALL. One more term: the measured grip on the straight
+    handle was a curved grip, whose bore was built for the curved steel, which is
+    narrower at B. On the straight steel its bore still cleared but its ribs bit
+    harder, so its wall moved out by at most half the difference. The straight
+    grip, built for its own steel, sits a full half-difference out. Counting that
+    half-difference in full is the worst case.
+    """
+    _, most = widest()
+    c, st = steel.CURVED, steel.STRAIGHT
+    extra = max(0.0, (st.width(st.length) - c.width(c.length)) / 2)
+    return SHUT_GAP - 2 * (WALL_SIDE + most - SHUT_WALL) - extra
+
+
+def outside(h):
+    """Outside: steel + walls, flared at B, straight past A to the ridge, then a dome."""
+    past, _ = closed_end(h)
+    s_dome = -past
+
+    def sec(s, grow, corner_r):
+        w = h.width(s) + 2 * (WALL_SIDE + grow)
+        t = h.thickness(s) + 2 * (WALL_FACE + grow)
+        return rrect(section_plane(h, s), w, t, corner_r)
+
+    # The open end is a true offset of the body: its corners grow and shrink
+    # with it, so the bevel keeps BEVEL_ANGLE at the corners as on the flats.
+    # Ruled: a smooth loft would ring through the round.
+    rim = cq.Solid.makeLoft([sec(h.length - d, g, CORNER_R + g) for d, g in rim_profile()],
+                            ruled=True)
+    secs = [sec(s, 0.0, CORNER_R) for s in loft_positions(h.length - FLARE_LEN, s_dome)]
+    for deg in (20, 38, 54, 67, 78, 90):       # dome: quarter circle of radius DOME_LEN;
+        phi = math.radians(deg)                 # rrect caps CORNER_R as it shrinks
+        secs.append(sec(s_dome - DOME_LEN * math.sin(phi), -DOME_LEN * (1 - math.cos(phi)),
+                        CORNER_R))
+    return rim.fuse(cq.Solid.makeLoft(secs)).clean()
+
+
+def grip(h):
+    """The grip in use position: outside minus bore, plus ribs."""
+    g = outside(h).cut(bore(h))
+    for rb in ribs(h):
+        g = g.fuse(rb)
+    g = g.clean()
+    assert g.isValid() and len(g.Solids()) == 1, "grip did not build as one valid solid"
+    return g
+
+
+def print_location(h):
+    """Location that stands a use-position part on its open end: B at the origin,
+    B's tangent pointing down, W along x, T along y."""
+    plane = cq.Plane(origin=h.point(h.length), xDir=h.normal(h.length),
+                     normal=-V(h.tangent(h.length)))
+    return cq.Location(plane).inverse
+
+
+def to_print(shape, h):
+    return shape.moved(print_location(h))
+
+
+def fit_test(printed):
+    """The printed grip's first FIT_LEN mm: the open end alone, for a quick check."""
+    bb = printed.BoundingBox()
+    box = cq.Solid.makeBox(bb.xlen + 20, bb.ylen + 20, FIT_LEN,
+                           cq.Vector(bb.xmin - 10, bb.ymin - 10, 0))
+    return printed.intersect(box)
+
+
+def export(shape, stem, out):
+    cq.exporters.export(shape, str(out / f"{stem}.step"))
+    cq.exporters.export(shape, str(out / f"{stem}.stl"), tolerance=0.01, angularTolerance=0.1)
+
+
+def corner_wall(grow=0.0):
+    """Material over each bore corner where the outside is offset grow past the body
+    wall, its corner radius with it (as at the open end)."""
+    c, r = BORE_CLEAR, BORE_CORNER_R
+    rc = CORNER_R + grow
+    gap_u = WALL_SIDE + grow - rc - (c - r)
+    gap_v = WALL_FACE + grow - rc - (c - r)
+    return rc - math.hypot(gap_u, gap_v) - r
+
+
+def check_design(h):
+    """Script assertions on the parameters; geometry checks belong to the test prints."""
+    assert 0 <= h.tip_r <= h.width(h.tip_r) / 2, "the tip's corner radius must be between 0 and half the tip's W"
+    assert ROOF_ANGLE >= 45, "the roof would need support"
+    assert RIB_FADE > 0, "the ribs need a length to fade over"
+    end_clear = END_CLEAR[h.name]
+    assert end_clear is None or end_clear > 0, "END_CLEAR must be a length past A, or None"
+    if end_clear is None:
+        tip_roof(h)                                     # asserts each slope meets its own corner
+    c, r = BORE_CLEAR, BORE_CORNER_R
+    corner_gap = c if r <= c else r - math.sqrt(2) * (r - c)
+    assert corner_gap >= 0.15, f"a sharp steel corner clears the bore by only {corner_gap:.2f}"
+    wall = corner_wall()
+    assert wall >= 2.0, f"only {wall:.2f} over the bore's corners"
+    rim = rim_profile()
+    assert all(q[0] > p[0] for p, q in zip(rim, rim[1:])), \
+        "the bevel and its round do not fit between the bed and FLARE_LEN"
+    shut = shut_gap()
+    assert shut >= MIN_SHUT_GAP, f"tool shut, the two grips' open ends would come within {shut:.2f}"
+    assert corner_wall(rim[0][1]) >= 1.2, \
+        "the bevel leaves under three extrusion lines over the bore's corners on the bed"
+    assert BEVEL_ANGLE >= 45, "the bevel would need support"
+    assert h.width(0) / 2 + WALL_SIDE - DOME_LEN > 0.4, "the dome would shrink to nothing"
+    assert DOME_LEN >= END, "the dome is too short to cap the roof"
+    assert RIB_INSET - RIB_BASE / 2 > r - c, "ribs would sit in the bore's corners"
+    return corner_gap, wall
+
+
+def sizes(h, printed):
+    gap, wall = check_design(h)
+    verts, _ = printed.tessellate(0.01, 0.1)   # BoundingBox() is loose on lofted faces
+    span = [max(getattr(v, a) for v in verts) - min(getattr(v, a) for v in verts) for a in "xyz"]
+    L = h.length
+    print(f"{h.name} grip: stands {span[2]:.1f} tall on its open end and spans "
+          f"{span[0]:.1f} x {span[1]:.1f} across (with any lean); volume {printed.Volume() / 1000:.1f} cm3")
+    rim = rim_profile()
+    d_most, most = widest()
+    # Rows where the bore is still a section of the body. A grip seated on its tip
+    # ends its rows where the round starts: past there the bore is the roof over the
+    # tip (the closed-end line below), and the ribs have faded out.
+    end_clear = END_CLEAR[h.name]
+    last = ("at A", 0.0, 0.0, True) if end_clear is not None else ("round starts", h.tip_r, 0.0, False)
+    for name, s, grow, ribbed in (("open end (B)", L, rim[0][1], True), ("widest", L - d_most, most, True),
+                                  ("body near B", L - FLARE_LEN, 0.0, True), last):
+        w, t = h.width(s), h.thickness(s)
+        rib = f"{w - 2 * RIB_BITE:5.2f} x {t - 2 * RIB_BITE:5.2f}" if ribbed else f"{'none':13s}"
+        print(f"  {name:13s} steel {w:5.2f} x {t:5.2f}  bore {w + 2 * BORE_CLEAR:5.2f} x "
+              f"{t + 2 * BORE_CLEAR:5.2f}  ribs {rib}  "
+              f"outside {w + 2 * (WALL_SIDE + grow):5.2f} x {t + 2 * (WALL_FACE + grow):5.2f}")
+    past, _ = closed_end(h)
+    print(f"  open end: edge on the bed {rim[0][1]:+.2f} from the body wall "
+          f"({corner_wall(rim[0][1]):.2f} over the bore corners); bevel up to {rim[1][0]:.2f}, "
+          f"then rounding to the widest, {most:.2f} out at {d_most:.2f} from B; "
+          f"the flare meets the body {FLARE_LEN} from B")
+    print(f"  wall at the widest, on the side facing the other handle: {WALL_SIDE + most:.2f}; "
+          f"tool shut, the two grips' open ends come within {shut_gap():.2f} (at least {MIN_SHUT_GAP})")
+    print(f"  steel corner clears the bore by {gap:.2f}; {wall:.2f} over each bore corner")
+    if end_clear is not None:
+        print(f"  closed end: the bore runs {end_clear} past A at full width, then its roof rises to the ridge, "
+              f"{past:.2f} past A; the dome {DOME_LEN} beyond that, so the grip ends {past + DOME_LEN:.2f} past A")
+    else:
+        print(f"  closed end: the tip's corners are {h.tip_r} in radius; the bore stays {BORE_CLEAR} off the tip, "
+              f"its ridge {past:.2f} past A; the dome {DOME_LEN} beyond that, so the grip ends {past + DOME_LEN:.2f} past A")
+
+
+def build(h, stem, out):
+    """Check the design for handle h, build its grip standing on the open end,
+    write <stem> and <stem>_fit_test (STEP and STL) into out, and print the sizes."""
+    check_design(h)
+    printed = to_print(grip(h), h)
+    export(printed, stem, out)
+    export(fit_test(printed), f"{stem}_fit_test", out)
+    sizes(h, printed)
+
+
+if __name__ == "__main__":
+    out = Path(__file__).resolve().parent
+    for h, stem in ((steel.CURVED, "curved_grip"), (steel.STRAIGHT, "straight_grip")):
+        build(h, stem, out)

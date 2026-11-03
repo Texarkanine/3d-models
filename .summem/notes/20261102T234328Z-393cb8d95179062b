@@ -1,0 +1,1 @@
+Superseded: the run 38833253910 reading that Cults updateCreation treats downloadPrice 0 as paid and a free listing omits it. Live probes (2026-10-16) show the opposite: send downloadPrice 0 for a free update; omitting it fails.

@@ -1,0 +1,1 @@
+Iteration 4 = 87e777c: print 1's flare, bed edge brought in BEVEL 1.5 by a 50 deg bevel (about 7 layers to the widest), rounded into the flare by RIM_R 0.8; footprint 132 mm2, so consider a brim. efac921 is its flawed first build (bevel flat at the corners); don't print it.
